@@ -34,3 +34,24 @@ vignettes/*.pdf
 # Temporary files created by R markdown
 *.utf8.md
 *.knit.md
+
+
+# knitr and R markdown default cache directories
+*_cache/
+/cache/
+_bookdown_files/
+*.utf8.md
+*.knit.md
+# R Environment Variables
+.Renviron
+# renv folder
+renv/
+#external data folder
+0_data/
+2_pipeline/
+3_output/
+rsconnect/
+5_cache/
+images/
+_bookdown.yml
+

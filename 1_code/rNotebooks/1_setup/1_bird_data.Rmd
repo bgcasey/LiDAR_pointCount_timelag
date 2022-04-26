@@ -1,1 +1,307 @@
 
+```{r setup, include=FALSE, cache=FALSE}
+#Set root directory to R project root
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+```
+
+
+
+```{css, echo=FALSE}
+# set max height of code chunks using the following css styling
+
+pre {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+pre[class] {
+  max-height: 500px;
+}
+```
+
+
+
+```{r message=FALSE}
+library(dplyr)
+library(stringr)
+library(tidyr)
+library(kableExtra)
+library(plyr)
+library(sf)
+library(tmap)
+library(tmaptools)
+library(OpenStreetMap)
+library(lubridate)
+```
+
+
+### Load data {-}
+
+Data is from the boreal avian modelling projects point count database [REF]
+
+```{r readBAM, eval=FALSE}
+BAM<-read.csv("../../data/avian_lifeHistory/BAM_avianDatabase/tables/BAM_ss_spp.csv", header = TRUE)
+#make copy
+b<-BAM 
+
+# rename columns
+names(b)[7]<- "x"
+names(b)[8]<- "y"
+
+#Change myrtle warbler to yellow-rumped warbler
+b$SPECIES[b$SPECIES == "MYWA"] <- "YRWA"
+```
+
+
+### Filter Calling Lake project {-}
+
+```{r filterCL, eval=FALSE}
+bird_callingLake_long<-b%>%
+    filter(str_detect(SS, "^CL"))
+
+#add a year column
+library(lubridate)
+bird_callingLake_long$DATE<-as.Date(bird_callingLake_long$DATE)
+bird_callingLake_long$year<-year(bird_callingLake_long$DATE)
+
+
+save(bird_callingLake_long, file="0_data/external/bird_callingLake_long.rData")
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("0_data/external/bird_callingLake_long.rData")
+
+knitr::kable(head(bird_callingLake_long)) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+
+### Format data {-}
+
+#### Convert bird data to wide presence/absence format {-}
+
+```{r eval=FALSE}
+
+# replace abundance values with 1
+bird_callingLake_long$ABUND<-1
+bird_callingLake_long<-distinct(bird_callingLake_long)
+
+bird_callingLake_wide<-bird_callingLake_long%>%
+  select(SS, PKEY, year, DATE, TIME, MAXDUR, MAXDIS, x, y, surveyType, SPECIES, ABUND)%>%
+  pivot_wider(names_from=SPECIES, values_from=ABUND, values_fill = 0)
+
+save(bird_callingLake_wide, file="0_data/manual/bird_callingLake_wide.rData")
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("0_data/manual/bird_callingLake_wide.rData")
+
+knitr::kable(head(bird_callingLake_wide)) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+### Define and plot study area {-}
+
+Create spatial object with point count locations.
+
+```{r eval=FALSE}
+ss_xy<-bird_callingLake_wide%>%
+  dplyr::select(SS, PKEY, x, y)
+
+ss_xy<-st_as_sf(ss_xy, coords=c("x","y"), crs=4326)
+
+x_xy<-st_transform(x_xy, crs=3400)
+
+save(ss_xy, file="0_data/manual/ss_xy.rData")
+```
+
+Create bounding box around stations
+
+```{r eval=FALSE}
+#station bounding box
+bb<-st_bbox(ss_xy)
+save(bb, file="0_data/manual/studyarea.rData")
+
+# calling lake bounding box
+cl_geo<-st_read("../../data/spatial/external/Alberta_Landcover_Data/Calling_Lake/surficialGeology/surf_ln_ll.shp")
+
+cl_bb<-st_bbox(cl_geo)
+
+#custom bounding box
+library(rgeos)
+c_bb<-bbox2SP(55.35,55.15, -113.6, -113.15,bbox=NA,proj4string=CRS("+init=epsg:4326"))
+c_bb<-st_bbox(c_bb)
+```
+
+Plot study area
+
+```{r eval=FALSE}
+#set up basemap
+base<-read_osm(c_bb, type="bing", minNumTiles = 10)
+
+#alberta boundary
+alberta<-st_read("../../data/spatial/external/Alberta_Boundaries_and_Roads/Alberta/Alberta.shp")
+
+
+mainmap<-tm_shape(base)+
+  tm_rgb()+ # to color the satelite basemap
+  tm_shape(ss_xy)+
+    tm_symbols(shape = 4, alpha = 1, size = .6, col = "red")+
+  tm_scale_bar(position=c("left", "BOTTOM"), text.color = "white", color.light="lightgrey")+
+  tm_graticules(lines=FALSE)
+
+insetmap<-tm_shape(alberta)+tm_fill(col="lightgrey")+tm_borders(lwd=.9, col="black")+
+  tm_shape(c_bb)+tm_borders(lw=2, col="red") +
+  tm_layout(inner.margins = c(0.04,0.04,0.04,0.04), outer.margins=c(0,0,0,0), bg.color="transparent", frame = FALSE)
+    #tm_symbols(shape = 20, alpha = .5, border.col="dimgray", size = .1, col = "black")
+  #tm_legend(position=c("left", "top"), frame=TRUE)
+
+#Get aspect ratio of bounding box
+asp <- (c_bb$ymax - c_bb$ymin)/(c_bb$xmax - c_bb$xmin)
+c_bb<-st_as_sfc(c_bb)
+c_bb<-st_as_sf(c_bb)
+
+library(grid)
+w <- 1
+h <- asp * w
+vp <- viewport(0.86, 0.33, width = w, height=h)
+#vp <- viewport(0.9, 0.22, width = w, height=h, just=c("right", "top"))
+
+tmap_save(mainmap,filename="3_output/maps/studyArea_inset.png",
+          dpi=300, insets_tm=insetmap, insets_vp=vp,
+          height=asp*300, width=160, units="mm")
+
+```
+
+```{r studyArea_tmap, echo=FALSE, fig.cap= "Point count locations near Calling Lake, Alberta.", out.width = '100%'}
+knitr::include_graphics("3_output/maps/studyArea_inset.png")
+```
+
+
+
+#### Filter data {-}
+
+Filter data to within 10 years of the LiDAR acquistion
+
+##### Import LiDAR aquistion shape file {-}
+
+```{r eval=FALSE}
+#Lidar acquistions
+acqDate<-st_read("../../data/spatial/external/Alberta_Landcover_Data/LiDAR/GOA_LiDAR_Alberta/from_ChrisBater/lidar_acquisitions/acquisition_date.shp")
+
+#stations
+load("0_data/manual/ss_xy.rData")
+
+#study area bounding box
+load("0_data/manual/studyarea.rData")
+bb<-st_as_sfc(bb)
+bb<-st_as_sf(bb)
+
+#Create a year column
+acqDate$date-as.Date(acqDate$date)
+
+# clip acquistions to study area
+
+acqDate<-st_transform(acqDate, crs = st_crs(ss_xy))
+acqDate_clip<-st_intersection(acqDate, bb)
+save(acqDate_clip, file="0_data/manual/acqDate_clip.rData")
+
+acqDate$year<-as.factor(year(acqDate$date))
+m<-tm_shape(alberta)+tm_borders()+
+  tm_shape(acqDate)+
+  tm_fill(col="year", palette = "PuRd", contrast = c(0.26, 1), title="LiDAR acquisition year")+
+  #tm_polygons(col=NA, border.col="black")+
+  tm_layout(frame=FALSE)+
+  tm_legend(outside=TRUE)
+
+tmap_save(m, "3_output/maps/LiDAR_acqYear_Alberta.png", asp=0, height = 5, width = 6, outer.margins=c(0,0,0,.08))
+
+acqDate_clip$year<-as.factor(year(acqDate_clip$date))
+m<-tm_shape(acqDate_clip)+tm_borders()+
+    tm_fill(col="year", palette = "PuRd", contrast = c(0.5, .6), title="LiDAR acquisition year")+
+  tm_shape(ss_xy)+
+    tm_symbols(shape = 4, alpha = 1, size = .6, col = "black")+
+  tm_layout(frame=FALSE)+
+  tm_legend(outside=TRUE)
+
+tmap_save(m, "3_output/maps/LiDAR_acqYear_CallingLake.png", asp=0, height = 5, width = 8)
+
+
+```
+
+```{r echo=FALSE, fig.cap= "LiDAR acquisition dates, Alberta.", out.width = '100%'}
+knitr::include_graphics("3_output/maps/LiDAR_acqYear_Alberta.png")
+```
+
+
+```{r echo=FALSE, fig.cap= "LiDAR acquisition dates, Calling Lake, Alberta.", out.width = '100%'}
+knitr::include_graphics("3_output/maps/LiDAR_acqYear_CallingLake.png")
+```
+
+##### Calculate LiDAR point count time lag {-}
+
+```{r eval=FALSE}
+load("0_data/manual/bird_callingLake_wide.rData")
+load("0_data/manual/acqDate_clip.rData")
+acqDate_clip$year<-year(acqDate_clip$date)
+
+ss_xy_timelag<-st_join(ss_xy, acqDate_clip)%>%
+  dplyr::rename(c(lidar_year=year,lidar_date=date ))%>%
+  dplyr::select(SS, PKEY, lidar_date, lidar_year)
+
+bird_callingLake_wide_2<-left_join(bird_callingLake_wide, ss_xy_timelag)%>%
+  dplyr::rename(c(ss_year=year, ss_date=DATE))%>%
+  dplyr::select(-geometry)
+
+bird_callingLake_wide_2<-bird_callingLake_wide_2%>%
+  dplyr::rename(c(ss_year=year, ss_date=DATE))
+
+bird_callingLake_wide_2$SS_lidar_timelag<-bird_callingLake_wide_2$ss_year-bird_callingLake_wide_2$lidar_year
+
+bird_callingLake_wide_2<-bird_callingLake_wide_2[c(1:4, 231:233, 5:230)]
+save(bird_callingLake_wide_2, file = "0_data/bird_callingLake_wide_2.rData")
+```
+
+
+##### Filter stations 
+
+Filter stations to those within 10 years of LIDAR and have at least 5 consequetive years of point counts
+
+```{r eval=FALSE}
+#Count number of consquetive annual surveys (https://www.datasciencemadesimple.com/groupby-count-in-r-2/)
+
+
+
+
+
+```
+
+
+### Look for trends {-}
+
+Check to see if the presence of bird species is increasing, decreasing, or staying steady
+
+```{r eval=FALSE}
+sum_detections_year<-bird_callingLake_wide%>%
+  group_by(year) %>%
+  summarise(across(10:229, sum))  #have to subtract the number of grouping columns.
+
+test<-dply(sum_detections_year,colwise(se))
+
+#standard deviation
+colwise(sd)(sum_detections_year)
+
+#median absolute deviation
+colwise(mad)(sum_detections_year)
+
+#coeficient of variation
+sapply(sum_detections_year, function(x) sd(x) / mean(x) * 100)
+
+```
+
+
+

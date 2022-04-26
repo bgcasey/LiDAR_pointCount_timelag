@@ -21,9 +21,6 @@ description: "This is document walks through the analyses I performed for this r
 # Overview
 
 
-
-
-
 ```{r GlobalOptions, echo=FALSE}
 options(bookdown.render.file_scope = FALSE, knitr.duplicate.label = "allow") 
 knitr::opts_chunk$set(cache.path = "5_cache/")
@@ -52,15 +49,11 @@ pre[class] {
 ```
 
 
-
-
-
-
-
-
-
 ```{r echo=FALSE, out.width = '100%'}
 ```
+
+
+
 
  
 
@@ -75,7 +68,10 @@ pre[class] {
 
 # Gather and prepare data
 
+## LiDAR data
 
+```{r child = '1_code/rNotebooks/1_setup/3_lidar_data.Rmd'}
+```
 
 ## Bird data
 
@@ -87,10 +83,6 @@ pre[class] {
 ```{r child = '1_code/rNotebooks/1_setup/2_landcover_data.Rmd'}
 ```
 
-## LiDAR data
-
-```{r child = '1_code/rNotebooks/1_setup/3_lidar_data.Rmd'}
-```
 
 ## Combine and filter
 

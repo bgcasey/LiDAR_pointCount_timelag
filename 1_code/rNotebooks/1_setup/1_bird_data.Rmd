@@ -77,6 +77,37 @@ knitr::kable(head(bird_callingLake_long)) %>%
   scroll_box(width = "100%", height = "400px")
 ```
 
+### Filter birds {-}
+
+Subset data frame so it does not include non-bird defections (e.g. wind, traffic, etc.) and unknown species. 
+
+```{r eval=FALSE}
+load("0_data/external/bird_callingLake_long.rData")
+
+#Load bird alpha codes and corresponding species names.
+bird_alpha<-read.csv("../../data/avian_lifeHistory/IBP-Alpha-Codes20.csv")
+
+
+#Get a list of species that don't match alpha codes
+noMatch<-anti_join(bird_callingLake_long, bird_alpha, by=c("SPECIES"="SPEC"))
+unique(noMatch$SPECIES)
+
+#Fix alpha codes
+bird_callingLake_long["SPECIES"][bird_callingLake_long["SPECIES"] == "GRAJ"] <- "CAJA"
+bird_callingLake_long["SPECIES"][bird_callingLake_long["SPECIES"] == "Oven"] <- "OVEN"
+
+#Filter detection to only include known bird species.
+bird_callingLake_long_sub<-semi_join(bird_callingLake_long, bird_alpha, by=c("SPECIES"="SPEC"))
+
+#remove unidentified birds
+bird_callingLake_long_sub<-bird_callingLake_long_sub[!grepl("^UN", bird_callingLake_long_sub$SPECIES),]
+
+save(bird_callingLake_long_sub, file="0_data/manual/bird/bird_callingLake_long_sub.rData")
+
+```
+
+
+
 
 ### Format data {-}
 
@@ -85,18 +116,18 @@ knitr::kable(head(bird_callingLake_long)) %>%
 ```{r eval=FALSE}
 
 # replace abundance values with 1
-bird_callingLake_long$ABUND<-1
-bird_callingLake_long<-distinct(bird_callingLake_long)
+bird_callingLake_long_sub$ABUND<-1
+bird_callingLake_long_sub<-distinct(bird_callingLake_long_sub)
 
-bird_callingLake_wide<-bird_callingLake_long%>%
+bird_callingLake_wide<-bird_callingLake_long_sub%>%
   select(SS, PKEY, year, DATE, TIME, MAXDUR, MAXDIS, x, y, surveyType, SPECIES, ABUND)%>%
   pivot_wider(names_from=SPECIES, values_from=ABUND, values_fill = 0)
 
-save(bird_callingLake_wide, file="0_data/manual/bird_callingLake_wide.rData")
+save(bird_callingLake_wide, file="0_data/manual/bird/bird_callingLake_wide.rData")
 ```
 
 ```{r echo=FALSE, message = FALSE, results="asis"}
-load("0_data/manual/bird_callingLake_wide.rData")
+load("0_data/manual/bird/bird_callingLake_wide.rData")
 
 knitr::kable(head(bird_callingLake_wide)) %>%
   kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
@@ -114,9 +145,9 @@ ss_xy<-bird_callingLake_wide%>%
 
 ss_xy<-st_as_sf(ss_xy, coords=c("x","y"), crs=4326)
 
-x_xy<-st_transform(x_xy, crs=3400)
+x_xy<-st_transform(ss_xy, crs=3400)
 
-save(ss_xy, file="0_data/manual/ss_xy.rData")
+save(ss_xy, file="0_data/manual/bird/ss_xy.rData")
 ```
 
 Create bounding box around stations
@@ -124,7 +155,7 @@ Create bounding box around stations
 ```{r eval=FALSE}
 #station bounding box
 bb<-st_bbox(ss_xy)
-save(bb, file="0_data/manual/studyarea.rData")
+save(bb, file="0_data/manual/bird/studyarea.rData")
 
 # calling lake bounding box
 cl_geo<-st_read("../../data/spatial/external/Alberta_Landcover_Data/Calling_Lake/surficialGeology/surf_ln_ll.shp")
@@ -134,7 +165,7 @@ cl_bb<-st_bbox(cl_geo)
 #custom bounding box
 library(rgeos)
 c_bb<-bbox2SP(55.35,55.15, -113.6, -113.15,bbox=NA,proj4string=CRS("+init=epsg:4326"))
-c_bb<-st_bbox(c_bb)
+c_bb<-st_as_sf(c_bb)
 ```
 
 Plot study area
@@ -161,9 +192,9 @@ insetmap<-tm_shape(alberta)+tm_fill(col="lightgrey")+tm_borders(lwd=.9, col="bla
   #tm_legend(position=c("left", "top"), frame=TRUE)
 
 #Get aspect ratio of bounding box
-asp <- (c_bb$ymax - c_bb$ymin)/(c_bb$xmax - c_bb$xmin)
-c_bb<-st_as_sfc(c_bb)
-c_bb<-st_as_sf(c_bb)
+c_bb_2<-st_bbox(c_bb)
+asp <- (c_bb_2$ymax - c_bb_2$ymin)/(c_bb_2$xmax - c_bb_2$xmin)
+
 
 library(grid)
 w <- 1
@@ -194,10 +225,10 @@ Filter data to within 10 years of the LiDAR acquistion
 acqDate<-st_read("../../data/spatial/external/Alberta_Landcover_Data/LiDAR/GOA_LiDAR_Alberta/from_ChrisBater/lidar_acquisitions/acquisition_date.shp")
 
 #stations
-load("0_data/manual/ss_xy.rData")
+load("0_data/manual/bird/ss_xy.rData")
 
 #study area bounding box
-load("0_data/manual/studyarea.rData")
+load("0_data/manual/bird/studyarea.rData")
 bb<-st_as_sfc(bb)
 bb<-st_as_sf(bb)
 
@@ -208,7 +239,7 @@ acqDate$date-as.Date(acqDate$date)
 
 acqDate<-st_transform(acqDate, crs = st_crs(ss_xy))
 acqDate_clip<-st_intersection(acqDate, bb)
-save(acqDate_clip, file="0_data/manual/acqDate_clip.rData")
+save(acqDate_clip, file="0_data/manual/spatialCov/acqDate_clip.rData")
 
 acqDate$year<-as.factor(year(acqDate$date))
 m<-tm_shape(alberta)+tm_borders()+
@@ -245,8 +276,9 @@ knitr::include_graphics("3_output/maps/LiDAR_acqYear_CallingLake.png")
 ##### Calculate LiDAR point count time lag {-}
 
 ```{r eval=FALSE}
-load("0_data/manual/bird_callingLake_wide.rData")
-load("0_data/manual/acqDate_clip.rData")
+load("0_data/manual/bird/bird_callingLake_wide.rData")
+load("0_data/manual/spatialCov/acqDate_clip.rData")
+load("0_data/manual/bird/ss_xy.rData")
 acqDate_clip$year<-year(acqDate_clip$date)
 
 ss_xy_timelag<-st_join(ss_xy, acqDate_clip)%>%
@@ -257,51 +289,228 @@ bird_callingLake_wide_2<-left_join(bird_callingLake_wide, ss_xy_timelag)%>%
   dplyr::rename(c(ss_year=year, ss_date=DATE))%>%
   dplyr::select(-geometry)
 
-bird_callingLake_wide_2<-bird_callingLake_wide_2%>%
-  dplyr::rename(c(ss_year=year, ss_date=DATE))
-
 bird_callingLake_wide_2$SS_lidar_timelag<-bird_callingLake_wide_2$ss_year-bird_callingLake_wide_2$lidar_year
 
-bird_callingLake_wide_2<-bird_callingLake_wide_2[c(1:4, 231:233, 5:230)]
-save(bird_callingLake_wide_2, file = "0_data/bird_callingLake_wide_2.rData")
+bird_callingLake_wide_2<-bird_callingLake_wide_2[c(1:4, 199:201, 5:198)]
+save(bird_callingLake_wide_2, file = "0_data/manual/bird/bird_callingLake_wide_2.rData")
 ```
 
 
-##### Filter stations 
+##### Filter stations  {-}
 
-Filter stations to those within 10 years of LIDAR and have at least 5 consequetive years of point counts
+Filter stations to those with at least 10 consecutive years of point counts
 
 ```{r eval=FALSE}
-#Count number of consquetive annual surveys (https://www.datasciencemadesimple.com/groupby-count-in-r-2/)
 
+#Count number of annual surveys done at each station
 
+SS_nYear<-
+  bird_callingLake_wide_2%>%
+  dplyr::select(SS, ss_year)%>%
+  distinct()%>%
+  group_by(SS)%>%
+  dplyr::summarize(n_years=n())
+  save(SS_nYear, file="0_data/manual/bird/SS_nYear.rData")
 
+# add number of of sampling years to bird data frame  
+bird_callingLake_wide_3<-left_join(bird_callingLake_wide_2, SS_nYear)
+bird_callingLake_wide_3<-bird_callingLake_wide_3[c(1:2, 202, 3:201)]
+save(bird_callingLake_wide_3, file = "0_data/manual/bird/bird_callingLake_wide_3.rData")
 
+# keep only bird data where there is more than 10 years of consequtive data
+
+bird_callingLake_wide_4<-
+bird_callingLake_wide_3%>%
+ filter(n_years>10)  
+
+save(bird_callingLake_wide_4, file = "0_data/manual/bird/bird_callingLake_wide_4.rData")
 
 ```
 
+### Select species {-}
 
-### Look for trends {-}
+
+#### Calculate number of detections  {-}
+
+```{r eval=FALSE}
+load("0_data/manual/bird/bird_callingLake_wide_4.rData")
+
+library(tibble)
+
+#Make a table with total detection for each species. Sort by detection
+b<-bird_callingLake_wide_4[-c(1:14)]
+totDet<-colSums(b !=0)
+totDet<-totDet[order(-totDet)]
+totDet<-as.data.frame(totDet)
+totDet$percStations<-round(totDet$totDet/nrow(b)*100,2)
+
+# add common species name
+bird_alpha<-read.csv("../../data/avian_lifeHistory/IBP-Alpha-Codes20.csv")
+ba<-bird_alpha[c(2,4)]
+totDet<-left_join(rownames_to_column(totDet), ba, by=c("rowname"="SPEC"))
+totDet<-totDet[c(1,4, 2,3)]
+names(totDet)[1]<-"spp"
+
+total_species_detections<-totDet
+#save(totDet, file ="2_pipeline/store/totDet_qpad.rData")
+save(total_species_detections, file="0_data/manual/bird/total_species_detections.rData")
+
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("0_data/manual/bird/total_species_detections.rData")
+
+knitr::kable(total_species_detections) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+
+#### Identify functional traits of species {-}
+
+```{r eval=FALSE}
+#Get functional traits from the traitdata package
+install.packages("remotes")
+remotes::install_github("RS-eco/traitdata")
+library(traitdata)
+
+# view glossary of trait data objects
+#t<-trait_glossary
+el<-elton_birds
+
+load("0_data/manual/bird/bird_callingLake_long_sub.rData")
+bird_alpha<-read.csv("../../data/avian_lifeHistory/IBP-Alpha-Codes20.csv")
+
+birds<-bird_callingLake_long_sub%>%
+  dplyr::select(SPECIES)%>%
+  distinct()
+#Get a list of species that don't match alpha codes
+birds<-left_join(birds, bird_alpha, by=c("SPECIES"="SPEC"))
+
+library(fuzzyjoin)
+
+bird_traits<-stringdist_left_join(birds, el, by= c("COMMONNAME" = "English"), max_dist=1, ignore_case=TRUE)
+
+bird_traits<-bird_traits[order(bird_traits$SPECIES),]
+bird_traits<-bird_traits[-c(2:3)]
+
+save(bird_traits, file="0_data/manual/bird/bird_traits.rData")
+```
+
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("0_data/manual/bird/bird_traits.rData")
+
+knitr::kable(bird_traits) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+
+
+
+
+#### Look for variation in yearly detections {-}
 
 Check to see if the presence of bird species is increasing, decreasing, or staying steady
 
 ```{r eval=FALSE}
-sum_detections_year<-bird_callingLake_wide%>%
-  group_by(year) %>%
-  summarise(across(10:229, sum))  #have to subtract the number of grouping columns.
 
-test<-dply(sum_detections_year,colwise(se))
+load("0_data/manual/bird/bird_callingLake_wide_4.rData")
+
+sum_detections_year<-bird_callingLake_wide_4%>%
+  group_by(ss_year) %>%
+  dplyr::summarise(across(15:201, sum))  #have to subtract the number of grouping columns.
 
 #standard deviation
-colwise(sd)(sum_detections_year)
+sd<-colwise(sd)(sum_detections_year)
 
 #median absolute deviation
-colwise(mad)(sum_detections_year)
+mad<-colwise(mad)(sum_detections_year)
 
 #coeficient of variation
-sapply(sum_detections_year, function(x) sd(x) / mean(x) * 100)
+ce<-sapply(sum_detections_year, function(x) sd(x) / mean(x))
+
+#variance
+var<-colwise(var)(sum_detections_year)
+
+#combine into a single dataframe
+bird_detVar<-rbind(sd,mad,ce, var)
+
+#round
+bird_detVar<-bird_detVar %>% mutate_if(is.numeric, round, 2)
+
+bird_detVar$stat<-c("standard_deviation", "median_absolute_deviation", "coeficient_of_variation", "variance")
+
+save(bird_detVar, file="0_data/manual/bird/bird_detVar.rData")
+
+
+bird_ce<-as.data.frame(bird_detVar[3,])
+bird_ce<-tidyr::gather(bird_ce, key="species", value="coeficient_of_variation", CONW:BWWA)
+bird_ce<-bird_ce[2:3]
+bird_ce<-bird_ce[order(bird_ce$species),]
+bird_det_ce<-bird_ce
+save(bird_det_ce, file="0_data/manual/bird/bird_det_ce.rData")
+
+
+
+# a<-ncol(bird_detVar-1)
+# 
+# bird_detVar<-bird_detVar[c(ncol(bird_detVar), 2:(ncol(bird_detVar)-1) )]
+#
 
 ```
 
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("0_data/manual/bird/bird_det_ce.rData")
+
+knitr::kable(bird_det_ce) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
 
 
+join CE and detection rate table for easier viewing
+
+```{r eval=FALSE}
+load("0_data/manual/bird/bird_det_ce.rData")
+load("0_data/manual/bird/total_species_detections.rData")
+
+bird_totDet_ce<-left_join(total_species_detections, bird_det_ce, by=c("spp"="species"))
+
+save(bird_totDet_ce, file="0_data/manual/bird/bird_totDet_ce.rData")
+
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("0_data/manual/bird/bird_totDet_ce.rData")
+
+knitr::kable(bird_totDet_ce) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+
+Based on this, we selected Black-throated Green Warbler (BTNW), associated with mature forests;  Swainson’s Thrush (SWTH) a forest generalist; and  Mourning Warbler (MOWA) an early-seral specialist. 
+
+```{r eval=FALSE}
+load("0_data/manual/bird/bird_callingLake_wide_4.rData")
+
+bird_callingLake_wide_5<-bird_callingLake_wide_4[c(1:14, 48, 97, 18)]
+
+save(bird_callingLake_wide_5, file="0_data/manual/bird/bird_callingLake_wide_5.rData")
+```
+
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("0_data/manual/bird/bird_callingLake_wide_5.rData")
+
+knitr::kable(head(bird_callingLake_wide_5)) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```

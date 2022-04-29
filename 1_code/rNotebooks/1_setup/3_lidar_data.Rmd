@@ -1,0 +1,207 @@
+```{r setup, include=FALSE, cache=FALSE}
+#Set root directory to R project root
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+```
+
+
+
+```{css, echo=FALSE}
+# set max height of code chunks using the following css styling
+
+pre {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+pre[class] {
+  max-height: 500px;
+}
+```
+
+
+```{r eval=FALSE}
+library(raster)
+library(dplyr)
+library(foreach)
+library(knitr)
+```
+
+
+
+*Description of LiDAR*
+
+20 m resolution 
+
+### Create LiDAR raster mosaics {-}
+
+34 LiDAR metrics will be summarized and evaluated prior to analyses.
+
+```{r list_lidar_directories, results='asis', echo=FALSE}
+dataPath <- "/Volumes/GoogleDrive/My Drive/PhD/thesis/chapter_1/empirical/0_data/external/CL_LiDAR/grid_metrics_surfaces"
+
+#list directories
+bl<-list.dirs(path=paste0(dataPath), full.names = F, recursive = F)
+
+library(gluedown)
+bl_md<-gluedown::md_bullet(bl)
+
+print(bl_md, font.size=10
+)
+```
+
+
+
+Each LiDAR metric corresponds to a directory containing metric rasters approximates 25000 ha in size. I used the 'raster::mosaic' function to combine these files into a single raster/metric. I created a `foreach` loop to generate a raster mosaic that combines each raster file into a single raster large raster covering the provence. The loop runs through the following steps for each metric:
+
+1. list directories containing LiDAR rasters. Each LiDAR metric has a folder containing many rasters. 
+2. List the geotiffs in the metric's directory
+3. Import files as raster objects
+4. Reporject rasters. The geotiffs have different crs's corresponding to two different UTM zones. They need to share the same projection for the `raster::mosaic` function to work.
+5. Use the `raster::mosaic` function to combine the geotiffs into a single large raster object.
+6. Save the raster as a new geoTiff. 
+7. Clear the R temp file folder to save memory and avoid crashing of future loops. 
+
+
+```{r generate_rasterMosaic_loop, eval=FALSE}
+
+dataPath <- "/Volumes/GoogleDrive/My Drive/PhD/thesis/chapter_1/empirical/0_data/external/CL_LiDAR/grid_metrics_surfaces/"
+
+bl<-list.dirs(path=paste0(dataPath), full.names = F, recursive = F)
+
+#load study area shapefile
+load("0_data/manual/bird/studyarea_big.rData")
+
+
+foreach (j = 1:length(bl)) %do%
+
+{ 
+  t1 = proc.time()
+  print(paste("---- Begin",bl[j], Sys.time()))
+  # fp<-combine_words(bl[j],after='*.tif$')
+  fl <- list.files(path=paste0(dataPath, bl[j]), pattern = '*.tif$', recursive = T, full.names = T)
+  print(paste("----",bl[j]," file scan complete", Sys.time()))
+  fl <- lapply(fl, raster)
+  print(paste("----",bl[j]," lapply Raster complete", Sys.time()))
+  #fl <- lapply(fl, projectRaster,crs="+init=EPSG:3400")
+  print(paste("----",bl[j]," projectRaster complete", Sys.time()))
+  fl$fun <- mean
+  fl$tolerance <-.5
+  x <- do.call(raster::mosaic, fl)
+  print(paste("----",bl[j]," mosaic complete!", Sys.time()))
+  x <- projectRaster(x, crs = st_crs(c_bb)$proj4string)
+  print(paste("----",bl[j]," projectRaster complete", Sys.time()))
+  x<-raster::crop(x ,c_bb)
+  print(paste("----",bl[j]," crop complete", Sys.time()))
+  #assign(paste0(bl[j],'_mosaic'), x)
+  writeRaster(x, filename=paste0('0_data/manual/spatialCov/LiDAR_mosaics/',bl[j]), format="GTiff",  overwrite=T) 
+  print(paste("----",bl[j]," saved as GeoTIFF", Sys.time()))
+  print("process time")
+  print(proc.time() - t1)
+  removeTmpFiles(0) #The raster package can store a lot of files. This removes any temp raster files generated   during the loop
+  }
+```
+
+
+### Stack the raster mosaics into a single r object {-}
+
+
+```{r create_LiDAR_raster_stack, eval=FALSE}
+#list the files
+# lidar_list<-list.files(path='0_data/external/CL_LiDAR/CL_raster_mosaics/', pattern = "*.tif$", full.names = TRUE)
+lidar_list<-list.files(path='0_data/manual/spatialCov/LiDAR_mosaics/', pattern = "*.tif$", full.names = TRUE)
+lidar_stack<-raster::stack(lidar_list)
+
+#save stack as r object
+stackSave(lidar_stack,file="0_data/manual/spatialCov/lidar_stack.stk")
+
+##############################################################################
+##Plot the first layer of the raster.
+
+#set up basemap
+# base<-read_osm(c_bb, type="bing", minNumTiles = 10)
+
+# stations
+load("0_data/manual/bird/ss_xy.rData")
+
+#alberta boundary
+alberta<-st_read("../../data/spatial/external/Alberta_Boundaries_and_Roads/Alberta/Alberta.shp")
+
+
+mainmap<-#tm_shape(base)+
+  #tm_rgb()+ # to color the satelite basemap
+  tm_shape(lidar_stack[[1]])+
+  tm_raster(style = "cont",title="Canopy relief ratio", breaks = NULL,
+            palette = terrain.colors(5))+
+  tm_shape(ss_xy)+
+    tm_symbols(shape = 4, alpha = 1, size = .6, col = "red")+
+  tm_scale_bar(position=c("left", "BOTTOM"), text.color = "black", color.light="lightgrey")+
+  tm_graticules(lines=FALSE)+
+  tm_legend(outside=TRUE)
+
+insetmap<-tm_shape(alberta)+tm_fill(col="lightgrey")+tm_borders(lwd=.9, col="black")+
+  tm_shape(c_bb)+tm_borders(lw=2, col="red") +
+  tm_layout(inner.margins = c(0.04,0.04,0.04,0.04), outer.margins=c(0,0,0,0), bg.color="transparent", frame = FALSE)
+    #tm_symbols(shape = 20, alpha = .5, border.col="dimgray", size = .1, col = "black")
+  #tm_legend(position=c("left", "top"), frame=TRUE)
+
+#Get aspect ratio of bounding box
+c_bb_2<-st_bbox(c_bb)
+asp <- (c_bb_2$ymax - c_bb_2$ymin)/(c_bb_2$xmax - c_bb_2$xmin)
+
+
+library(grid)
+w <- 1
+h <- asp * w
+vp <- viewport(0.7, 0.33, width = w, height=h)
+#vp <- viewport(0.9, 0.22, width = w, height=h, just=c("right", "top"))
+
+tmap_save(mainmap,filename="3_output/maps/lidar_inset.png",
+          dpi=300, insets_tm=insetmap, insets_vp=vp,
+          height=asp*350, width=350, units="mm")
+```
+
+```{r  echo=FALSE, fig.cap= "Canopy relief ratio raster. The first layer of the LiDAR raster stack.", out.width = '100%'}
+knitr::include_graphics("3_output/maps/lidar_inset.png")
+```
+
+### Summarize LiDAR
+
+Check the extreme values if the raster stack to identity any values that shouldn't be included (e.g. -9999).
+
+```{r extremeValues, eval=FALSE}
+#load stack
+lidar_stack<-stackOpen("0_data/manual/spatialCov/lidar_stack.stk")
+
+minValue(lidar_stack)
+maxValue(lidar_stack)
+
+print(min)
+print(max)
+```
+ The values appear normal. Next I summarized LiDAR within 100 m of each point count location.
+
+```{r eval=FALSE}
+load("0_data/manual/bird/ss_xy.rData")
+
+#ss_xy<-st_transform(ss_xy, crs(lidar_stack))
+ss_lidar<-extract(lidar_stack,ss_xy, buffer=100, na.rm=TRUE, fun=mean) 
+
+ss_lidar_df<-data.frame("SS"=ss_xy$SS, ss_lidar)
+
+write.csv(ss_lidar_df, file = "0_data/manual/spatialCov/ss_lidar_df.csv")
+```
+
+
+
+```{r}
+#list the files
+lidar_list<-list.files(path='../../chapter_3/empirical/0_data/manual/mosaics/', pattern = "*.tif$", full.names = TRUE)
+lidar_stack<-raster::stack(lidar_list)
+
+#load("../..//chapter_3/empirical/0_data/manual/rObjects/lidar_stack.Rdata")
+rasterOptions(progress = 'text', timer = TRUE)
+ss_lidar_2<-extract(lidar_stack,ss_xy[1,],buffer=100, na.rm=TRUE, fun=mean) 
+
+```
+
+

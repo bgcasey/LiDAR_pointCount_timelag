@@ -188,20 +188,16 @@ ss_lidar<-extract(lidar_stack,ss_xy, buffer=100, na.rm=TRUE, fun=mean)
 
 ss_lidar_df<-data.frame("SS"=ss_xy$SS, ss_lidar)
 
+save(ss_lidar_df, file="0_data/manual/spatialCov/ss_lidar_df.rData")
 write.csv(ss_lidar_df, file = "0_data/manual/spatialCov/ss_lidar_df.csv")
 ```
 
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("0_data/manual/spatialCov/ss_lidar_df.rData")
 
-
-```{r}
-#list the files
-lidar_list<-list.files(path='../../chapter_3/empirical/0_data/manual/mosaics/', pattern = "*.tif$", full.names = TRUE)
-lidar_stack<-raster::stack(lidar_list)
-
-#load("../..//chapter_3/empirical/0_data/manual/rObjects/lidar_stack.Rdata")
-rasterOptions(progress = 'text', timer = TRUE)
-ss_lidar_2<-extract(lidar_stack,ss_xy[1,],buffer=100, na.rm=TRUE, fun=mean) 
-
+knitr::kable(head(ss_lidar_df)) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
 ```
-
 

@@ -141,11 +141,12 @@ Create spatial object with point count locations.
 
 ```{r eval=FALSE}
 ss_xy<-bird_callingLake_wide%>%
-  dplyr::select(SS, PKEY, x, y)
+  dplyr::select(SS, x, y)%>%
+  distinct()
 
 ss_xy<-st_as_sf(ss_xy, coords=c("x","y"), crs=4326)
 
-x_xy<-st_transform(ss_xy, crs=3400)
+sx_xy<-st_transform(ss_xy, crs=3400)
 
 save(ss_xy, file="0_data/manual/bird/ss_xy.rData")
 ```
@@ -164,8 +165,16 @@ cl_bb<-st_bbox(cl_geo)
 
 #custom bounding box
 library(rgeos)
-c_bb<-bbox2SP(55.35,55.15, -113.6, -113.15,bbox=NA,proj4string=CRS("+init=epsg:4326"))
+# c_bb<-bbox2SP(55.35,55.15, -113.6, -113.15,bbox=NA,proj4string=st_crs("+init=epsg:3400"))
+
+# c_bb_1<-st_bbox(c(xmin=55.35,xmax=55.15, ymin=-113.6, ymax=-113.15),crs=st_crs(ss_xy))
+c_bb<-st_bbox(c(xmin=-113.6, ymin= 55.15, xmax=-113.15, ymax=55.35),crs=st_crs(ss_xy))
+
+
+c_bb<-st_as_sfc(c_bb)
 c_bb<-st_as_sf(c_bb)
+
+save(c_bb, file="0_data/manual/bird/studyarea_big.rData")
 ```
 
 Plot study area
@@ -517,6 +526,10 @@ knitr::kable(head(bird_callingLake_wide_5)) %>%
 
 ### Add BAM QPAD offsets
 
+https://github.com/psolymos/QPAD
+
+[@SolymosMatsuoka2013]
+
 ```{r eval=FALSE}
 load("../../data/avian_lifeHistory/BAM_avianDatabase/AB-data-w-offsets-to-Brendan.RData")
 
@@ -532,7 +545,7 @@ save(callingLake_QPAD_offsets, file="0_data/manual/bird/callingLake_QPAD_offsets
 ```{r echo=FALSE, message = FALSE, results="asis"}
 load("0_data/manual/bird/callingLake_QPAD_offsets.rData")
 
-knitr::kable(head("0_data/manual/bird/callingLake_QPAD_offsets.rData")) %>%
+knitr::kable(head(callingLake_QPAD_offsets)) %>%
   kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
   column_spec(1, width= "20em")%>%
   scroll_box(width = "100%", height = "400px")

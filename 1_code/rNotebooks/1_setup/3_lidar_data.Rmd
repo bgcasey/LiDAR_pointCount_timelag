@@ -93,7 +93,7 @@ foreach (j = 1:length(bl)) %do%
   x<-raster::crop(x ,c_bb)
   print(paste("----",bl[j]," crop complete", Sys.time()))
   #assign(paste0(bl[j],'_mosaic'), x)
-  writeRaster(x, filename=paste0('0_data/manual/spatialCov/LiDAR_mosaics/',bl[j]), format="GTiff",  overwrite=T) 
+  writeRaster(x, filename=paste0('0_data/manual/spatialCov/LiDAR/LiDAR_mosaics/',bl[j]), format="GTiff",  overwrite=T) 
   print(paste("----",bl[j]," saved as GeoTIFF", Sys.time()))
   print("process time")
   print(proc.time() - t1)
@@ -108,11 +108,11 @@ foreach (j = 1:length(bl)) %do%
 ```{r create_LiDAR_raster_stack, eval=FALSE}
 #list the files
 # lidar_list<-list.files(path='0_data/external/CL_LiDAR/CL_raster_mosaics/', pattern = "*.tif$", full.names = TRUE)
-lidar_list<-list.files(path='0_data/manual/spatialCov/LiDAR_mosaics/', pattern = "*.tif$", full.names = TRUE)
+lidar_list<-list.files(path='0_data/manual/spatialCov/LiDAR/LiDAR_mosaics/', pattern = "*.tif$", full.names = TRUE)
 lidar_stack<-raster::stack(lidar_list)
 
 #save stack as r object
-stackSave(lidar_stack,file="0_data/manual/spatialCov/lidar_stack.stk")
+stackSave(lidar_stack,file="0_data/manual/spatialCov/LiDAR/lidar_stack.stk")
 
 ##############################################################################
 ##Plot the first layer of the raster.
@@ -170,7 +170,7 @@ Check the extreme values if the raster stack to identity any values that shouldn
 
 ```{r extremeValues, eval=FALSE}
 #load stack
-lidar_stack<-stackOpen("0_data/manual/spatialCov/lidar_stack.stk")
+lidar_stack<-stackOpen("0_data/manual/spatialCov/LiDAR/lidar_stack.stk")
 
 minValue(lidar_stack)
 maxValue(lidar_stack)
@@ -188,12 +188,12 @@ ss_lidar<-extract(lidar_stack,ss_xy, buffer=100, na.rm=TRUE, fun=mean)
 
 ss_lidar_df<-data.frame("SS"=ss_xy$SS, ss_lidar)
 
-save(ss_lidar_df, file="0_data/manual/spatialCov/ss_lidar_df.rData")
-write.csv(ss_lidar_df, file = "0_data/manual/spatialCov/ss_lidar_df.csv")
+save(ss_lidar_df, file="0_data/manual/spatialCov/LiDAR/ss_lidar_df.rData")
+write.csv(ss_lidar_df, file = "0_data/manual/spatialCov/LiDAR/ss_lidar_df.csv")
 ```
 
 ```{r echo=FALSE, message = FALSE, results="asis"}
-load("0_data/manual/spatialCov/ss_lidar_df.rData")
+load("0_data/manual/spatialCov/LiDAR/ss_lidar_df.rData")
 
 knitr::kable(head(ss_lidar_df)) %>%
   kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%

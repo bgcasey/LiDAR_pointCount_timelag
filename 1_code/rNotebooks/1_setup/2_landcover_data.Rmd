@@ -1,4 +1,4 @@
-### QPAD landcover
+### Classified landcover data
 
 
 ```{r setup, include=FALSE, cache=FALSE}
@@ -22,23 +22,283 @@ pre[class] {
 ```
 
 
-http://www.cec.org/north-american-environmental-atlas/land-cover-2005-modis-250m/
+```{r eval=FALSE}
+library(sf)
+library(dplyr)
+library(stringr)
+```
+
+
+
+#### CAS-FRI data {-}
+
+##### Load CAS-FRI polygons {-}
+
+Read ESRI geodatabase containing CAS-FRI, using sf package 
+
+
+```{r eval=FALSE, echo=FALSE}
+#  see layers in ESRI geodatabase
+
+l<-st_layers(dsn="../../data/spatial/external/CASFRI/Alberta/alberta_geo.gdb")
+l
+
+# Driver: OpenFileGDB 
+# Available layers:
+#              layer_name geometry_type features fields
+# 1           alberta_geo Multi Polygon  2632003     17
+# 2     Alberta_dst_CO_25            NA       96      5
+# 3     Alberta_dst_CO_50            NA      249      5
+# 4     Alberta_dst_CO_95            NA     1684      5
+# 5     Alberta_dst_CO_75            NA      395      5
+# 6    Alberta_dst_CO_100            NA    22952      5
+# 7 Alberta_dst_CO_DistRd Multi Polygon    14166      8
+# 8   alberta_geo_project Multi Polygon  2631185      3
+
+
+
+#Load alberta_geo (the CAS-FRI polygons)
+
+cas_geo<-st_read(dsn="../../data/spatial/external/CASFRI/Alberta/alberta_geo.gdb", layer="alberta_geo")
+
+cas_geo<-cas_geo[,1]
+
+
+save(cas_geo, file="0_data/manual/CASFRI/cas_geo.rData")
+```
+
+
+
+##### Clip CAS-FRI to study area {-}
 
 ```{r eval=FALSE}
+# load cas_geo
+load("0_data/manual/spatialCov/CASFRI/cas_geo.rData")
+
+# load study area
+load("0_data/manual/bird/studyarea_big.rData")
+
+c_bb_tr<-st_transform(c_bb, st_crs(cas_geo))
+cas_geo_clip<-st_intersection(cas_geo, c_bb_tr)
+cas_geo_clip_tr<-st_transform(cas_geo_clip, st_crs(c_bb))
+
+save(cas_geo_clip, file="0_data/manual/spatialCov/CASFRI/cas_geo_clip.rData")
+
+
+##############################################################################
+##Plot the clipped CAS-FRI polygons
+
+#set up basemap
+# base<-read_osm(c_bb, type="bing", minNumTiles = 10)
+
+# stations
+load("0_data/manual/bird/ss_xy.rData")
+
+#alberta boundary
+alberta<-st_read("../../data/spatial/external/Alberta_Boundaries_and_Roads/Alberta/Alberta.shp")
+
+
+mainmap<-#tm_shape(base)+
+  #tm_rgb()+ # to color the satelite basemap
+  tm_shape(cas_geo_clip)+
+  tm_borders()+
+  tm_shape(ss_xy)+
+    tm_symbols(shape = 4, alpha = 1, size = .6, col = "red")+
+  tm_scale_bar(position=c("left", "BOTTOM"), text.color = "black", color.light="lightgrey")+
+  tm_graticules(lines=FALSE)+
+  tm_legend(outside=TRUE)
+
+insetmap<-tm_shape(alberta)+tm_fill(col="lightgrey")+tm_borders(lwd=.9, col="black")+
+  tm_shape(c_bb)+tm_borders(lw=2, col="red") +
+  tm_layout(inner.margins = c(0.04,0.04,0.04,0.04), outer.margins=c(0,0,0,0), bg.color="transparent", frame = FALSE)
+    #tm_symbols(shape = 20, alpha = .5, border.col="dimgray", size = .1, col = "black")
+  #tm_legend(position=c("left", "top"), frame=TRUE)
+
+#Get aspect ratio of bounding box
+c_bb_2<-st_bbox(c_bb)
+asp <- (c_bb_2$ymax - c_bb_2$ymin)/(c_bb_2$xmax - c_bb_2$xmin)
+
+
+library(grid)
+w <- 1
+h <- asp * w
+vp <- viewport(0.7, 0.33, width = w, height=h)
+#vp <- viewport(0.9, 0.22, width = w, height=h, just=c("right", "top"))
+
+tmap_save(mainmap,filename="3_output/maps/casfri_inset.png",
+          dpi=300, insets_tm=insetmap, insets_vp=vp,
+          height=asp*350, width=350, units="mm")
+```
+
+```{r map_fCASFRI_plot, echo=FALSE, fig.cap= "CASFRI landcover polygons", out.width = '100%'}
+knitr::include_graphics("3_output/maps/casfri_inset.png")
+```
+
+
+
+##### Spatial join point count locations with CAS-FRI polygons {-}
+
+
+```{r eval=FALSE}
+#load clipped cas-fri polygons
+load("0_data/manual/spatialCov/CASFRI/cas_geo_clip.rData")
+# load point count locations
+load("0_data/manual/bird/ss_xy.rData")
+
+#transform crs of station locations to match the CAS-FRI polygons
+ss_xy_tr<-st_transform(ss_xy, st_crs(cas_geo))
+
+#add CAS-FRI ids to station data
+ss_xy_cas<-st_join(ss_xy_tr, cas_geo)
+# transform back to original crs
+ss_xy_tr<-st_transform(ss_xy_cas, st_crs(ss_xy))
+
+
+save(ss_xy_cas, file ="0_data/manual/spatialCov/CASFRI/ss_xy_cas.rData")
+
+```
+
+##### Or...bring in cas-fri station data from another chapter {-}
+
+```{r eval=FALSE}
+load("../../chapter_3/empirical/2_pipeline/tmp/bd_xy_cas.rData")
+load("0_data/manual/bird/ss_xy.rData")
+
+test<-left_join(as.data.frame(ss_xy), as.data.frame(bd_xy_cas), by="SS")
+
+x<-as.data.frame(ss_xy)%>%
+  select(SS)
+y<-as.data.frame(bd_xy_cas)%>%
+  select(SS, cas_id)
+
+ss_cas<-left_join(x, y)
+save(ss_cas, file ="0_data/manual/spatialCov/CASFRI/ss_cas.rData")
+
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("0_data/manual/spatialCov/CASFRI/ss_cas.rData")
+
+knitr::kable(head(ss_cas)) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+
+
+
+##### extract data on stand age and disturbance history {-}
+
+```{r eval=FALSE}
+###################################
+# load disturbance data
+###################################
+cas_dst<-read.csv("../../data/spatial/external/CASFRI/Alberta/alberta_dst.csv")
+#filter to only first layer
+cas_dst<-filter(cas_dst, layer=="1")
+
+###################################
+# load forest data 
+###################################
+cas_lyr<-read.csv("../../data/spatial/external/CASFRI/Alberta/alberta_lyr.csv")
+#filter to only first layer
+cas_lyr<-filter(cas_lyr, layer=="1" & layer_rank=="1")
+
+#forest type
+cas_forestType<-read.csv("../../data/spatial/external/CASFRI/Alberta/Alberta_forestType.csv")
+#filter to only first layer
+cas_forestType<-cas_forestType%>%
+  rename(cas_id=Expr1)
+
+
+###################################
+# Join CASFRI covariates into a single data frame
+###################################
+cas_cov<-left_join(cas_lyr, cas_forestType,  by="cas_id")
+cas_cov<-left_join(cas_cov, cas_dst, by="cas_id")
+
+#change missing tree/forest type values to NA
+d2<-cas_cov
+
+d2[ d2 == -1111 ] <- NA 
+d2[ d2 == -8888 ] <- NA 
+#d2[29:47][ d2[28:46] == "XXXX MISS" ] <- NA     
+
+d2$PercentDecid[ d2$Forest_Type == "" ] <- NA
+d2$PercentConif[ d2$Forest_Type == "" ] <- NA
+d2$Forest_Type[ d2$Forest_Type == "" ] <- NA
+
+d2$dist_ext_upper_1<-as.factor(d2$dist_ext_upper_1)
+d2$dist_ext_upper_2<-as.factor(d2$dist_ext_upper_2)
+
+
+cas_cov<-d2
+
+###################################
+# Filter to calling lake
+###################################     
+ss_cas_cov<-left_join(ss_cas, cas_cov)
+
+save(cas_cov, file="0_data/manual/spatialCov/CASFRI/cas_cov.rData")
+save(ss_cas_cov, file="0_data/manual/spatialCov/CASFRI/ss_cas_cov.rData")
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("0_data/manual/spatialCov/CASFRI/cas_cov.rData")
+
+knitr::kable(head(cas_cov)) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+
+
+
+###### Load pointcount data {-}
+
+```{r eval=FALSE}
+load("0_data/manual/bird/bird_callingLake_wide_5.rData")
+pkey_cas_cov<-bird_callingLake_wide_5%>%
+  select(SS, PKEY, ss_year) %>%
+  left_join(ss_cas_cov)
+```
+
+###### calculate forest age at time of survey {-}
+
+```{r eval=FALSE}
+pkey_cas_cov$forest_age<-pkey_cas_cov$ss_year-pkey_cas_cov$origin_upper
+```
+
+###### calculate time since disturbance {-}
+
+```{r eval=FALSE}
+pkey_cas_cov$ss_dst_timelag<-pkey_cas_cov$ss_year-pkey_cas_cov$dist_yr_1
+
+pkey_cas_cov<-pkey_cas_cov[c(1:2,4,3,54:55,5:53)]
+save(pkey_cas_cov, file="0_data/manual/spatialCov/CASFRI/pkey_cas_cov.rData")
+```
+
+
+
+#### 2005 MODIS Landcover {-}
+
+http://www.cec.org/north-american-environmental-atlas/land-cover-2005-modis-250m/
+
+
+```{r eval=FALSE}
+#use the modis landcover data extracted for the QPAD offsets.
 load("../../data/avian_lifeHistory/BAM_avianDatabase/AB-data-w-offsets-to-Brendan.RData")
 
 # use dd for the habitat covariates the offsets were based on
-
 callingLake_QPAD_LC<-dd%>%filter(str_detect(PKEY, "^CL"))
 
-save(callingLake_QPAD_LC, file="0_data/manual/bird/callingLake_QPAD_LC.rData")
-
-library(QPAD)
-
-
-rlcc <- raster("./data/lcc.tif")
-
-
-
+save(callingLake_QPAD_LC, file="0_data/manual/spatialCov/QPAD/callingLake_QPAD_LC.rData")
 
 ```
+
+
+
+
+

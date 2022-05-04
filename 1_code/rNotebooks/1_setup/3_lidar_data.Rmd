@@ -164,7 +164,7 @@ tmap_save(mainmap,filename="3_output/maps/lidar_inset.png",
 knitr::include_graphics("3_output/maps/lidar_inset.png")
 ```
 
-### Summarize LiDAR
+### Summarize LiDAR {-}
 
 Check the extreme values if the raster stack to identity any values that shouldn't be included (e.g. -9999).
 

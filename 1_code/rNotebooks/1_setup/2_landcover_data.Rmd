@@ -1,5 +1,3 @@
-### Classified landcover data
-
 
 ```{r setup, include=FALSE, cache=FALSE}
 #Set root directory to R project root
@@ -30,9 +28,9 @@ library(stringr)
 
 
 
-#### CAS-FRI data {-}
+### CAS-FRI data {-}
 
-##### Load CAS-FRI polygons {-}
+#### Load CAS-FRI polygons {-}
 
 Read ESRI geodatabase containing CAS-FRI, using sf package 
 
@@ -69,7 +67,7 @@ save(cas_geo, file="0_data/manual/CASFRI/cas_geo.rData")
 
 
 
-##### Clip CAS-FRI to study area {-}
+#### Clip CAS-FRI to study area {-}
 
 ```{r eval=FALSE}
 # load cas_geo
@@ -136,7 +134,7 @@ knitr::include_graphics("3_output/maps/casfri_inset.png")
 
 
 
-##### Spatial join point count locations with CAS-FRI polygons {-}
+#### Spatial join point count locations with CAS-FRI polygons {-}
 
 
 ```{r eval=FALSE}
@@ -158,7 +156,7 @@ save(ss_xy_cas, file ="0_data/manual/spatialCov/CASFRI/ss_xy_cas.rData")
 
 ```
 
-##### Or...bring in cas-fri station data from another chapter {-}
+#### Or...bring in cas-fri station data from another chapter {-}
 
 ```{r eval=FALSE}
 load("../../chapter_3/empirical/2_pipeline/tmp/bd_xy_cas.rData")
@@ -188,7 +186,7 @@ knitr::kable(head(ss_cas)) %>%
 
 
 
-##### extract data on stand age and disturbance history {-}
+#### extract data on stand age and disturbance history {-}
 
 ```{r eval=FALSE}
 ###################################
@@ -256,7 +254,7 @@ knitr::kable(head(cas_cov)) %>%
 
 
 
-###### Load pointcount data {-}
+##### Load pointcount data {-}
 
 ```{r eval=FALSE}
 load("0_data/manual/bird/bird_callingLake_wide_5.rData")
@@ -265,13 +263,13 @@ pkey_cas_cov<-bird_callingLake_wide_5%>%
   left_join(ss_cas_cov)
 ```
 
-###### calculate forest age at time of survey {-}
+#### calculate forest age at time of survey {-}
 
 ```{r eval=FALSE}
 pkey_cas_cov$forest_age<-pkey_cas_cov$ss_year-pkey_cas_cov$origin_upper
 ```
 
-###### calculate time since disturbance {-}
+##### calculate time since disturbance {-}
 
 ```{r eval=FALSE}
 pkey_cas_cov$ss_dst_timelag<-pkey_cas_cov$ss_year-pkey_cas_cov$dist_yr_1
@@ -282,7 +280,7 @@ save(pkey_cas_cov, file="0_data/manual/spatialCov/CASFRI/pkey_cas_cov.rData")
 
 
 
-#### 2005 MODIS Landcover {-}
+### 2005 MODIS Landcover {-}
 
 http://www.cec.org/north-american-environmental-atlas/land-cover-2005-modis-250m/
 

@@ -1,0 +1,112 @@
+```{r setup, include=FALSE, cache=FALSE}
+#Set root directory to R project root
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+```
+
+
+
+```{css, echo=FALSE}
+# set max height of code chunks using the following css styling
+
+pre {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+pre[class] {
+  max-height: 500px;
+}
+```
+
+```{r eval=FALSE}
+library(dplyr)
+```
+
+
+
+### Combine spatial data {-}
+
+Combine spatial data into a single data frame
+
+#### Load data {-}
+
+```{r eval=FALSE}
+# bird detection data
+load("0_data/manual/bird/bird_callingLake_wide_5.rData")
+
+# QPAD offsets
+load("0_data/manual/bird/callingLake_QPAD_offsets.rData")
+
+# LIDAR
+load("0_data/manual/spatialCov/LiDAR/ss_lidar_df.rData")
+
+# Classified landcover
+load("0_data/manual/spatialCov/CASFRI/pkey_cas_cov.rData")
+load("0_data/manual/spatialCov/QPAD/callingLake_QPAD_LC.rData")
+```
+
+
+#### Select covariates {-}
+
+```{r eval=FALSE}
+# LiDAR
+
+
+From CAS-FRI
+
+- forest_age
+
+
+```
+
+
+#### Join spatial data {-}
+
+```{r eval=FALSE}
+spatialCov_all<-left_join(ss_lidar_df)
+
+
+save(spatialCov_all, file = "spatialCov_all")
+
+```
+
+
+
+### Combine observation and spatial data {-}
+
+```{r eval=FALSE}
+data_main<-bird_callingLake_wide_5 %>%
+  left_join(callingLake_QPAD_offsets) %>% 
+  left_join(spatialCov_all)
+
+save(data_main, file = "0_data/manual/data_main.rData")
+```
+
+
+
+#### Load data {-}
+
+```{r eval=FALSE}
+
+```
+
+
+
+#### Join data {-}
+
+```{r eval=FALSE}
+
+```
+
+
+
+
+
+### Filter data {-}
+
+```{r eval=FALSE}
+
+```
+
+
+

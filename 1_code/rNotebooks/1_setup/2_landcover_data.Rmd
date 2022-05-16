@@ -21,9 +21,12 @@ pre[class] {
 
 
 ```{r eval=FALSE}
-library(sf)
 library(dplyr)
 library(stringr)
+library(tmaptools)
+library(tmap)
+library(sf)
+library(raster)
 ```
 
 
@@ -76,18 +79,30 @@ load("0_data/manual/spatialCov/CASFRI/cas_geo.rData")
 # load study area
 load("0_data/manual/bird/studyarea_big.rData")
 
-c_bb_tr<-st_transform(c_bb, st_crs(cas_geo))
-cas_geo_clip<-st_intersection(cas_geo, c_bb_tr)
-cas_geo_clip_tr<-st_transform(cas_geo_clip, st_crs(c_bb))
+#repair geometry of cas_geo
+cas_geo1<-st_make_valid(cas_geo)
 
-save(cas_geo_clip, file="0_data/manual/spatialCov/CASFRI/cas_geo_clip.rData")
+c_bb_tr<-st_transform(c_bb, st_crs(cas_geo1))
+c_bb_tr_2<-st_bbox(c_bb_tr)
+cas_geo_crop<-st_crop(cas_geo1, c_bb_tr_2)
 
+
+# cas_geo_clip<-st_intersection(cas_geo, c_bb_tr)
+cas_geo_crop_tr<-st_transform(cas_geo_crop, st_crs(c_bb))
+
+cas_geo_crop_tr_1<-projectRaster(cas_geo_crop, crs = st_crs(c_bb)$proj4string)
+test<-raster::projectRaster(cas_geo_crop, crs = projection(alberta))
+
+cas_geo_crop<-cas_geo_crop[1]
+
+cas_geo_crop<-st_buffer(cas_geo_crop, 0.0)
+save(cas_geo_crop, file="0_data/manual/spatialCov/CASFRI/cas_geo_crop.rData")
 
 ##############################################################################
 ##Plot the clipped CAS-FRI polygons
 
 #set up basemap
-# base<-read_osm(c_bb, type="bing", minNumTiles = 10)
+base<-read_osm(c_bb, type="bing", minNumTiles = 10)
 
 # stations
 load("0_data/manual/bird/ss_xy.rData")
@@ -96,10 +111,13 @@ load("0_data/manual/bird/ss_xy.rData")
 alberta<-st_read("../../data/spatial/external/Alberta_Boundaries_and_Roads/Alberta/Alberta.shp")
 
 
-mainmap<-#tm_shape(base)+
-  #tm_rgb()+ # to color the satelite basemap
-  tm_shape(cas_geo_clip)+
-  tm_borders()+
+
+mainmap<-tm_shape(base)+
+  tm_rgb(alpha=.8)+ # to color the satelite basemap
+  # tm_shape(c_bb)+
+  # tm_fill(col="white", alpha=.7)+
+  tm_shape(cas_geo_crop)+
+  tm_borders(col="black")+
   tm_shape(ss_xy)+
     tm_symbols(shape = 4, alpha = 1, size = .6, col = "red")+
   tm_scale_bar(position=c("left", "BOTTOM"), text.color = "black", color.light="lightgrey")+
@@ -263,11 +281,218 @@ pkey_cas_cov<-bird_callingLake_wide_5%>%
   left_join(ss_cas_cov)
 ```
 
-#### calculate forest age at time of survey {-}
+
+##### calculate forest age at time of survey {-}
+
+Get forest origin dates
+
+```{r eval= FALSE}
+### add forest origin year to cas_geo
+load("0_data/manual/spatialCov/CASFRI/cas_cov.rData")
+load("0_data/manual/spatialCov/CASFRI/cas_geo_crop.rData")
+
+origin<-cas_cov%>%
+  dplyr::select(cas_id, origin_upper, dist_yr_1, dist_yr_2, dist_yr_3)%>%
+  mutate(forest_origin_year=coalesce(origin_upper, dist_yr_1))%>% # if upper origin is NA and there was a disturbance, replace NA with disturbance year.
+  dplyr::select(cas_id, forest_origin_year)
+
+cas_geo_crop_originYr<-left_join(cas_geo_crop, origin)
+
+#plot
+##############################################################################
+##Plot the clipped CAS-FRI polygons and color by forest age
+
+# stations
+load("0_data/manual/bird/ss_xy.rData")
+
+#alberta boundary
+alberta<-st_read("../../data/spatial/external/Alberta_Boundaries_and_Roads/Alberta/Alberta.shp")
+
+
+#set up basemap
+base<-read_osm(c_bb, type="bing", minNumTiles = 10)
+
+mainmap<-tm_shape(base)+
+  tm_rgb(alph=.8)+ # to color the satelite basemap
+  tm_shape(cas_geo_crop_originYr)+
+  tm_fill(col = "forest_origin_year", 
+              style = "quantile",
+              palette = "BuGn",
+              legend.hist = TRUE) +
+  #tm_fill(col="forest_origin_year")+
+  tm_shape(ss_xy)+
+    tm_symbols(shape = 4, alpha = 1, size = .6, col = "red")+
+  tm_scale_bar(position=c("left", "BOTTOM"), text.color = "black", color.light="lightgrey")+
+  tm_graticules(lines=FALSE)+
+  tm_legend(outside=TRUE)
+
+insetmap<-tm_shape(alberta)+tm_fill(col="lightgrey")+tm_borders(lwd=.9, col="black")+
+  tm_shape(c_bb)+tm_borders(lw=2, col="red") +
+  tm_layout(inner.margins = c(0.04,0.04,0.04,0.04), outer.margins=c(0,0,0,0), bg.color="transparent", frame = FALSE)
+    #tm_symbols(shape = 20, alpha = .5, border.col="dimgray", size = .1, col = "black")
+  #tm_legend(position=c("left", "top"), frame=TRUE)
+
+#Get aspect ratio of bounding box
+c_bb_2<-st_bbox(c_bb)
+asp <- (c_bb_2$ymax - c_bb_2$ymin)/(c_bb_2$xmax - c_bb_2$xmin)
+
+
+library(grid)
+w <- .8
+h <- asp * w
+vp <- viewport(0.7, 0.3, width = w, height=h)
+
+tmap_save(mainmap,filename="3_output/maps/casfri_forestYear_inset.png",
+          dpi=300, insets_tm=insetmap, insets_vp=vp,
+          height=asp*350, width=350, units="mm")
+
+#####################################
+## Rasterize origin year polygons
+#####################################
+
+
+#create the extent and the raster
+e <- extent(cas_geo_crop_originYr)
+
+#use study area aspect ration to calculate ncol and nrow for raster: #h=0.4444444 * w 
+r <- raster::raster(e, crs= st_crs(cas_geo_crop_originYr)$proj4string, resolution = c(10, 10)) 
+
+# convert cas_geo to raster
+cas_geo_crop_originYr_raster<-raster::rasterize(cas_geo_crop_originYr, r, 'forest_origin_year')
+
+# save raster
+writeRaster(cas_geo_crop_originYr_raster, filename = "0_data/manual/spatialCov/CASFRI/cas_geo_crop_originYr_raster", format="GTiff", overwrite=T)
+
+ writeRaster(x, filename=paste0('0_data/manual/spatialCov/LiDAR/LiDAR_mosaics/',bl[j]), format="GTiff",  overwrite=T) 
+
+#change resolution of raster for printing
+r10<-aggregate(cas_geo_crop_originYr_raster, fact=10)
+
+mainmap<-tm_shape(c_bb)+
+  tm_borders(col="white")+ # to color the satelite basemap
+  tm_shape(r10)+
+  tm_raster(style = "cont",title="Canopy relief ratio", breaks = NULL,
+            palette = "BuGn")+
+  tm_shape(ss_xy)+
+    tm_symbols(shape = 4, alpha = 1, size = .6, col = "red")+
+  tm_scale_bar(position=c("left", "BOTTOM"), text.color = "black", color.light="lightgrey")+
+  tm_graticules(lines=FALSE)+
+  tm_legend(outside=TRUE)
+
+tmap_save(mainmap,filename="3_output/maps/cas_geo_crop_originYr_raster.png",
+          dpi=300, insets_tm=insetmap, insets_vp=vp,
+          height=asp*350, width=350, units="mm")
+```
+
+
+```{r map_fCASFRI_plot, echo=FALSE, fig.cap= "CASFRI landcover polygons colored by forest age.", out.width = '100%'}
+knitr::include_graphics("3_output/maps/casfri_forestYear_inset.png")
+```
+
+```{r map_fCASFRI_plot, echo=FALSE, fig.cap= "CASFRI landcover forest age raster.", out.width = '100%'}
+knitr::include_graphics("3_output/maps/cas_geo_crop_originYr_raster.png")
+```
+
+
 
 ```{r eval=FALSE}
-pkey_cas_cov$forest_age<-pkey_cas_cov$ss_year-pkey_cas_cov$origin_upper
+load("0_data/manual/spatialCov/CASFRI/pkey_cas_cov.rData")
+pkey_cas_cov$poly_forest_age<-pkey_cas_cov$ss_year-pkey_cas_cov$origin_upper
+
+#plot
+##############################################################################
+##Plot the clipped CAS-FRI polygons and color by forest age
+
+load("0_data/manual/spatialCov/CASFRI/cas_geo_crop.rData")
+#load("0_data/manual/spatialCov/CASFRI/pkey_cas_cov.rData")
+x<-pkey_cas_cov%>%
+  select(cas_id, forest_age, PKEY)%>%
+  filter(forest_age>=0)
+
+y<-inner_join(cas_geo_crop, x)
+
+# stations
+load("0_data/manual/bird/ss_xy.rData")
+
+#alberta boundary
+alberta<-st_read("../../data/spatial/external/Alberta_Boundaries_and_Roads/Alberta/Alberta.shp")
+
+
+#set up basemap
+base<-read_osm(c_bb, type="bing", minNumTiles = 10)
+
+mainmap<-tm_shape(base)+
+  tm_rgb(alph=.8)+ # to color the satelite basemap
+  tm_shape(y)+
+  tm_fill(col="forest_age")+
+  tm_shape(ss_xy)+
+    tm_symbols(shape = 4, alpha = 1, size = .6, col = "red")+
+  tm_scale_bar(position=c("left", "BOTTOM"), text.color = "black", color.light="lightgrey")+
+  tm_graticules(lines=FALSE)+
+  tm_legend(outside=TRUE)
+
+insetmap<-tm_shape(alberta)+tm_fill(col="lightgrey")+tm_borders(lwd=.9, col="black")+
+  tm_shape(c_bb)+tm_borders(lw=2, col="red") +
+  tm_layout(inner.margins = c(0.04,0.04,0.04,0.04), outer.margins=c(0,0,0,0), bg.color="transparent", frame = FALSE)
+    #tm_symbols(shape = 20, alpha = .5, border.col="dimgray", size = .1, col = "black")
+  #tm_legend(position=c("left", "top"), frame=TRUE)
+
+#Get aspect ratio of bounding box
+c_bb_2<-st_bbox(c_bb)
+asp <- (c_bb_2$ymax - c_bb_2$ymin)/(c_bb_2$xmax - c_bb_2$xmin)
+
+
+library(grid)
+w <- 1
+h <- asp * w
+vp <- viewport(0.7, 0.33, width = w, height=h)
+#vp <- viewport(0.9, 0.22, width = w, height=h, just=c("right", "top"))
+
+tmap_save(mainmap,filename="3_output/maps/casfri_forestAge_inset.png",
+          dpi=300, insets_tm=insetmap, insets_vp=vp,
+          height=asp*350, width=350, units="mm")
+
+
 ```
+
+```{r map_fCASFRI_plot, echo=FALSE, fig.cap= "CASFRI landcover polygons colored by forest age.", out.width = '100%'}
+
+knitr::include_graphics("3_output/maps/casfri_forestAge_inset.png")
+```
+
+###### Extract stand origin date raster values to points
+
+```{r eval=false}
+
+r<-raster("0_data/manual/spatialCov/CASFRI/cas_geo_crop_originYr_raster.tif")
+
+ss_forest_origDate_mean<-extract(r,ss_xy, buffer=100, na.rm=TRUE, fun=mean)
+save(ss_forest_origDate_mean, file="2_pipeline/tmp/ss_forest_origDate_mean.rData")
+
+ss_forest_origDate_sd<-extract(r,ss_xy, buffer=100, na.rm=TRUE, fun=sd) 
+save(ss_forest_origDate_sd, file="2_pipeline/tmp/ss_forest_origDate_sd.rData")
+
+ss_forest_origDate_mean<-round(ss_forest_origDate_mean,0)
+ss_forest_origDate_sd<-round(ss_forest_origDate_sd,2)
+
+SS_forest_origDate_mean_sd<-as.data.frame(cbind(ss_xy, ss_forest_origDate_mean, ss_forest_origDate_sd))%>%
+  dplyr::select(-geometry)
+
+save(SS_forest_origDate_mean_sd, file="2_pipeline/tmp/SS_forest_origDate_mean_sd")
+```
+
+##### Calculate forest age based on mean raster values
+
+```{r eval=FALSE}
+x<-left_join(pkey_cas_cov, SS_forest_origDate_mean_sd)
+x$rast_forest_age<-x$ss_year-x$ss_forest_origDate_mean
+x<-x[c(1:5, 58, 36, 56:57, 7:35, 37:55)]
+
+pkey_cas_cov<-x
+pkey_cas_cov<-pkey_cas_cov[c(1:6, 38:39, 7:37, 40:57)]
+```
+
+
 
 ##### calculate time since disturbance {-}
 
@@ -277,7 +502,6 @@ pkey_cas_cov$ss_dst_timelag<-pkey_cas_cov$ss_year-pkey_cas_cov$dist_yr_1
 pkey_cas_cov<-pkey_cas_cov[c(1:2,4,3,54:55,5:53)]
 save(pkey_cas_cov, file="0_data/manual/spatialCov/CASFRI/pkey_cas_cov.rData")
 ```
-
 
 
 ### 2005 MODIS Landcover {-}

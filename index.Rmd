@@ -73,45 +73,47 @@ pre[class] {
 ```{r child = '1_code/rNotebooks/1_setup/1_bird_data.Rmd'}
 ```
 
-## LiDAR data
 
-```{r child = '1_code/rNotebooks/1_setup/3_lidar_data.Rmd'}
-```
-
-## Landcover data
+## Classified landcover data
 
 ```{r child = '1_code/rNotebooks/1_setup/2_landcover_data.Rmd'}
 ```
 
 
+## LiDAR data
+
+```{r child = '1_code/rNotebooks/1_setup/3_lidar_data.Rmd'}
+```
+
+
 ## Combine and filter
 
-```{r child = '1_code/rNotebooks/1_setup/4_combine_filter.Rmd'}
+```{r child = '1_code/rNotebooks/1_setup/4_combine_and_filter_data.Rmd'}
 ```
 
 
 
 # SDMs
 
-```{r child = '1_code/rNotebooks/2_sdms/sdm_spp_1.Rmd'}
+```{r child = '1_code/rNotebooks/2_sdms/sdm_BTNW.Rmd'}
 ```
 
-```{r child = '1_code/rNotebooks/2_sdms/sdm_spp_2.Rmd'}
+```{r child = '1_code/rNotebooks/2_sdms/sdm_MOWA.Rmd'}
 ```
 
-```{r child = '1_code/rNotebooks/2_sdms/sdm_spp_3.Rmd'}
+```{r child = '1_code/rNotebooks/2_sdms/sdm_SWTH.Rmd'}
 ```
 
 
 # Compare SDMs accross years
 
-```{r child = '1_code/rNotebooks/3_compare/compare_spp_1.Rmd'}
+```{r child = '1_code/rNotebooks/3_compare/compare_BTNW.Rmd'}
 ```
 
-```{r child = '1_code/rNotebooks/3_compare/compare_spp_2.Rmd'}
+```{r child = '1_code/rNotebooks/3_compare/compare_MOWA.Rmd'}
 ```
 
-```{r child = '1_code/rNotebooks/3_compare/compare_spp_3.Rmd'}
+```{r child = '1_code/rNotebooks/3_compare/compare_SWTH.Rmd'}
 ```
 
 # Results summary

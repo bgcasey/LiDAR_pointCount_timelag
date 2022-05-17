@@ -88,7 +88,7 @@ pre[class] {
 
 ## Combine and filter
 
-```{r child = '1_code/rNotebooks/1_setup/4_combine_and_filter_data.Rmd'}
+```{r child = '1_code/rNotebooks/1_setup/4_combine_and_filter.Rmd'}
 ```
 
 

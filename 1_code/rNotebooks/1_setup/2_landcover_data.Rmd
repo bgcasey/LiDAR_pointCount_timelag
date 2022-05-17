@@ -286,7 +286,7 @@ pkey_cas_cov<-bird_callingLake_wide_5%>%
 
 Get forest origin dates
 
-```{r eval= FALSE}
+```{r eval=FALSE}
 ### add forest origin year to cas_geo
 load("0_data/manual/spatialCov/CASFRI/cas_cov.rData")
 load("0_data/manual/spatialCov/CASFRI/cas_geo_crop.rData")
@@ -462,7 +462,7 @@ knitr::include_graphics("3_output/maps/casfri_forestAge_inset.png")
 
 ###### Extract stand origin date raster values to points
 
-```{r eval=false}
+```{r eval=FALSE}
 
 r<-raster("0_data/manual/spatialCov/CASFRI/cas_geo_crop_originYr_raster.tif")
 

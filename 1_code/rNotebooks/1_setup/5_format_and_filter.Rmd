@@ -1,0 +1,278 @@
+```{r setup, include=FALSE, cache=FALSE}
+#Set root directory to R project root
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+```
+
+
+
+```{css, echo=FALSE}
+# set max height of code chunks using the following css styling
+
+pre {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+pre[class] {
+  max-height: 500px;
+}
+```
+
+```{r eval=FALSE}
+library(dplyr)
+```
+
+### Load data {-}
+
+```{r}
+load("0_data/manual/data_main.rData")
+```
+
+
+### Filter data {-}
+
+Filter by:
+- To minimize the influence of forest edges and adjacent differently aged forest, remove stations that are surrounded by a variety of forest ages (sd>5).
+
+
+```{r eval=FALSE}
+f1<-data_main%>%
+  filter(ss_forest_origDate_sd<11)
+
+nrow(f1 %>%
+  dplyr::select("SS.x")%>%
+  distinct())
+
+
+f2<-data_main%>%
+  filter(ss_forest_origDate_sd<6)
+
+nrow(f2 %>%
+  dplyr::select("SS.x")%>%
+  distinct())
+
+f3a<-data_main %>% 
+  filter(rast_forest_age > 30 & ss_forest_origDate_sd<11)
+f3b<-data_main %>% 
+  filter(rast_forest_age < 31 & ss_forest_origDate_sd<6)  
+f3c<-rbind(f3a, f3b)
+
+
+data_main_filter<-f2
+
+save(data_main_filter, file = "2_pipeline/store/data_main_filter.rData")
+```
+
+### Reclasify data {-}
+
+```{r eval=FALSE}
+# check classes
+lapply(d2,class)
+
+
+#Convert character variables to factors
+d2 <- cbind(d[1:2],as.data.frame(unclass(d[c(3:ncol(d))]),                 
+                       stringsAsFactors = TRUE))
+```
+
+### Remove missing data {-}
+
+```{r eval=FALSE}
+d3<-d2[complete.cases(d2),]
+```
+
+### Scale LiDAR metrics {-}
+
+```{r eval=FALSE}
+
+# scale Lidar
+d3$canopy_relief_ratio<-scale(d3$canopy_relief_ratio, center=TRUE, scale=TRUE)
+d3$elev_0pnt15_to_2pnt00_return_proportion<-scale(d3$elev_0pnt15_to_2pnt00_return_proportion, center=TRUE, scale=TRUE)
+d3$elev_10pnt00_to_15pnt00_return_proportion<-scale(d3$elev_10pnt00_to_15pnt00_return_proportion, center=TRUE, scale=TRUE)
+d3$elev_15pnt00_to_20pnt00_return_proportion<-scale(d3$elev_15pnt00_to_20pnt00_return_proportion, center=TRUE, scale=TRUE)
+d3$elev_20pnt00_to_25pnt00_return_proportion<-scale(d3$elev_20pnt00_to_25pnt00_return_proportion, center=TRUE, scale=TRUE)
+d3$elev_25pnt00_to_30pnt00_return_proportion<-scale(d3$elev_25pnt00_to_30pnt00_return_proportion, center=TRUE, scale=TRUE)
+d3$elev_2pnt00_to_4pnt00_return_proportion<-scale(d3$elev_2pnt00_to_4pnt00_return_proportion, center=TRUE, scale=TRUE)
+d3$elev_30pnt00_to_50pnt00_return_proportion<-scale(d3$elev_30pnt00_to_50pnt00_return_proportion, center=TRUE, scale=TRUE)
+d3$elev_4pnt00_to_6pnt00_return_proportion<-scale(d3$elev_4pnt00_to_6pnt00_return_proportion, center=TRUE, scale=TRUE)
+d3$elev_6pnt00_to_8pnt00_return_proportion<-scale(d3$elev_6pnt00_to_8pnt00_return_proportion, center=TRUE, scale=TRUE)
+d3$elev_8pnt00_to_10pnt00_return_proportion <-scale(d3$elev_8pnt00_to_10pnt00_return_proportion , center=TRUE, scale=TRUE)
+d3$elev_below_0pnt15_return_proportion<-scale(d3$elev_below_0pnt15_return_proportion, center=TRUE, scale=TRUE)
+d3$elev_cv<-scale(d3$elev_cv, center=TRUE, scale=TRUE)
+d3$elev_kurtosis<-scale(d3$elev_kurtosis, center=TRUE, scale=TRUE)
+d3$elev_l_cv<-scale(d3$elev_l_cv, center=TRUE, scale=TRUE)
+d3$elev_l_kurtosis<-scale(d3$elev_l_kurtosis, center=TRUE, scale=TRUE)
+d3$elev_maximum <-scale(d3$elev_maximum , center=TRUE, scale=TRUE)
+d3$elev_mean<-scale(d3$elev_mean, center=TRUE, scale=TRUE)
+d3$elev_p05 <-scale(d3$elev_p05 , center=TRUE, scale=TRUE)
+d3$elev_p10 <-scale(d3$elev_p10 , center=TRUE, scale=TRUE)
+d3$elev_p20 <-scale(d3$elev_p20 , center=TRUE, scale=TRUE)
+d3$elev_p25 <-scale(d3$elev_p25 , center=TRUE, scale=TRUE)
+d3$elev_p30 <-scale(d3$elev_p30 , center=TRUE, scale=TRUE)
+d3$elev_p50 <-scale(d3$elev_p50 , center=TRUE, scale=TRUE)
+d3$elev_p60 <-scale(d3$elev_p60 , center=TRUE, scale=TRUE)
+d3$elev_p70 <-scale(d3$elev_p70 , center=TRUE, scale=TRUE)
+d3$elev_p75 <-scale(d3$elev_p75 , center=TRUE, scale=TRUE)
+d3$elev_p80 <-scale(d3$elev_p80 , center=TRUE, scale=TRUE)
+d3$elev_p95 <-scale(d3$elev_p95 , center=TRUE, scale=TRUE)
+d3$elev_p99 <-scale(d3$elev_p99 , center=TRUE, scale=TRUE)
+d3$elev_stddev<-scale(d3$elev_stddev, center=TRUE, scale=TRUE)
+d3$percentage_first_returns_above_2pnt00<-scale(d3$percentage_first_returns_above_2pnt00, center=TRUE, scale=TRUE)
+d3$percentage_first_returns_above_mean<-scale(d3$percentage_first_returns_above_mean, center=TRUE, scale=TRUE)
+d3$total_all_returns <-scale(d3$total_all_returns , center=TRUE, scale=TRUE)
+
+
+
+```
+
+
+### Group by time since LiDAR {-}
+
+
+#### Identify stations that have surveys at each time step
+
+```{r eval=FALSE}
+
+dd<-d3
+dd<-dd%>%
+  filter(SS_lidar_timelag != "-16" & SS_lidar_timelag != "6")
+
+complete_series_SS<-as.data.frame(Reduce(intersect, split(dd$SS, dd$SS_lidar_timelag)))%>%
+  setNames("SS")
+
+save(complete_series_SS, file="2_pipeline/tmp/complete_series_SS.rData")
+```
+
+#### Filter dataframe to include only those stations
+
+```{r eval=FALSE}
+d4<-semi_join(d3, complete_series_SS)
+sdm_d<-d4
+save(sdm_d, file="2_pipeline/tmp/sdm_d.rData")
+```
+
+
+
+```{r eval=FALSE}
+
+# d_minus16<-sdm_d%>%
+#   filter(SS_lidar_timelag==-16)
+# nrow(distinct(as.data.frame((d_minus16$SS))))
+# d_minus16_ss<-d_minus15%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+# 
+# d_minus15<-sdm_d%>%
+#   filter(SS_lidar_timelag==-15)
+# nrow(distinct(as.data.frame((d_minus15$SS))))
+# d_minus15_ss<-d_minus15%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+# 
+# d_minus14<-sdm_d%>%
+#   filter(SS_lidar_timelag==-14)
+# nrow(distinct(as.data.frame((d_minus14$SS))))
+# d_minus14_ss<-d_minus14%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+# 
+# d_minus13<-sdm_d%>%
+#   filter(SS_lidar_timelag==-13)
+# nrow(distinct(as.data.frame((d_minus13$SS))))
+# d_minus13_ss<-d_minus13%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+# 
+# d_minus12<-sdm_d%>%
+#   filter(SS_lidar_timelag==-12)
+# nrow(distinct(as.data.frame((d_minus12$SS))))
+# d_minus12_ss<-d_minus12%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+# 
+# d_minus11<-sdm_d%>%
+#   filter(SS_lidar_timelag==-11)
+# nrow(distinct(as.data.frame((d_minus11$SS))))
+# d_minus11_ss<-d_minus11%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+# 
+# d_minus10<-sdm_d%>%
+#   filter(SS_lidar_timelag==-10)
+# nrow(distinct(as.data.frame((d_minus10$SS))))
+# d_minus10_ss<-d_minus10%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+# 
+# d_minus9<-sdm_d%>%
+#   filter(SS_lidar_timelag==-9)
+# nrow(distinct(as.data.frame((d_minus9$SS))))
+# d_minus9_ss<-d_minus9%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+# 
+# d_minus8<-sdm_d%>%
+#   filter(SS_lidar_timelag==-8)
+# nrow(distinct(as.data.frame((d_minus8$SS))))
+# d_minus8_ss<-d_minus8%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+# 
+# d_minus7<-sdm_d%>%
+#   filter(SS_lidar_timelag==-7)
+# nrow(distinct(as.data.frame((d_minus7$SS))))
+# d_minus7_ss<-d_minus7%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+# 
+# d_minus6<-sdm_d%>%
+#   filter(SS_lidar_timelag==-6)
+# nrow(distinct(as.data.frame((d_minus6$SS))))
+# d_minus6_ss<-d_minus6%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+# 
+# d_minus5<-sdm_d%>%
+#   filter(SS_lidar_timelag==-5)
+# nrow(distinct(as.data.frame((d_minus5$SS))))
+# d_minus5_ss<-d_minus5%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+# 
+# d_minus4<-sdm_d%>%
+#   filter(SS_lidar_timelag==-4)
+# nrow(distinct(as.data.frame((d_minus4$SS))))
+# d_minus4_ss<-d_minus4%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+# 
+# d_minus3<-sdm_d%>%
+#   filter(SS_lidar_timelag==-3)
+# nrow(distinct(as.data.frame((d_minus3$SS))))
+# d_minus3_ss<-d_minus3%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+# 
+# d_minus2<-sdm_d%>%
+#   filter(SS_lidar_timelag==-2)
+# nrow(distinct(as.data.frame((d_minus2$SS))))
+# d_minus2_ss<-d_minus2%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+# 
+# d_minus1<-sdm_d%>%
+#   filter(SS_lidar_timelag==-1)
+# nrow(distinct(as.data.frame((d_minus1$SS))))
+# d_minus1_ss<-d_minus1%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+# 
+# d_0<-sdm_d%>%
+#   filter(SS_lidar_timelag==0)
+# nrow(distinct(as.data.frame((d_0$SS))))
+# d_0_ss<-d_0%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+# 
+# 
+# d_1<-sdm_d%>%
+#   filter(SS_lidar_timelag==1)
+# nrow(distinct(as.data.frame((d_1$SS))))
+# d_1_ss<-d_1%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+# 
+# d_2<-sdm_d%>%
+#   filter(SS_lidar_timelag==2)
+# nrow(distinct(as.data.frame((d_2$SS))))
+# d_2_ss<-d_2%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+# 
+# d_3<-sdm_d%>%
+#   filter(SS_lidar_timelag==3)
+# nrow(distinct(as.data.frame((d_3$SS))))
+# d_3_ss<-d_3%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+# 
+# d_4<-sdm_d%>%
+#   filter(SS_lidar_timelag==4)
+# nrow(distinct(as.data.frame((d_4$SS))))
+# d_4_ss<-d_4%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+# 
+# d_5<-sdm_d%>%
+#   filter(SS_lidar_timelag==5)
+# nrow(distinct(as.data.frame((d_5$SS))))
+# d_5_ss<-d_5%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+# 
+# d_6<-sdm_d%>%
+#   filter(SS_lidar_timelag==6)
+# nrow(distinct(as.data.frame((d_6$SS))))
+# d_6_ss<-d_6%>%dplyr::select(SS, SS_lidar_timelag)%>%distinct()
+
+```
+
+
+
+

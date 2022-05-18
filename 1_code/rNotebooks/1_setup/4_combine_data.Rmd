@@ -48,17 +48,17 @@ load("0_data/manual/spatialCov/QPAD/callingLake_QPAD_LC.rData")
 
 #### Select covariates {-}
 
-- *CAS-FRI derived*
+- **CAS-FRI derived**
   - rast_forest_age
   - ss_forest_origDate_mean
   - ss_forest_origDate_sd
   - Forest_Type  
 
-- *From 2005 MODIS Landcover*
+- **From 2005 MODIS Landcover**
   - LCC2
   - LCC4
   
-- *LiDAR*  
+- **LiDAR**  
   - canopy_relief_ratio                      
   - elev_0pnt15_to_2pnt00_return_proportion  
   - elev_10pnt00_to_15pnt00_return_proportion

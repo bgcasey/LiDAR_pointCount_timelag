@@ -141,41 +141,4 @@ knitr::kable(head(data_main)) %>%
 ```
 
 
-### Filter data {-}
-
-Filter by:
-- To minimize the influence of forest edges and adjacent differently aged forest, remove stations that are surrounded by a variety of forest ages (sd>5).
-
-
-```{r eval=FALSE}
-load("0_data/manual/data_main.rData")
-f1<-data_main%>%
-  filter(ss_forest_origDate_sd<11)
-
-nrow(f1 %>%
-  dplyr::select("SS.x")%>%
-  distinct())
-
-
-f2<-data_main%>%
-  filter(ss_forest_origDate_sd<6)
-
-nrow(f2 %>%
-  dplyr::select("SS.x")%>%
-  distinct())
-
-f3a<-data_main %>% 
-  filter(rast_forest_age > 30 & ss_forest_origDate_sd<11)
-f3b<-data_main %>% 
-  filter(rast_forest_age < 31 & ss_forest_origDate_sd<6)  
-f3c<-rbind(f3a, f3b)
-
-
-data_main_filter<-f2
-
-save(data_main_filter, file = "2_pipeline/store/data_main_filter.rData")
-
-```
-
-
 

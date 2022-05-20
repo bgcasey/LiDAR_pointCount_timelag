@@ -88,9 +88,17 @@ pre[class] {
 
 ## Combine and filter
 
-```{r child = '1_code/rNotebooks/1_setup/4_combine_and_filter.Rmd'}
+```{r child = '1_code/rNotebooks/1_setup/4_combine_data.Rmd'}
 ```
 
+## Combine and filter
+
+```{r child = '1_code/rNotebooks/1_setup/4_combine_data.Rmd'}
+```
+
+## Prepare Data for SDMs
+```{r child = '1_code/rNotebooks/1_setup/5_format_and_filter.Rmd'}
+```
 
 
 # SDMs

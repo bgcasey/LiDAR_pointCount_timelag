@@ -26,13 +26,16 @@ pre[class] {
 library(dplyr)
 library(lme4)
 library(car)
+library(MuMIn)
+#library(jtools)
+
+
 #library(piecewiseSEM) # for psudo R2
-# library(jtools)
-# library(MuMIn)
+
 # library(see)
 # library(performance)
-# library(effects)
-# library(DHARMa)
+library(effects)
+library(DHARMa)
 # library(fitdistrplus)
 # library(purrr)
 # library(webshot)
@@ -73,7 +76,7 @@ save(BTNW_null_ms, file="2_pipeline/store/models/BTNW_null_ms.rData")
 ```
 
 
-#### Build models {-}
+#### Build models for zero timelag stations {-}
 
 
 ##### Evaluate classified landcover variable {-}
@@ -88,6 +91,36 @@ cm3<-lme4::glmer(BTNW ~  LCC4 + LCC2 + rast_forest_age + Forest_Type + (1|SS), d
 
 # There is not much variation in the factor levels so we'll just stick with rast_forest_age as a precitor. 
 ```
+
+
+##### Test for nonlinear effects {-}
+```{r eval=FALSE}
+
+# rast_forest_age
+mp1<-lme4::glmer(BTNW ~rast_forest_age + (1 | SS), data=d, family = binomial, na.action = na.exclude, control=glmerControl(optCtrl=list(maxfun=1e9))) 
+
+ 
+mp2<-lme4::glmer(BTNW ~poly(rast_forest_age,2) + (1 | SS), data=d, family = binomial, na.action = na.exclude, control=glmerControl(optCtrl=list(maxfun=1e9))) 
+
+mp3<-lme4::glmer(BTNW ~poly(rast_forest_age,3) + (1 | SS), data=d, family = binomial, na.action = na.exclude, control=glmerControl(optCtrl=list(maxfun=1e9))) 
+
+mp4<-lme4::glmer(BTNW ~poly(rast_forest_age,4) + (1 | SS), data=d, family = binomial, na.action = na.exclude, control=glmerControl(optCtrl=list(maxfun=1e9))) 
+
+print(AIC(mp1, mp2, mp3, mp4))
+
+d5<-d
+d5$rast_forest_age<-as.numeric(d5$rast_forest_age)
+pred<-effect_plot(mp2, pred=rast_forest_age, data = d5, plot.points=TRUE, interval=TRUE)
+plot(pred)
+# 
+# 
+# mp3_eff<-allEffects(mp3)
+# sc <- attr(d$rast_forest_age, 'scaled:scale')
+# ce <- attr(d$rast_forest_age, 'scaled:center')
+# mp3_eff[["poly(rast_forest_age,3)"]][["x"]]<-mp3_eff[["poly(rast_forest_age,3)"]][["x"]] * sc + ce
+
+```
+
 
 ##### Prelim LiDAR models {-}
 
@@ -170,14 +203,407 @@ plm13<-lme4::glmer(BTNW ~ rast_forest_age + canopy_relief_ratio+  elev_maximum +
 - total_all_returns  
 
 
-##### GLM's
+###### Interaction effects {-}
+
+```{r eval=FALSE}
+in_1<-lme4::glmer(BTNW ~ rast_forest_age * canopy_relief_ratio  +  (1|SS), data=d, family = binomial, offset = BTNW_OFF,  na.action=na.fail) 
+d_in_1<-MuMIn::dredge(in_1, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
 
 
-``` {eval=FALSE}
-vif(lm1)
+in_2<-lme4::glmer(BTNW ~ rast_forest_age * elev_maximum  +  (1|SS), data=d, family = binomial, offset = BTNW_OFF,  na.action=na.fail) 
+d_in_2<-MuMIn::dredge(in_2, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
+
+
+in_3<-lme4::glmer(BTNW ~ rast_forest_age * elev_stddev  +  (1|SS), data=d, family = binomial, offset = BTNW_OFF,  na.action=na.fail) 
+d_in_3<-MuMIn::dredge(in_3, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
+
+
+in_4<-lme4::glmer(BTNW ~ rast_forest_age * total_all_returns  +  (1|SS), data=d, family = binomial, offset = BTNW_OFF,  na.action=na.fail) 
+d_in_4<-MuMIn::dredge(in_4, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
+
+
+in_5<-lme4::glmer(BTNW ~ canopy_relief_ratio +  elev_maximum + rast_forest_age *elev_stddev + total_all_returns +  (1|SS), data=d, family = binomial, offset = BTNW_OFF,  na.action=na.fail) 
+d_in_5<-MuMIn::dredge(in_5, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
+
+# Did not identify meaningful interactions
+```
+
+
+##### Models {-}
+
+###### Build {-}
+
+``` {r eval=FALSE}
+m_can<-lme4::glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns +  (1|SS), data=d, family = binomial, offset = BTNW_OFF,  na.action=na.fail) 
+
+# m_can_dredge<-dredge(m_can, fixed = "rast_forest_age")
+
+m_can_dredge<-MuMIn::dredge(m_can, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
+save(m_can_dredge, file="2_pipeline/store/models/m_can_dredge.rData")
+
+# Get AUC of models
+auc.val <- apply(m_can_dredge,2,function(x)roc(pred=x,resp=y)$auc)
+
+
+#get a subset of top models
+m_can_dredge_sub<-subset(m_can_dredge, delta<5) 
+save(m_can_dredge_sub, file="2_pipeline/store/models/m_can_dredge_sub.rDATA")
+
+#calculate variable importance weights
+# m_can_dredge_imp<-importance(m_can_dredge)
+m_can_dredge_imp<-sw(m_can_dredge)
+save(m_can_dredge_imp, file="2_pipeline/store/models/m_can_dredge_imp.rDATA")
+
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("2_pipeline/store/models/m_can_dredge.rData")
+
+knitr::kable(head(m_can_dredge)) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("2_pipeline/store/models/m_can_dredge_imp.rData")
+
+knitr::kable(head(m_can_dredge_imp
+                  )) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+###### Evaluate top models {-}
+
+```{r eval=FALSE}
+m1<-lme4::glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, family = binomial, offset = BTNW_OFF,  na.action=na.fail) 
+
+#compare with the null
+anova(m1, BTNW_m2)
+
+# Models:
+# BTNW_m2: BTNW ~ 1 + (1 | SS) + (1 | ss_year)
+# m1: BTNW ~ poly(rast_forest_age, 2) + canopy_relief_ratio + elev_maximum + total_all_returns + (1 | SS)
+#         npar    AIC    BIC  logLik deviance  Chisq Df Pr(>Chisq)    
+# BTNW_m2    3 306.87 318.59 -150.44   300.87                         
+# m1         7 276.06 303.40 -131.03   262.06 38.813  4  7.614e-08 ***
+# ---
+# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 
 ```
 
+###### visualize top model {-}
 
+
+######## Diagnostic Plots {-}
+
+```{r eval=FALSE}
+png("3_output/figures/diagnostic/glmm/BTNW_check_m1.png", width = 600, height = 800, units = "px", pointsize = 12)
+performance::check_model(m1)
+dev.off() 
+
+
+BTNW_dharma_resid_m1 <- simulateResiduals(fittedModel = m1, n = 500)
+
+png("3_output/figures/diagnostic/glmm/BTNW_dharma_resid_m1.png", width = 800, height = 500, units = "px", pointsize = 12)
+plot(BTNW_dharma_resid_m1)
+dev.off()
+```
+
+```{r check_m1, echo=FALSE, fig.cap= "Visualizing model m1", out.width = '100%'}
+knitr::include_graphics("3_output/figures/diagnostic/glmm/BTNW_check_m1.png", dpi = 300)
+```
+
+```{r check_m1, echo=FALSE, fig.cap= "Model residual check", out.width = '100%'}
+knitr::include_graphics("3_output/figures/diagnostic/glmm/BTNW_dharma_resid_m1.png", dpi = 300)
+```
+
+####### Effect plots {-}
+
+```{r eval=FALSE}
+png("3_output/figures/diagnostic/glmm/effects_m1.png", width = 1200, height = 800, units = "px", pointsize = 12)
+plot(allEffects(m1))
+dev.off() 
+
+# summ(lm21)
+# export_summs(lm21)
+```
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/diagnostic/glmm/effects_m1.png", dpi = 300)
+```
+
+####### Check for residual spatial autocorrelation {-}
+
+```{r eval=FALSE}
+library(gstat)
+temp_data = data.frame(error = residuals(m1, type="deviance"), x = d$x, y = d$y)
+coordinates(temp_data) <- c("x","y") 
+bubble(temp_data, "error", col = c("black","grey"),
+       main = "Residuals", xlab = "X-coordinates", ylab = "Y-coordinates")
+plot(temp_data$error ~ temp_data$x, xlab = "X-coordinates", ylab = "Errors")
+plot(temp_data$error ~ temp_data$y, xlab = "Y-coordinates", ylab = "Errors")
+plot(variogram(error ~ 1, temp_data))
+plot(variogram(error ~ 1, temp_data, alpha = c(0, 45, 90, 135)))
+plot(variogram(m1))
+```
+
+###### AUC {-}
+```{r eval=FALSE}
+predicted <- predict(m_5,  type="response")
+
+
+library(pROC)
+auc(filter(d, SS_lidar_timelag==-0)$BTNW, predicted)
+
+auc(filter(d, SS_lidar_timelag==-5)$BTNW, predicted)
+```
+
+
+
+###### Map {-}
+
+add raster_forest_age to raster stack
+
+```{r eval=FALSE}
+
+```
+
+```{r}
+
+#using predict function in raster
+library(raster)
+library(dismo)
+stack<-stackOpen("0_data/manual/spatialCov/LiDAR/lidar_stack.stk")
+
+m0<-lme4::glmer(BTNW ~ canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=filter(d, SS_lidar_timelag==0), family = binomial, offset = BTNW_OFF,  na.action=na.fail) 
+
+m_15<-lme4::glmer(BTNW ~ canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=filter(d, SS_lidar_timelag==-15), family = binomial, offset = BTNW_OFF,  na.action=na.fail) 
+
+
+#unscale before raster::predict or scale
+#exponate/ backtransform raster predictions
+pg <- raster::predict(test, m_15, re.form=NA, type="response")
+```
+
+
+#### Run model for different time lags{-}
+
+```{r eval=FALSE}
+
+m_0<-lme4::glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = BTNW_OFF,  na.action=na.fail)
+predicted <- predict(m_0,  type="response")
+m_0_auc<-auc(filter(d, SS_lidar_timelag==-0)$BTNW, predicted)
+
+
+m_1<-lme4::glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==-1, family = binomial, offset = BTNW_OFF,  na.action=na.fail)
+predicted <- predict(m_1,  type="response")
+m_1_auc<-auc(filter(d, SS_lidar_timelag==-1)$BTNW, predicted)
+
+
+m_2<-lme4::glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==-2, family = binomial, offset = BTNW_OFF,  na.action=na.fail)
+m_3<-lme4::glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==-3, family = binomial, offset = BTNW_OFF,  na.action=na.fail)
+m_4<-lme4::glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==-4, family = binomial, offset = BTNW_OFF,  na.action=na.fail)
+m_5<-lme4::glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==-5, family = binomial, offset = BTNW_OFF,  na.action=na.fail)
+m_6<-lme4::glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==-6, family = binomial, offset = BTNW_OFF,  na.action=na.fail)
+m_7<-lme4::glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==-7, family = binomial, offset = BTNW_OFF,  na.action=na.fail)
+m_8<-lme4::glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==-8, family = binomial, offset = BTNW_OFF,  na.action=na.fail)
+m_9<-lme4::glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==-9, family = binomial, offset = BTNW_OFF,  na.action=na.fail)
+m_10<-lme4::glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==-10, family = binomial, offset = BTNW_OFF,  na.action=na.fail)
+m_11<-lme4::glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==-11, family = binomial, offset = BTNW_OFF,  na.action=na.fail)
+m_12<-lme4::glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==-12, family = binomial, offset = BTNW_OFF,  na.action=na.fail)
+m_13<-lme4::glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==-13, family = binomial, offset = BTNW_OFF,  na.action=na.fail)
+m_14<-lme4::glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==-14, family = binomial, offset = BTNW_OFF,  na.action=na.fail)
+m_15<-lme4::glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==-15, family = binomial, offset = BTNW_OFF,  na.action=na.fail)
+
+
+predicted_a <- predict(m4,  type="response")
+predicted_b <- predict(m4a,  type="response")
+
+library(pROC)
+auc(filter(d, SS_lidar_timelag==4)$BTNW, predicted_a)
+
+auc(filter(d, SS_lidar_timelag==4)$BTNW, predicted_b)
+
+BTNW_models<-list(m_0, m_1, m_2, m_3, m_4, m_5, m_6, m_7, m_8, m_9, m_10, m_11, m_12, m_13, m_14, m_15)
+names(BTNW_models) <- c("m_0", "m_1", "m_2", "m_3", "m_4", "m_5", "m_6", "m_7", "m_8", "m_9", "m_10", "m_11", "m_12", "m_13", "m_14", "m_15")
+save(BTNW_models, file="2_pipeline/store/models/BTNW_models.rData")
+
+BTNW_model_stats <- model.sel(BTNW_models, rank="AIC", extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3), AUC=function(x) pROC::auc(roc(d$BTNW, predict(x, type = "response")))))
+
+AUC=function(x) auc(filter(d, SS_lidar_timelag==-5)$BTNW, predicted)
+
+save(richness_n_ms, file="2_pipeline/store/models/richness_n_ms.rData")
+
+auc.tmp <- performance(pred,"auc"); auc <- as.numeric(auc.tmp@y.values)
+
+
+
+data_list <- split(d, d$SS_lidar_timelag)
+
+results <- lapply(data_list, function (x) {
+     temp_model <- glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=x, family = binomial, offset = BTNW_OFF,  na.action=na.fail)
+     pROC::auc(roc(predict(temp_model, type = "response")))})
+
+results_data <- data.frame(predictor = names(results), auc = results)
+
+
+
+
+
+```
+
+##### As a loop
+```{r eval=FALSE}
+#create subsets of data based on the lidar timelag
+data_list <- split(d, d$SS_lidar_timelag)
+timelag <- list(unique(d$SS_lidar_timelag))
+
+
+models <- lapply(timelag, function(x) {
+  d2<-d%>%filter(SS_lidar_timelag==x)})
+   m_lag <- glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d2,  family = binomial, offset = BTNW_OFF,  na.action=na.fail)
+  predicted <- predict(m_lag,  type="response")
+  m_auc<-auc(data$BTNW, predicted)
+ data.frame(
+    auc = as.numeric(m_auc)
+  )
+  # return(list(m_lag, predicted, m_auc))
+})  
+
+AUC_sum<-lapply(BTNW_models, function(x){
+  predicted <- predict(x,  type="response")
+  m_auc<-auc(filter(x@call[["data"]], m_0@call[["subset"]])$BTNW, predicted)
+ data.frame(
+    auc = as.numeric(m_auc)
+  )
+  
+  
+  
+})
+
+
+
+model_sum<-lapply(model_list)
+
+
+model_sum <- lapply(model_list, function(sub_df) {
+   richness_n_ms <- model.sel(model_list, rank="AIC", extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
+})
+
+
+richness_n_ms <- model.sel(model_list, rank="AIC", extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
+
+```
+
+```{r}
+# create data frame to store results
+results <- data.frame()
+
+for(SS_lidar_timelag in unique(d$SS_lidar_timelag)){
+    for(var in names(d)[c(-1,-length(d))]){
+        # fit glm model
+        fit <-  glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, family = binomial, offset = BTNW_OFF,  na.action=na.fail)
+
+        ## capture summary stats
+        intercept <- coef(summary(fit))[1]
+        slope <- coef(summary(fit))[2]
+        p.value <- coef(summary(fit))[8]
+        AIC <- AIC(fit)
+        Deviance <- deviance(fit)
+
+        # get coefficents of fit
+        cfit <- coef(summary(fit))
+
+        # create temporary data frame
+        df <- data.frame(var = var, SS_lidar_timelag = SS_lidar_timelag, intercept = cfit[1],
+                         slope = cfit[2], p.value = cfit[8],
+                         AIC = AIC(fit), Deviance = deviance(fit), stringsAsFactors = F)
+
+        # bind rows of temporary data frame to the results data frame
+        results <- rbind(results, df)
+    }
+}
+
+```
+
+
+```{r}
+nested_df <- tibble(subdf = 1:5) %>% # Choose number of 'random_df' 
+  rowwise() %>% 
+  mutate(data = split(d, d$SS_lidar_timelag)) %>% # create a list of random data.frames within our data.frame
+  ungroup() %>% 
+  mutate(model = map(data, ~ glm(y ~ x1 + x2, data = .x, 
+                                     subset = train, family = binomial))) # iterate with map throug all of data.frame's in column data
+
+
+nested_df
+
+
+data_list <- split(d, d$SS_lidar_timelag)
+
+m4<-lme4::glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=filter(d, SS_lidar_timelag==4), family = binomial, offset = BTNW_OFF,  na.action=na.fail) 
+
+
+m4a<-lme4::glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, subset = SS_lidar_timelag==4, family = binomial, offset = BTNW_OFF,  na.action=na.fail) 
+
+```
+
+```{r}
+#create subsets of data based on the lidar timelag
+data_list <- split(d, d$SS_lidar_timelag)
+timelag <- unique(d$SS_lidar_timelag)
+
+#Loop subsets through models
+models <- lapply(timelag, function(z) {
+   glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, subset = SS_lidar_timelag==paste0(z), family = binomial, offset = BTNW_OFF,  na.action=na.fail)
+})
+
+save(BTNW_models, file="2_pipeline/store/BTNW_models.rData")
+
+
+
+# 
+  predicted <- predict(m_lag,  type="response")
+  m_auc<-auc(data_list$BTNW, predicted)
+
+   return(list(m_lag, predicted, m_auc))
+})
+
+model_sum<-lapply(model_list)
+
+
+model_sum <- lapply(model_list, function(sub_df) {
+   richness_n_ms <- model.sel(model_list, rank="AIC", extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
+})
+
+
+richness_n_ms <- model.sel(model_list, rank="AIC", extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
+
+```
+
+```{r}
+library(dplyr)
+
+d <- sdm_d
+fitted_models = d %>% group_by(SS_lidar_timelag) %>% do(model = (glmer(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=., family = binomial, offset = BTNW_OFF,  na.action=na.fail)))
+
+library(broom)
+rowwise(fitted_models) %>% tidy(model)
+
+split(d, d$SS_lidar_timelag)
+
+fits <- lapply(split(d, d$SS_lidar_timelag), function(x) {
+    eval(substitute(
+        lmList(BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS),                    # fit the data to subset
+               data=d[d$SS_lidar_timelag %in% x,], family = binomial, offset = BTNW_OFF,  na.action=na.fail),  # use the subset
+        list(x=x)))                                         # substitue the actual x-values so the proper call gets stored
+})
+
+
+BTNW ~ poly(rast_forest_age,2) + canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, family = binomial, offset = BTNW_OFF,  na.action=na.fail
+```
 

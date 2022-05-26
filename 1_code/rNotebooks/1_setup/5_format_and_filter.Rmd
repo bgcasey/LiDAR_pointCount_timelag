@@ -37,18 +37,18 @@ Filter by:
 
 ```{r eval=FALSE}
 f1<-data_main%>%
-  filter(ss_forest_origDate_sd<11)
+  filter(ss_forest_origDate_sd<10)
 
 nrow(f1 %>%
-  dplyr::select("SS.x")%>%
+  dplyr::select("SS")%>%
   distinct())
 
 
 f2<-data_main%>%
-  filter(ss_forest_origDate_sd<6)
+  filter(ss_forest_origDate_sd<5)
 
 nrow(f2 %>%
-  dplyr::select("SS.x")%>%
+  dplyr::select("SS")%>%
   distinct())
 
 f3a<-data_main %>% 
@@ -66,8 +66,10 @@ save(data_main_filter, file = "2_pipeline/store/data_main_filter.rData")
 ### Reclasify data {-}
 
 ```{r eval=FALSE}
+d<-data_main_filter
+
 # check classes
-lapply(d2,class)
+lapply(d,class)
 
 
 #Convert character variables to factors
@@ -81,7 +83,7 @@ d2 <- cbind(d[1:2],as.data.frame(unclass(d[c(3:ncol(d))]),
 d3<-d2[complete.cases(d2),]
 ```
 
-### Scale LiDAR metrics {-}
+### Scale metrics {-}
 
 ```{r eval=FALSE}
 
@@ -121,6 +123,7 @@ d3$percentage_first_returns_above_2pnt00<-scale(d3$percentage_first_returns_abov
 d3$percentage_first_returns_above_mean<-scale(d3$percentage_first_returns_above_mean, center=TRUE, scale=TRUE)
 d3$total_all_returns <-scale(d3$total_all_returns , center=TRUE, scale=TRUE)
 
+d3$rast_forest_age<-scale(d3$rast_forest_age, center=TRUE, scale=TRUE)
 
 
 ```
@@ -152,8 +155,99 @@ save(sdm_d, file="2_pipeline/tmp/sdm_d.rData")
 ```
 
 
+#### Seperate by aqusition year
 
 ```{r eval=FALSE}
+d4<-sdm_d
+d5_2008<-filter(d4, lidar_year==2008)
+d5_2009<-filter(d4, lidar_year==2009)
+```
+
+#### Check variability in detections by year
+```{r eval=FALSE}
+# Median and Median Absolute Deviation (MAD)
+
+
+x<-d5_2009%>%
+  filter(SS_lidar_timelag<1)%>%
+  group_by(SS_lidar_timelag)%>%
+  #filter(lidar_year==2009)%>%
+  dplyr::summarise(across(13:15, sum)) #
+
+
+   ce<-sapply(test[2:4], function(x) sd(x) / mean(x))
+   mean<-sapply(test, function(x) mean(x))
+   dist<-sapply(test, function(x) x - mean(x))
+   
+  
+xBTNW<-x$BTNW
+med = median(xBTNW)
+# subtract median from each value of x and get absolute deviation
+abs_dev = abs(xBTNW-med)
+# get MAD
+mad = 1.4826 * median(abs_dev)
+
+# get threshold values for outliers
+Tmin = med-(2*mad) 
+Tmax = med+(2*mad) 
+
+# find outlier
+xBTNW[which(xBTNW < Tmin | xBTNW > Tmax)]
+
+# remove outlier
+yBTNW=xBTNW[which(xBTNW > Tmin & xBTNW < Tmax)]
+
+
+xMOWA<-x$MOWA
+med = median(xMOWA)
+# subtract median from each value of x and get absolute deviation
+abs_dev = abs(xMOWA-med)
+# get MAD
+mad = 1.4826 * median(abs_dev)
+
+# get threshold values for outliers
+Tmin = med-(1*mad) 
+Tmax = med+(1*mad) 
+
+# find outlier
+xMOWA[which(xMOWA < Tmin | xMOWA > Tmax)]
+
+# remove outlier
+yMOWA=xMOWA[which(xMOWA > Tmin & xMOWA < Tmax)]
+
+
+xSWTH<-x$SWTH
+med = median(xSWTH)
+# subtract median from each value of x and get absolute deviation
+abs_dev = abs(xSWTH-med)
+# get MAD
+mad = 1.4826 * median(abs_dev)
+
+# get threshold values for outliers
+Tmin = med-(2*mad) 
+Tmax = med+(2*mad) 
+
+# find outlier
+xSWTH[which(xSWTH < Tmin | xSWTH > Tmax)]
+
+# remove outlier
+ySWTH=xSWTH[which(xSWTH > Tmin & xSWTH < Tmax)]
+
+
+y2=x %>%
+  filter(BTNW %in% yBTNW)%>%
+  filter(MOWA%in% yMOWA)%>%
+  filter(SWTH %in% ySWTH)
+
+
+
+ce<-sapply(y2, function(x) sd(x) / mean(x))
+```
+
+
+
+
+```{r eval=FALSE, echo=FALSE, include=FALSE}
 
 # d_minus16<-sdm_d%>%
 #   filter(SS_lidar_timelag==-16)

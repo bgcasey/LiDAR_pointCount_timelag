@@ -336,6 +336,18 @@ save(bird_callingLake_wide_4, file = "0_data/manual/bird/bird_callingLake_wide_4
 
 ```
 
+
+
+
+
+
+
+
+
+
+
+
+
 ### Select species {-}
 
 
@@ -431,7 +443,10 @@ load("0_data/manual/bird/bird_callingLake_wide_4.rData")
 
 sum_detections_year<-bird_callingLake_wide_4%>%
   group_by(ss_year) %>%
-  dplyr::summarise(across(15:201, sum))  #have to subtract the number of grouping columns.
+  dplyr::summarise(across(15:201, sum)) %>% #have to subtract the number of grouping columns.
+  dplyr::select(order(colnames(.)))%>%
+  dplyr::select(ss_year, ALFL:SPSA, SSHA:YRWA)
+
 
 #standard deviation
 sd<-colwise(sd)(sum_detections_year)
@@ -504,12 +519,41 @@ knitr::kable(bird_totDet_ce) %>%
 ```
 
 
+```{r eval=FALSE}
+bird_totDet_ce_cand<-bird_totDet_ce %>%
+  filter(percStations>5 & coeficient_of_variation<.6)
+
+#add  functional traits
+load("0_data/manual/bird/bird_traits.rData")
+bird_traits2<-bird_traits[c(1, 32:36)]
+
+bird_totDet_ce_cand<-left_join(bird_totDet_ce_cand, bird_traits2, by=c("spp"="SPECIES"))
+
+save(bird_totDet_ce_cand, file="0_data/manual/bird/bird_totDet_ce_cand.rData")
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("0_data/manual/bird/bird_totDet_ce_cand.rData")
+
+knitr::kable(bird_totDet_ce_cand) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+
+
 Based on this, we selected Black-throated Green Warbler (BTNW), associated with mature forests;  Swainson’s Thrush (SWTH) a forest generalist; and  Mourning Warbler (MOWA) an early-seral specialist. 
+YBSA Yellow-bellied Sapsucker
+AMRE American redstart (mid seral)
+WTSP White throated sparrow (early)
+
 
 ```{r eval=FALSE}
 load("0_data/manual/bird/bird_callingLake_wide_4.rData")
 
-bird_callingLake_wide_5<-bird_callingLake_wide_4[c(1:14, 48, 97, 18)]
+bird_callingLake_wide_5<-bird_callingLake_wide_4%>%
+  dplyr::select(SS:surveyType, AMRE, BTNW, MOWA, SWTH, WTSP, YBSA)
 
 save(bird_callingLake_wide_5, file="0_data/manual/bird/bird_callingLake_wide_5.rData")
 ```
@@ -524,6 +568,7 @@ knitr::kable(head(bird_callingLake_wide_5)) %>%
   scroll_box(width = "100%", height = "400px")
 ```
 
+
 ### Add BAM QPAD offsets {-}
 
 https://github.com/psolymos/QPAD
@@ -533,9 +578,11 @@ https://github.com/psolymos/QPAD
 ```{r eval=FALSE}
 load("../../data/avian_lifeHistory/BAM_avianDatabase/AB-data-w-offsets-to-Brendan.RData")
 
+qpad_offsets<-as.data.frame(off)
+
 callingLake_QPAD_offsets <- tibble::rownames_to_column(qpad_offsets, "PKEY")%>%
-      dplyr::select(PKEY, BTNW, MOWA, SWTH)%>%
-      dplyr::rename(c(BTNW_OFF=BTNW, MOWA_OFF=MOWA, SWTH_OFF=SWTH))%>%
+      dplyr::select(PKEY, AMRE, BTNW, MOWA, SWTH, WTSP, YBSA)%>%
+      dplyr::rename(c(AMRE_OFF=AMRE, BTNW_OFF=BTNW, MOWA_OFF=MOWA, SWTH_OFF=SWTH, WTSP_OFF=WTSP, YBSA_OFF=YBSA))%>%
       filter(str_detect(PKEY, "^CL"))
 
 save(callingLake_QPAD_offsets, file="0_data/manual/bird/callingLake_QPAD_offsets.rData")
@@ -550,4 +597,6 @@ knitr::kable(head(callingLake_QPAD_offsets)) %>%
   column_spec(1, width= "20em")%>%
   scroll_box(width = "100%", height = "400px")
 ```
+
+
 

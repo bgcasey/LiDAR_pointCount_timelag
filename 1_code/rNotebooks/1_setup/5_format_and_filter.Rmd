@@ -26,6 +26,8 @@ library(dplyr)
 
 ```{r}
 load("0_data/manual/data_main.rData")
+
+data_main<-data_main%>%dplyr::select(-poly_forest_age)
 ```
 
 
@@ -67,6 +69,7 @@ save(data_main_filter, file = "2_pipeline/store/data_main_filter.rData")
 
 ```{r eval=FALSE}
 d<-data_main_filter
+#d<-data_main
 
 # check classes
 lapply(d,class)
@@ -102,8 +105,6 @@ d3$elev_8pnt00_to_10pnt00_return_proportion <-scale(d3$elev_8pnt00_to_10pnt00_re
 d3$elev_below_0pnt15_return_proportion<-scale(d3$elev_below_0pnt15_return_proportion, center=TRUE, scale=TRUE)
 d3$elev_cv<-scale(d3$elev_cv, center=TRUE, scale=TRUE)
 d3$elev_kurtosis<-scale(d3$elev_kurtosis, center=TRUE, scale=TRUE)
-d3$elev_l_cv<-scale(d3$elev_l_cv, center=TRUE, scale=TRUE)
-d3$elev_l_kurtosis<-scale(d3$elev_l_kurtosis, center=TRUE, scale=TRUE)
 d3$elev_maximum <-scale(d3$elev_maximum , center=TRUE, scale=TRUE)
 d3$elev_mean<-scale(d3$elev_mean, center=TRUE, scale=TRUE)
 d3$elev_p05 <-scale(d3$elev_p05 , center=TRUE, scale=TRUE)
@@ -124,10 +125,12 @@ d3$percentage_first_returns_above_mean<-scale(d3$percentage_first_returns_above_
 d3$total_all_returns <-scale(d3$total_all_returns , center=TRUE, scale=TRUE)
 
 d3$rast_forest_age<-scale(d3$rast_forest_age, center=TRUE, scale=TRUE)
-
+#d3$poly_forest_age<-scale(d3$poly_forest_age, center=TRUE, scale=TRUE)
 
 ```
 
+
+***
 
 ### Group by time since LiDAR {-}
 
@@ -138,7 +141,8 @@ d3$rast_forest_age<-scale(d3$rast_forest_age, center=TRUE, scale=TRUE)
 
 dd<-d3
 dd<-dd%>%
-  filter(SS_lidar_timelag != "-16" & SS_lidar_timelag != "6")
+  filter(SS_lidar_timelag < "1")%>%
+  filter(SS_lidar_timelag>"-16")
 
 complete_series_SS<-as.data.frame(Reduce(intersect, split(dd$SS, dd$SS_lidar_timelag)))%>%
   setNames("SS")
@@ -154,7 +158,6 @@ sdm_d<-d4
 save(sdm_d, file="2_pipeline/tmp/sdm_d.rData")
 ```
 
-
 #### Seperate by aqusition year
 
 ```{r eval=FALSE}
@@ -168,16 +171,17 @@ d5_2009<-filter(d4, lidar_year==2009)
 # Median and Median Absolute Deviation (MAD)
 
 
-x<-d5_2009%>%
+#x<-d5_2009%>%
+x<-d4%>%
   filter(SS_lidar_timelag<1)%>%
   group_by(SS_lidar_timelag)%>%
   #filter(lidar_year==2009)%>%
   dplyr::summarise(across(13:15, sum)) #
 
 
-   ce<-sapply(test[2:4], function(x) sd(x) / mean(x))
-   mean<-sapply(test, function(x) mean(x))
-   dist<-sapply(test, function(x) x - mean(x))
+   # ce<-sapply(test[2:4], function(x) sd(x) / mean(x))
+   # mean<-sapply(test, function(x) mean(x))
+   # dist<-sapply(test, function(x) x - mean(x))
    
   
 xBTNW<-x$BTNW
@@ -188,8 +192,8 @@ abs_dev = abs(xBTNW-med)
 mad = 1.4826 * median(abs_dev)
 
 # get threshold values for outliers
-Tmin = med-(2*mad) 
-Tmax = med+(2*mad) 
+Tmin = med-(1*mad) 
+Tmax = med+(1*mad) 
 
 # find outlier
 xBTNW[which(xBTNW < Tmin | xBTNW > Tmax)]
@@ -206,8 +210,8 @@ abs_dev = abs(xMOWA-med)
 mad = 1.4826 * median(abs_dev)
 
 # get threshold values for outliers
-Tmin = med-(1*mad) 
-Tmax = med+(1*mad) 
+Tmin = med-(.5*mad) 
+Tmax = med+(.5*mad) 
 
 # find outlier
 xMOWA[which(xMOWA < Tmin | xMOWA > Tmax)]
@@ -235,9 +239,9 @@ ySWTH=xSWTH[which(xSWTH > Tmin & xSWTH < Tmax)]
 
 
 y2=x %>%
-  filter(BTNW %in% yBTNW)%>%
-  filter(MOWA%in% yMOWA)%>%
-  filter(SWTH %in% ySWTH)
+  filter(BTNW %in% yBTNW)#%>%
+  #filter(MOWA%in% yMOWA)#%>%
+  #filter(SWTH %in% ySWTH)
 
 
 

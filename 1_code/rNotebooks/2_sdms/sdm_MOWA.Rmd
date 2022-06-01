@@ -28,7 +28,7 @@ library(car)
 library(MuMIn)
 library(raster)
 
-#library(jtools)
+library(jtools)
 
 
 #library(piecewiseSEM) # for psudo R2
@@ -52,10 +52,37 @@ load("2_pipeline/tmp/sdm_d.rData")
 d<-sdm_d
 ```
 
+### Test for outlier detection years
+```{r eval=FALSE}
+x<-d%>%
+  filter(SS_lidar_timelag<1)%>%
+  group_by(SS_lidar_timelag)%>%
+  #filter(lidar_year==2009)%>%
+  dplyr::summarise(across(13:15, sum)) #
 
-#### Model exploration {-}
+xBTNW<-x$BTNW
+med = median(xBTNW)
+# subtract median from each value of x and get absolute deviation
+abs_dev = abs(xBTNW-med)
+# get MAD
+mad = 1.4826 * median(abs_dev)
 
-##### Evaluate random effects {-}
+# get threshold values for outliers
+Tmin = med-(1*mad) 
+Tmax = med+(1*mad) 
+
+# find outlier values
+xBTNW[which(xBTNW < Tmin | xBTNW > Tmax)]
+
+# remove outlier
+yBTNW=xBTNW[which(xBTNW > Tmin & xBTNW < Tmax)]
+
+```
+
+
+### Model exploration {-}
+
+#### Evaluate random effects {-}
 
 ```{r eval=FALSE}
 MOWA_m0<-glm(MOWA ~ 1, data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action = na.exclude)
@@ -64,10 +91,14 @@ MOWA_m1<-lme4::glmer(MOWA ~ 1 + (1|SS), data=d, subset=SS_lidar_timelag==0, fami
 
 MOWA_m2<-lme4::glmer(MOWA ~ 1 + (1|SS) + (1|ss_year), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action = na.exclude)
 
-# # Compare models
-anova(MOWA_m1, MOWA_m2)
+MOWA_m3<-lme4::glmer(MOWA ~ 1 + (1|ss_year/SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action = na.exclude)
 
-MOWA_null_ms <- model.sel(MOWA_m2, rank="AIC", extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
+# # Compare models
+anova(MOWA_m3, MOWA_m1)
+
+anova(MOWA_m1, MOWA_m0)
+
+MOWA_null_ms <- model.sel(MOWA_m1, rank="AIC", extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
 
 save(MOWA_null_ms, file="2_pipeline/store/models/MOWA_null_ms.rData")
 ```
@@ -79,22 +110,25 @@ save(MOWA_null_ms, file="2_pipeline/store/models/MOWA_null_ms.rData")
 ```{r eval=FALSE}
 cm1<-lme4::glmer(MOWA ~ rast_forest_age  + (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action = na.exclude )
 
-cm2<-lme4::glmer(MOWA ~  LCC4 + (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action = na.exclude )
+cm2<-lme4::glmer(MOWA ~  LCC4 + (1|ss_year/SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action = na.exclude )
 
-cm3<-lme4::glmer(MOWA ~  LCC4 + LCC2 + rast_forest_age + Forest_Type + (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action = na.exclude)
+cm3<-lme4::glmer(MOWA ~  LCC4 + LCC2 + rast_forest_age + Forest_Type + (1|ss_year/SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action = na.exclude)
+
+cm4<-lme4::glmer(MOWA ~ poly_forest_age  + (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action = na.exclude )
+
 
 # There is not much variation in the factor levels so we'll just stick with rast_forest_age as a preditor. 
 ```
 
 
-##### Test for nonlinear effects {-}
+##### Test for nonlinear effects forest age {-}
 ```{r eval=FALSE}
 
 # rast_forest_age
 mp1<-lme4::glmer(MOWA ~rast_forest_age + (1 | SS), data=d, subset=SS_lidar_timelag==0, family = binomial, na.action = na.exclude, control=glmerControl(optCtrl=list(maxfun=1e9))) 
 
  
-mp2<-lme4::glmer(MOWA ~ (1 | SS), data=d, subset=SS_lidar_timelag==0, family = binomial, na.action = na.exclude, control=glmerControl(optCtrl=list(maxfun=1e9))) 
+mp2<-lme4::glmer(MOWA ~ poly(rast_forest_age,2) + (1 | SS), data=d, subset=SS_lidar_timelag==0, family = binomial, na.action = na.exclude, control=glmerControl(optCtrl=list(maxfun=1e9))) 
 
 mp3<-lme4::glmer(MOWA ~poly(rast_forest_age,3) + (1 | SS), data=d, subset=SS_lidar_timelag==0, family = binomial, na.action = na.exclude, control=glmerControl(optCtrl=list(maxfun=1e9))) 
 
@@ -102,16 +136,28 @@ mp4<-lme4::glmer(MOWA ~poly(rast_forest_age,4) + (1 | SS), data=d, subset=SS_lid
 
 print(AIC(mp1, mp2, mp3, mp4))
 
+#plot
 d5<-d
 d5$rast_forest_age<-as.numeric(d5$rast_forest_age)
-pred<-effect_plot(mp2, pred=rast_forest_age, data = d5, plot.points=TRUE, interval=TRUE)
+pred<-effect_plot(mp1, pred=rast_forest_age, data = d5, plot.points=TRUE, interval=TRUE)
 plot(pred)
-# 
-# 
-# mp3_eff<-allEffects(mp3)
-# sc <- attr(d$rast_forest_age, 'scaled:scale')
-# ce <- attr(d$rast_forest_age, 'scaled:center')
-# mp3_eff[["poly(rast_forest_age,3)"]][["x"]]<-mp3_eff[["poly(rast_forest_age,3)"]][["x"]] * sc + ce
+
+
+## Plot unscaled
+d2<-d
+
+# Extract scales
+sc <- attr(d2$rast_forest_age, 'scaled:scale')
+ce <- attr(d2$rast_forest_age, 'scaled:center')
+
+
+library(ggeffects)
+pred<-ggpredict(mp1, terms="rast_forest_age [all]", data=d2)
+pred$x<-pred$x * sc + ce
+plot(pred,)
+
+
+# select mp1
 
 ```
 
@@ -126,43 +172,30 @@ plm1<-lme4::glmer(MOWA ~ rast_forest_age + canopy_relief_ratio+ elev_0pnt15_to_2
 
 #Extract variance-covariance matrix for all parameters
 library(merDeriv)
-merDeriv::vcov.glmerMod(lm1)
+merDeriv::vcov.glmerMod(plm1)
 
 #Check variance inflation factors of fixed effects
-l_vif<-as.data.frame(vif(lm1))
+l_vif<-as.data.frame(vif(plm1))
 
 # Iteratively remove highly correlated variables with VIF > 3 and r >.5 
-plm2<-lme4::glmer(MOWA ~ rast_forest_age + canopy_relief_ratio+ elev_0pnt15_to_2pnt00_return_proportion+ elev_10pnt00_to_15pnt00_return_proportion+ elev_15pnt00_to_20pnt00_return_proportion+ elev_20pnt00_to_25pnt00_return_proportion+ elev_25pnt00_to_30pnt00_return_proportion+ elev_2pnt00_to_4pnt00_return_proportion+ elev_30pnt00_to_50pnt00_return_proportion+ elev_4pnt00_to_6pnt00_return_proportion+ elev_6pnt00_to_8pnt00_return_proportion+ elev_8pnt00_to_10pnt00_return_proportion + elev_below_0pnt15_return_proportion+ elev_cv+  elev_maximum + elev_mean+  elev_p50 + elev_p95 + elev_p99 + elev_stddev+ percentage_first_returns_above_2pnt00+ percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action = na.exclude ) 
+plm2<-lme4::glmer(MOWA ~ rast_forest_age + canopy_relief_ratio+ elev_cv+ elev_kurtosis+ elev_maximum + elev_mean+ elev_p05 + elev_p10 + elev_p20 + elev_p25 + elev_p30 + elev_p50 + elev_p60 + elev_p70 + elev_p75 + elev_p80 + elev_p95 + elev_p99 + elev_stddev+ percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action = na.exclude )  
+l_vif<-as.data.frame(vif(plm2))
 
 
-plm3<-lme4::glmer(MOWA ~ rast_forest_age + canopy_relief_ratio+  elev_cv+  elev_maximum + elev_mean+  elev_p50 + elev_p95 + elev_p99 + elev_stddev+ percentage_first_returns_above_2pnt00+ percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action = na.exclude ) 
+plm3<-lme4::glmer(MOWA ~ rast_forest_age + canopy_relief_ratio+ elev_cv+ elev_kurtosis+ elev_maximum + elev_mean+ elev_p50 + + elev_stddev+ percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action = na.exclude )
+
+l_vif<-as.data.frame(vif(plm3))
 
 
-plm3<-lme4::glmer(MOWA ~ rast_forest_age + canopy_relief_ratio+  elev_cv+  elev_maximum + elev_mean+  elev_p50 + elev_p95 + elev_p99 + elev_stddev+ percentage_first_returns_above_2pnt00+ percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action = na.exclude ) 
+plm4<-lme4::glmer(MOWA ~ canopy_relief_ratio+ elev_maximum +  elev_p50 + elev_stddev+ percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action = na.exclude )
 
-l_vif<-as.data.frame(vif(lm3))
-
-
-plm4<-lme4::glmer(MOWA ~ rast_forest_age + canopy_relief_ratio+  elev_cv+  elev_maximum +  elev_p50 + elev_p95  + elev_stddev+ percentage_first_returns_above_2pnt00+ percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action = na.exclude ) 
-
-l_vif<-as.data.frame(vif(lm4))
+l_vif<-as.data.frame(vif(plm4))
 
 
-plm5<-lme4::glmer(MOWA ~ rast_forest_age + canopy_relief_ratio+  elev_maximum +  elev_p50   + elev_stddev+ percentage_first_returns_above_2pnt00+ percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action = na.exclude ) 
+plm5<-plm4<-lme4::glmer(MOWA ~ elev_maximum + elev_stddev+ percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action = na.exclude )
 
-l_vif<-as.data.frame(vif(lm5))
+l_vif<-as.data.frame(vif(plm5))
 
-plm6<-lme4::glmer(MOWA ~ rast_forest_age + canopy_relief_ratio+  elev_maximum + elev_stddev+ percentage_first_returns_above_2pnt00+ percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action = na.exclude ) 
-
-l_vif<-as.data.frame(vif(lm6))
-
-plm7<-lme4::glmer(MOWA ~ rast_forest_age + canopy_relief_ratio+  elev_maximum + elev_stddev+ percentage_first_returns_above_2pnt00 + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action = na.exclude ) 
-
-l_vif<-as.data.frame(vif(lm7))
-
-plm8<-lme4::glmer(MOWA ~ rast_forest_age + canopy_relief_ratio+  elev_maximum + elev_stddev + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action = na.exclude ) 
-
-l_vif<-as.data.frame(vif(lm8))
 
 ###################
 #candidates
@@ -235,12 +268,12 @@ MOWA_can_dredge<-MuMIn::dredge(MOWA_can, extra = c(r2=function(x) round(r.square
 save(MOWA_can_dredge, file="2_pipeline/store/models/MOWA_can_dredge.rData")
 
 #get a subset of top models
-MOWA_can_dredge_sub<-subset(m_can_dredge, delta<5) 
+MOWA_can_dredge_sub<-subset(MOWA_can_dredge, delta<5) 
 save(MOWA_can_dredge_sub, file="2_pipeline/store/models/MOWA_can_dredge_sub.rDATA")
 
 #calculate variable importance weights
 # m_can_dredge_imp<-importance(m_can_dredge)
-MOWA_can_dredge_imp<-sw(m_can_dredge)
+MOWA_can_dredge_imp<-sw(MOWA_can_dredge)
 save(MOWA_can_dredge_imp, file="2_pipeline/store/models/MOWA_can_dredge_imp.rDATA")
 ```
 
@@ -267,10 +300,10 @@ knitr::kable(head(m_can_dredge_imp
 ###### Evaluate top model {-}
 
 ```{r eval=FALSE}
-m1<-lme4::glmer(MOWA ~  canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, family = binomial, offset = MOWA_OFF,  na.action=na.fail) 
+m1<-lme4::glmer(MOWA ~  canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action=na.fail) 
 
 #compare with the null
-anova(m1, MOWA_m2)
+anova(m1, MOWA_m1)
 
 # Models:
 # MOWA_m2: MOWA ~ 1 + (1 | SS) + (1 | ss_year)
@@ -313,7 +346,7 @@ knitr::include_graphics("3_output/figures/diagnostic/glmm/MOWA_dharma_resid_m1.p
 ####### Effect plots {-}
 
 ```{r eval=FALSE}
-png("3_output/figures/diagnostic/glmm/effects_m1.png", width = 1200, height = 800, units = "px", pointsize = 12)
+png("3_output/figures/diagnostic/glmm/MOWA_effects_m1.png", width = 1200, height = 800, units = "px", pointsize = 12)
 plot(allEffects(m1))
 dev.off() 
 
@@ -322,7 +355,7 @@ dev.off()
 ```
 
 ```{r  echo=FALSE, out.width = '100%'}
-knitr::include_graphics("3_output/figures/diagnostic/glmm/effects_m1.png", dpi = 300)
+knitr::include_graphics("3_output/figures/diagnostic/glmm/MOWA_effects_m1.png", dpi = 300)
 ```
 
 ####### Check for residual spatial autocorrelation {-}
@@ -344,10 +377,58 @@ plot(variogram(m1))
 #### Run model for different time lags{-}
 
 ```{r eval=FALSE}
+d_0<-sdm_d%>%filter(SS_lidar_timelag==0)
+set.seed(1)
+sample <- sample(c(TRUE, FALSE), nrow(d_0), replace=TRUE, prob=c(0.7,0.3))
+train <- d_0[sample, ]
+test <- d_0[!sample, ] 
+
+md_0<-glm(MOWA ~  canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_0, test, type="response")
+auc_d_0<-auc(test$MOWA, predicted)
+
+
+
+
+```
+
+
+```{r eval=FALSE}
+d<-sdm_d%>%filter(SS_lidar_timelag==0)
+sample <- sample(c(TRUE, FALSE), nrow(d), replace=TRUE, prob=c(0.7,0.3))
+train <- d[sample, ]
+test <- d[!sample, ] 
+
+md_0<-lme4::glmer(MOWA ~  canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail) 
+predicted <- predict(md_0, test, type="response", allow.new.levels=TRUE)
+#predicted <- predict(model, test, type="response")
+auc(test$MOWA, predicted)
+
+AUCFun <- function(fit) {
+  library(pROC)
+  pred<-predict(fit, test, type="response",allow.new.levels=TRUE)
+  AUC<-as.numeric(auc(test$MOWA, pred))
+  }
+
+#test
+m<-AUCFun(md_1)
+
+test<-bootMer(md_0, nsim = 100, seed = 101, FUN=AUCFun,
+        type = "semiparametric",
+        verbose = TRUE, .progress = "none",
+        use.u = TRUE)
+
+
+
+predicted <- predict(m_0, test, type="response")
+
+d<-sdm_d
 
 m_0<-lme4::glmer(MOWA ~  canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
-predicted <- predict(m_0,  type="response")
+predicted <- predict(m_1,  type="response")
 m_0_auc<-auc(filter(d, SS_lidar_timelag==0)$MOWA, predicted)
+
+
 
 m_1<-lme4::glmer(MOWA ~  canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==-1, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
 predicted <- predict(m_1,  type="response")
@@ -418,7 +499,7 @@ lag<-as.data.frame(c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15))
 colnames(lag)<-"SS_lidar_timelag"
 MOWA_models_AUC<-as.data.frame(rbind(m_0_auc, m_1_auc, m_2_auc, m_3_auc, m_4_auc, m_5_auc, m_6_auc, m_7_auc, m_8_auc, m_9_auc, m_10_auc, m_11_auc, m_12_auc, m_13_auc, m_14_auc, m_15_auc))%>%
   cbind(lag)%>%
-  rename(AUC=V1)
+  dplyr::rename(AUC=V1)
 #Create a model name column
 MOWA_models_AUC <- cbind(rownames(MOWA_models_AUC), data.frame(MOWA_models_AUC, row.names=NULL))
 MOWA_models_AUC$model<-str_sub(MOWA_models_AUC$`rownames(MOWA_models_AUC)`,1,nchar(MOWA_models_AUC$`rownames(MOWA_models_AUC)`) -4)
@@ -443,9 +524,8 @@ AUC_test<-lm(AUC~ SS_lidar_timelag, data=MOWA_model_stats)
 
 ggplot(MOWA_model_stats, aes(x=SS_lidar_timelag, y=r2.R2m)) + geom_point() + geom_smooth(method = lm)
 AUC_test<-lm(r2.R2m~ SS_lidar_timelag, data=MOWA_model_stats)
-
-
 ```
+
 
 
 ```{r echo=FALSE, message = FALSE, results="asis"}
@@ -467,11 +547,246 @@ knitr::kable(MOWA_model_stats
   scroll_box(width = "100%", height = "400px")
 ```
 
+##### Compare timelags
 
-##### Predictive maps {-}
+###### Run tup model at each time lag
+
+```{r eval=FALSE}
+d_0<-sdm_d%>%filter(SS_lidar_timelag==0)
+set.seed(1)
+sample <- sample(c(TRUE, FALSE), nrow(d_0), replace=TRUE, prob=c(0.7,0.3))
+train <- d_0[sample, ]
+test <- d_0[!sample, ] 
+
+md_0<-glm(MOWA ~  canopy_relief_ratio +  elev_maximum  + total_all_returns, data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail) 
+predicted <- predict(md_0, test, type="response")
+auc_d_0<-auc(test$MOWA, predicted)
+
+############################################################
+d_1<-sdm_d%>%filter(SS_lidar_timelag==-1)
+set.seed(1)
+sample <- sample(c(TRUE, FALSE), nrow(d_1), replace=TRUE, prob=c(0.7,0.3))
+train <- d_1[sample, ]
+test <- d_1[!sample, ] 
+
+md_1<-glm(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_1, test, type="response")
+auc_d_1<-auc(test$MOWA, predicted)
+
+############################################################
+d_2<-sdm_d%>%filter(SS_lidar_timelag==-2)
+set.seed(1)
+sample <- sample(c(TRUE, FALSE), nrow(d_2), replace=TRUE, prob=c(0.7,0.3))
+train <- d_2[sample, ]
+test <- d_2[!sample, ] 
+
+md_2<-glm (MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_2, test, type="response")
+auc_d_2<-auc(test$MOWA, predicted)
+
+############################################################
+d_3<-sdm_d%>%filter(SS_lidar_timelag==-3)
+set.seed(1)
+sample <- sample(c(TRUE, FALSE), nrow(d_3), replace=TRUE, prob=c(0.7,0.3))
+train <- d_3[sample, ]
+test <- d_3[!sample, ] 
+
+md_3<-glm (MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_3, test, type="response")
+auc_d_3<-auc(test$MOWA, predicted)
 
 
-###### Build maps {-}
+############################################################
+d_4<-sdm_d%>%filter(SS_lidar_timelag==-4)
+set.seed(1)
+sample <- sample(c(TRUE, FALSE), nrow(d_4), replace=TRUE, prob=c(0.7,0.3))
+train <- d_4[sample, ]
+test <- d_4[!sample, ] 
+
+md_4<-glm (MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_4, test, type="response")
+auc_d_4<-auc(test$MOWA, predicted)
+
+
+############################################################
+d_5<-sdm_d%>%filter(SS_lidar_timelag==-5)
+set.seed(1)
+sample <- sample(c(TRUE, FALSE), nrow(d_5), replace=TRUE, prob=c(0.7,0.3))
+train <- d_5[sample, ]
+test <- d_5[!sample, ] 
+
+md_5<-glm (MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_5, test, type="response")
+auc_d_5<-auc(test$MOWA, predicted)
+
+############################################################
+d_6<-sdm_d%>%filter(SS_lidar_timelag==-6)
+set.seed(1)
+sample <- sample(c(TRUE, FALSE), nrow(d_6), replace=TRUE, prob=c(0.7,0.3))
+train <- d_6[sample, ]
+test <- d_6[!sample, ] 
+
+md_6<-glm (MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_6, test, type="response")
+auc_d_6<-auc(test$MOWA, predicted)
+
+
+############################################################
+d_7<-sdm_d%>%filter(SS_lidar_timelag==-7)
+set.seed(1)
+sample <- sample(c(TRUE, FALSE), nrow(d_7), replace=TRUE, prob=c(0.7,0.3))
+train <- d_7[sample, ]
+test <- d_7[!sample, ] 
+
+md_7<-glm (MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_7, test, type="response")
+auc_d_7<-auc(test$MOWA, predicted)
+
+############################################################
+d_8<-sdm_d%>%filter(SS_lidar_timelag==-8)
+set.seed(1)
+sample <- sample(c(TRUE, FALSE), nrow(d_8), replace=TRUE, prob=c(0.7,0.3))
+train <- d_8[sample, ]
+test <- d_8[!sample, ] 
+
+md_8<-glm (MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_8, test, type="response")
+auc_d_8<-auc(test$MOWA, predicted)
+
+############################################################
+d_9<-sdm_d%>%filter(SS_lidar_timelag==-9)
+set.seed(1)
+sample <- sample(c(TRUE, FALSE), nrow(d_9), replace=TRUE, prob=c(0.7,0.3))
+train <- d_9[sample, ]
+test <- d_9[!sample, ] 
+
+md_9<-glm (MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_9, test, type="response")
+auc_d_9<-auc(test$MOWA, predicted)
+
+############################################################
+d_10<-sdm_d%>%filter(SS_lidar_timelag==-10)
+set.seed(1)
+sample <- sample(c(TRUE, FALSE), nrow(d_10), replace=TRUE, prob=c(0.7,0.3))
+train <- d_10[sample, ]
+test <- d_10[!sample, ] 
+
+md_10<-glm (MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_10, test, type="response")
+auc_d_10<-auc(test$MOWA, predicted)
+
+############################################################
+d_11<-sdm_d%>%filter(SS_lidar_timelag==-11)
+set.seed(1)
+sample <- sample(c(TRUE, FALSE), nrow(d_11), replace=TRUE, prob=c(0.7,0.3))
+train <- d_11[sample, ]
+test <- d_11[!sample, ] 
+
+md_11<-glm (MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_11, test, type="response")
+auc_d_11<-auc(test$MOWA, predicted)
+
+############################################################
+d_12<-sdm_d%>%filter(SS_lidar_timelag==-12)
+set.seed(1)
+sample <- sample(c(TRUE, FALSE), nrow(d_12), replace=TRUE, prob=c(0.7,0.3))
+train <- d_12[sample, ]
+test <- d_12[!sample, ] 
+
+md_12<-glm (MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_12, test, type="response")
+auc_d_12<-auc(test$MOWA, predicted)
+
+############################################################
+d_13<-sdm_d%>%filter(SS_lidar_timelag==-13)
+set.seed(1)
+sample <- sample(c(TRUE, FALSE), nrow(d_13), replace=TRUE, prob=c(0.7,0.3))
+train <- d_13[sample, ]
+test <- d_13[!sample, ] 
+
+md_13<-glm (MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_13, test, type="response")
+auc_d_13<-auc(test$MOWA, predicted)
+
+############################################################
+d_14<-sdm_d%>%filter(SS_lidar_timelag==-14)
+set.seed(1)
+sample <- sample(c(TRUE, FALSE), nrow(d_14), replace=TRUE, prob=c(0.7,0.3))
+train <- d_14[sample, ]
+test <- d_14[!sample, ] 
+
+md_14<-glm (MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_14, test, type="response")
+auc_d_14<-auc(test$MOWA, predicted)
+
+############################################################
+d_15<-sdm_d%>%filter(SS_lidar_timelag==-15)
+set.seed(1)
+sample <- sample(c(TRUE, FALSE), nrow(d_15), replace=TRUE, prob=c(0.7,0.3))
+train <- d_15[sample, ]
+test <- d_15[!sample, ] 
+
+md_15<-glm (MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_15, test, type="response")
+auc_d_15<-auc(test$MOWA, predicted)
+```
+
+
+
+
+###### Compare model performance {-}
+
+```{r eval=FALSE}
+# create an AUC dataframe
+
+#lag<-as.data.frame(c(1,3, 8,9,10,12)) #removed outlier years
+lag<-as.data.frame(c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15))
+colnames(lag)<-"SS_lidar_timelag"
+MOWA_models_AUC<-as.data.frame(rbind(auc_d_0, auc_d_1, auc_d_2, auc_d_3, auc_d_4, auc_d_5, auc_d_6, auc_d_7, auc_d_8, auc_d_9, auc_d_10, auc_d_11, auc_d_12, auc_d_13, auc_d_14, auc_d_15))%>%
+#MOWA_models_AUC<-as.data.frame(rbind(auc_d_1, auc_d_3,  auc_d_8, auc_d_9, auc_d_10,  auc_d_12))%>%
+  cbind(lag)%>%
+  dplyr::rename(AUC=V1)
+#Create a model name column
+MOWA_models_AUC <- cbind(rownames(MOWA_models_AUC), data.frame(MOWA_models_AUC, row.names=NULL))
+MOWA_models_AUC$model<-str_sub(MOWA_models_AUC$`rownames(MOWA_models_AUC)`,1,nchar(MOWA_models_AUC$`rownames(MOWA_models_AUC)`) -4)
+MOWA_models_AUC<-MOWA_models_AUC[c(4,3,2)]
+save(MOWA_models_AUC, file="2_pipeline/store/models/MOWA_models_AUC.rData")
+
+
+
+MOWA_models<-list(md_0, md_1, md_2, md_3, md_4, md_5, md_6, md_7, md_8, md_9, md_10, md_11, md_12, md_13, md_14, md_15)
+names(MOWA_models) <- c("md_0", "md_1", "md_2", "md_3", "md_4", "md_5", "md_6", "md_7", "md_8", "md_9", "md_10", "md_11", "md_12", "md_13", "md_14", "md_15")
+save(MOWA_models, file="2_pipeline/store/models/MOWA_models.rData")
+
+MOWA_model_stats <- model.sel(MOWA_models, rank="AIC", extra = c(r2=function(x) round(r.squaredglmerM(x)[1,c(1,2)],3)))%>%
+  add_rownames(var = "model")%>%
+  left_join(MOWA_models_AUC)
+
+save(MOWA_model_stat, file="2_pipeline/store/models/MOWA_model_stats.rData")
+
+
+ggplot(MOWA_models_AUC, aes(x=SS_lidar_timelag, y=AUC)) + geom_point() + geom_smooth(method = lm)
+AUC_test<-lm(AUC~ SS_lidar_timelag, data=MOWA_models_AUC)
+
+ggplot(MOWA_model_stats, aes(x=SS_lidar_timelag, y=r2.R2m)) + geom_point() + geom_smooth(method = lm)
+AUC_test<-lm(r2.R2m~ SS_lidar_timelag, data=MOWA_model_stats)
+```
+
+
+
+
+
+
+
+
+
+
+####### Confidence intervals on AUCs
+
+###### Compare spearman's correlation {-}
+###### Compare predictive maps {-}
+
+####### Build maps {-}
 
 ```{r eval=FALSE}
 #using predict function in raster
@@ -598,7 +913,7 @@ cor<- cor(sampleRandom(dif_stack, size= ncell(MOWA_reclassified_0)), method = "s
 
 
 
-###### Compare maps {-}
+####### Compare maps {-}
 ```{r}
 test<-MOWA_predictMap_m_1-MOWA_predictMap_m_0
 test2<-MOWA_predictMap_m_2-MOWA_predictMap_m_0

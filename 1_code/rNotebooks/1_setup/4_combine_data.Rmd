@@ -52,7 +52,8 @@ load("0_data/manual/spatialCov/QPAD/callingLake_QPAD_LC.rData")
   - rast_forest_age
   - ss_forest_origDate_mean
   - ss_forest_origDate_sd
-  - Forest_Type  
+  - Forest_Type 
+  - poly_forest_age
 
 - **From 2005 MODIS Landcover**
   - LCC2
@@ -90,7 +91,8 @@ l<-ss_lidar_df %>%
 
 # CAS-FRI
 c<-pkey_cas_cov %>%
-  select(SS, PKEY, rast_forest_age, ss_forest_origDate_mean, ss_forest_origDate_sd, Forest_Type)
+  select(SS, PKEY, rast_forest_age, ss_forest_origDate_mean, ss_forest_origDate_sd, Forest_Type, poly_forest_age
+)
 
 # MODIS
 m<-callingLake_QPAD_LC %>%
@@ -121,11 +123,11 @@ bd<-distinct(bird_callingLake_wide_5)
 
 data_main<-bd%>%
   dplyr::select(-lidar_date)%>%
-  rename(n_survey_years=n_years) %>%
+  dplyr::rename(n_survey_years=n_years) %>%
   left_join(callingLake_QPAD_offsets) %>% 
   left_join(spatialCov_all, by="PKEY") %>%
   dplyr::select(-c(SS.y)) %>%
-  rename(SS=SS.x) %>%
+  dplyr::rename(SS=SS.x) %>%
   distinct()
 
 save(data_main, file = "0_data/manual/data_main.rData")
@@ -139,6 +141,26 @@ knitr::kable(head(data_main)) %>%
   column_spec(1, width= "20em")%>%
   scroll_box(width = "100%", height = "400px")
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

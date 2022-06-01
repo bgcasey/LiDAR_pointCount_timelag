@@ -107,29 +107,38 @@ save(bird_callingLake_long_sub, file="0_data/manual/bird/bird_callingLake_long_s
 ```
 
 
-
-
 ### Format data {-}
 
-#### Convert bird data to wide presence/absence format {-}
+#### Convert bird data to wide format {-}
 
 ```{r eval=FALSE}
-
+#Convert bird data to wide presence/absence format
 # replace abundance values with 1
-bird_callingLake_long_sub$ABUND<-1
+bird_callingLake_long_sub_occ<-bird_callingLake_long_sub
+bird_callingLake_long_sub_occ$ABUND<-1
+bird_callingLake_long_sub_occ<-distinct(bird_callingLake_long_sub_occ)
+
+bird_callingLake_wide_occ<-bird_callingLake_long_sub_occ%>%
+  dplyr::select(SS, PKEY, year, DATE, TIME, MAXDUR, MAXDIS, x, y, surveyType, SPECIES, ABUND)%>%
+  tidyr::pivot_wider(names_from=SPECIES, values_from=ABUND, values_fill = 0)
+
+save(bird_callingLake_wide_occ, file="0_data/manual/bird/bird_callingLake_wide_occ.rData")
+
+
 bird_callingLake_long_sub<-distinct(bird_callingLake_long_sub)
+bird_callingLake_wide_abund<-bird_callingLake_long_sub%>%
+  dplyr::select(SS, PKEY, year, DATE, TIME, MAXDUR, MAXDIS, x, y, surveyType, SPECIES, ABUND)%>%
+  distinct()%>%
+  tidyr::pivot_wider(names_from=SPECIES, values_from=ABUND, values_fn={sum}, values_fill = 0)
 
-bird_callingLake_wide<-bird_callingLake_long_sub%>%
-  select(SS, PKEY, year, DATE, TIME, MAXDUR, MAXDIS, x, y, surveyType, SPECIES, ABUND)%>%
-  pivot_wider(names_from=SPECIES, values_from=ABUND, values_fill = 0)
 
-save(bird_callingLake_wide, file="0_data/manual/bird/bird_callingLake_wide.rData")
+save(bird_callingLake_wide_abund, file="0_data/manual/bird/bird_callingLake_wide_abund.rData")
 ```
 
 ```{r echo=FALSE, message = FALSE, results="asis"}
-load("0_data/manual/bird/bird_callingLake_wide.rData")
+load("0_data/manual/bird/bird_callingLake_wide_abund.rData")
 
-knitr::kable(head(bird_callingLake_wide)) %>%
+knitr::kable(head(bird_callingLake_wide_abund)) %>%
   kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
   column_spec(1, width= "20em")%>%
   scroll_box(width = "100%", height = "400px")
@@ -553,7 +562,8 @@ WTSP White throated sparrow (early)
 load("0_data/manual/bird/bird_callingLake_wide_4.rData")
 
 bird_callingLake_wide_5<-bird_callingLake_wide_4%>%
-  dplyr::select(SS:surveyType, AMRE, BTNW, MOWA, SWTH, WTSP, YBSA)
+  dplyr::select(SS:surveyType, AMRE, BTNW, MOWA, SWTH, WTSP, YBSA)%>%
+  dplyr::rename(c(AMRE_OCC=AMRE, BTNW_OCC=BTNW, MOWA_OCC=MOWA, SWTH_OCC=SWTH, WTSP_OCC=WTSP, YBSA_OCC=YBSA))
 
 save(bird_callingLake_wide_5, file="0_data/manual/bird/bird_callingLake_wide_5.rData")
 ```
@@ -566,6 +576,21 @@ knitr::kable(head(bird_callingLake_wide_5)) %>%
   kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
   column_spec(1, width= "20em")%>%
   scroll_box(width = "100%", height = "400px")
+```
+
+### Add abundance columns {-}
+
+```{r eval=FALSE}
+load("0_data/manual/bird/bird_callingLake_wide_5.rData")
+load("0_data/manual/bird/bird_callingLake_wide_abund.rData")
+
+bird_callingLake_wide_abund_2<-bird_callingLake_wide_abund%>%
+  dplyr::select(SS:surveyType, AMRE, BTNW, MOWA, SWTH, WTSP, YBSA)%>%
+   dplyr::rename(c(ss_year=year, ss_date=DATE))%>%
+  dplyr::rename(c(AMRE_ABUND=AMRE, BTNW_ABUND=BTNW, MOWA_ABUND=MOWA, SWTH_ABUND=SWTH, WTSP_ABUND=WTSP, YBSA_ABUND=YBSA))
+
+bird_callingLake_wide_6<-left_join(bird_callingLake_wide_5, bird_callingLake_wide_abund_2)
+save(bird_callingLake_wide_6, file="0_data/manual/bird/bird_callingLake_wide_6.rData")
 ```
 
 
@@ -591,7 +616,7 @@ save(callingLake_QPAD_offsets, file="0_data/manual/bird/callingLake_QPAD_offsets
 
 ```{r echo=FALSE, message = FALSE, results="asis"}
 load("0_data/manual/bird/callingLake_QPAD_offsets.rData")
-
+6
 knitr::kable(head(callingLake_QPAD_offsets)) %>%
   kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
   column_spec(1, width= "20em")%>%

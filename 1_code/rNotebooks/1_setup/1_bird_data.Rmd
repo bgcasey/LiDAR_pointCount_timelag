@@ -257,7 +257,7 @@ acqDate$date-as.Date(acqDate$date)
 
 acqDate<-st_transform(acqDate, crs = st_crs(ss_xy))
 acqDate_clip<-st_intersection(acqDate, bb)
-save(acqDate_clip, file="0_data/manual/spatialCov/acqDate_clip.rData")
+save(acqDate_clip, file="0_data/manual/spatialCov/LiDAR/acqDate_clip.rData")
 
 acqDate$year<-as.factor(year(acqDate$date))
 m<-tm_shape(alberta)+tm_borders()+

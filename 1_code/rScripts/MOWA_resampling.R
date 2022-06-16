@@ -61,17 +61,32 @@ pred.glmBoostModel <- as.vector(predict(lm1, newdata=d_0, type="prob")[,"yes"])
 AUCFun <- function(fit) {
   library(pROC)
   pred<-predict(fit, type="response")
-  AUC<-as.numeric(auc(filter(d, SS_lidar_timelag==-1)$MOWA, pred))
+  AUC<-as.numeric(auc(filter(d, SS_lidar_timelag==0)$MOWA_OCC, pred))
   }
 
 #test
-AUCFun(m_1)
+test<-AUCFun(cm1)
 
-test<-bootMer(m_1, nsim = 100, seed = 101, FUN=AUCFun,
-        type = "semiparametric",
+cm1<-lme4::glmer(MOWA_OCC ~ rast_forest_age  + (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action = na.exclude )
+
+
+ 
+test<-bootMer(cm1, nsim = 100, seed = 101, FUN=AUCFun,
+        type = "parametric",
         verbose = TRUE, .progress = "none",
         use.u = TRUE)
 
+#R2 function
+rsq <- function(formula, data, indices) {
+  d <- data[indices,] 
+  fit.r.squared <- r.squaredGLMM(cm1)
+  return(fit.r.squared[,2])
+}
+
+test<-bootMer(cm1, nsim = 100, seed = 101, FUN=rsq,
+              type = "parametric",
+              verbose = TRUE, .progress = "none",
+              use.u = TRUE)
 
 
 

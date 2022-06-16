@@ -32,7 +32,7 @@ Combine spatial data into a single data frame
 
 ```{r eval=FALSE}
 # bird detection data
-load("0_data/manual/bird/bird_callingLake_wide_5.rData")
+load("0_data/manual/bird/bird_callingLake_wide_6.rData")
 
 # QPAD offsets
 load("0_data/manual/bird/callingLake_QPAD_offsets.rData")
@@ -119,7 +119,7 @@ save(spatialCov_all, file = "2_pipeline/store/spatialCov_all.rData")
 
 ```{r eval=FALSE}
 
-bd<-distinct(bird_callingLake_wide_5)
+bd<-distinct(bird_callingLake_wide_6)
 
 data_main<-bd%>%
   dplyr::select(-lidar_date)%>%

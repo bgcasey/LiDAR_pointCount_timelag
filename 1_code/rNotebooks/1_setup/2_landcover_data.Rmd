@@ -27,6 +27,7 @@ library(tmaptools)
 library(tmap)
 library(sf)
 library(raster)
+library(lubridate)
 ```
 
 
@@ -150,6 +151,17 @@ tmap_save(mainmap,filename="3_output/maps/casfri_inset.png",
 knitr::include_graphics("3_output/maps/casfri_inset.png")
 ```
 
+#### Add LiDAR acquistion date to CAS_FRI polygons
+```{r eval=FALSE}
+acqDate<-st_read("../../data/spatial/external/Alberta_Landcover_Data/LiDAR/GOA_LiDAR_Alberta/from_ChrisBater/lidar_acquisitions/acquisition_date.shp")
+
+acqDate<-st_transform(acqDate, crs = st_crs(cas_geo_crop))
+cas_geo_crop_lidarDate<-st_join(cas_geo_crop,acqDate)
+cas_geo_crop_lidarDate$date-as.Date(cas_geo_crop_lidarDate$date)
+cas_geo_crop_lidarDate$year<-year(cas_geo_crop_lidarDate$date)
+
+save(cas_geo_crop_lidarDate, file="0_data/manual/spatialCov/CASFRI/cas_geo_crop_lidarDate.rData")
+```
 
 
 #### Spatial join point count locations with CAS-FRI polygons {-}
@@ -222,8 +234,7 @@ cas_lyr<-read.csv("../../data/spatial/external/CASFRI/Alberta/alberta_lyr.csv")
 cas_lyr<-filter(cas_lyr, layer=="1" & layer_rank=="1")
 
 #forest type
-cas_forestType<-read.csv("../../data/spatial/external/CASFRI/Alberta/Alberta_forestType.csv")
-#filter to only first layer
+   c#filter to only first layer
 cas_forestType<-cas_forestType%>%
   rename(cas_id=Expr1)
 
@@ -279,6 +290,51 @@ load("0_data/manual/bird/bird_callingLake_wide_5.rData")
 pkey_cas_cov<-bird_callingLake_wide_5%>%
   select(SS, PKEY, ss_year) %>%
   left_join(ss_cas_cov)
+```
+
+##### calculate forest age at time of LiDAR {-}
+```{r}
+cas_lyr<-read.csv("../../data/spatial/external/CASFRI/Alberta/alberta_lyr.csv")
+cas_dst<-read.csv("../../data/spatial/external/CASFRI/Alberta/alberta_dst.csv")
+
+cas_lyr2<-dplyr::filter(cas_lyr, layer=="1" & layer_rank=="1")%>%
+  left_join(cas_dst)%>%
+  mutate(forest_origin_year=coalesce(origin_upper, dist_yr_1))%>%
+  dplyr::select(cas_id, forest_origin_year, dist_1)
+
+load("0_data/manual/spatialCov/CASFRI/cas_geo_crop_lidarDate.rData")
+
+cas_geo_crop_lidarDate_age<-cas_geo_crop_lidarDate%>%
+  left_join(cas_lyr2)%>%
+  mutate(lidar_forest_age=year-forest_origin_year)
+
+save(cas_geo_crop_lidarDate_age, file="0_data/manual/spatialCov/CASFRI/cas_geo_crop_lidarDate_age.rData")
+
+```
+
+###### Create forest age raster {-}
+
+```{r eval=FALSE}
+load("0_data/manual/spatialCov/CASFRI/cas_geo_crop_lidarDate_age.rData")
+
+
+
+#create the extent and the raster
+e <- extent(cas_geo_crop_lidarDate_age)
+
+#use study area aspect ration to calculate ncol and nrow for raster: #h=0.4444444 * w 
+r <- raster::raster(e, crs= st_crs(cas_geo_crop_lidarDate_age)$proj4string, resolution = c(10, 10)) 
+
+#remove error values
+lidar_forestAge<-cas_geo_crop_lidarDate_age%>%
+  dplyr::filter(lidar_forest_age<300)
+
+# vreate forest age raster using rasterize
+lidar_forestAge_raster<-raster::rasterize(lidar_forestAge, r, 'lidar_forest_age')
+
+# save raster
+writeRaster(lidar_forestAge_raster, filename = "0_data/manual/spatialCov/CASFRI/lidar_forestAge_raster", format="GTiff", overwrite=T)
+
 ```
 
 
@@ -418,6 +474,7 @@ load("0_data/manual/bird/ss_xy.rData")
 alberta<-st_read("../../data/spatial/external/Alberta_Boundaries_and_Roads/Alberta/Alberta.shp")
 
 
+
 #set up basemap
 base<-read_osm(c_bb, type="bing", minNumTiles = 10)
 
@@ -521,6 +578,13 @@ save(callingLake_QPAD_LC, file="0_data/manual/spatialCov/QPAD/callingLake_QPAD_L
 ```
 
 
+### Oceanic Niño Index (ONI) {-}
 
+@lestonLongtermChangesBoreal2018
+
+December January February
+```{r eval=FALSE}
+ONI<-read.csv("0_data/external/OceanicNinoIndex.csv")
+```
 
 

@@ -12,7 +12,7 @@ train <- d_0[sample, ]
 test <- d_0[!sample, ] 
 
 md_0<-lme4::glmer(MOWA ~  canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail) 
-predicted <- predict(md_0, test, type="response")
+predicted <- predict(md_0, test, type="response", allow.new.levels=TRUE)
 auc_d_0<-auc(test$MOWA, predicted)
 
 ############################################################
@@ -22,8 +22,8 @@ sample <- sample(c(TRUE, FALSE), nrow(d_1), replace=TRUE, prob=c(0.7,0.3))
 train <- d_1[sample, ]
 test <- d_1[!sample, ] 
 
-md_1<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
-predicted <- predict(md_1, test, type="response")
+md_1<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_1, test, type="response", allow.new.levels=TRUE)
 auc_d_1<-auc(test$MOWA, predicted)
 
 ############################################################
@@ -33,8 +33,8 @@ sample <- sample(c(TRUE, FALSE), nrow(d_2), replace=TRUE, prob=c(0.7,0.3))
 train <- d_2[sample, ]
 test <- d_2[!sample, ] 
 
-md_2<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
-predicted <- predict(md_2, test, type="response")
+md_2<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_2, test, type="response", allow.new.levels=TRUE)
 auc_d_2<-auc(test$MOWA, predicted)
 
 ############################################################
@@ -44,8 +44,8 @@ sample <- sample(c(TRUE, FALSE), nrow(d_3), replace=TRUE, prob=c(0.7,0.3))
 train <- d_3[sample, ]
 test <- d_3[!sample, ] 
 
-md_3<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
-predicted <- predict(md_3, test, type="response")
+md_3<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_3, test, type="response", allow.new.levels=TRUE)
 auc_d_3<-auc(test$MOWA, predicted)
 
 
@@ -56,8 +56,8 @@ sample <- sample(c(TRUE, FALSE), nrow(d_4), replace=TRUE, prob=c(0.7,0.3))
 train <- d_4[sample, ]
 test <- d_4[!sample, ] 
 
-md_4<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
-predicted <- predict(md_4, test, type="response")
+md_4<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_4, test, type="response", allow.new.levels=TRUE)
 auc_d_4<-auc(test$MOWA, predicted)
 
 
@@ -68,8 +68,8 @@ sample <- sample(c(TRUE, FALSE), nrow(d_5), replace=TRUE, prob=c(0.7,0.3))
 train <- d_5[sample, ]
 test <- d_5[!sample, ] 
 
-md_5<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
-predicted <- predict(md_5, test, type="response")
+md_5<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_5, test, type="response", allow.new.levels=TRUE)
 auc_d_5<-auc(test$MOWA, predicted)
 
 ############################################################
@@ -79,8 +79,8 @@ sample <- sample(c(TRUE, FALSE), nrow(d_6), replace=TRUE, prob=c(0.7,0.3))
 train <- d_6[sample, ]
 test <- d_6[!sample, ] 
 
-md_6<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
-predicted <- predict(md_6, test, type="response")
+md_6<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_6, test, type="response", allow.new.levels=TRUE)
 auc_d_6<-auc(test$MOWA, predicted)
 
 
@@ -91,8 +91,8 @@ sample <- sample(c(TRUE, FALSE), nrow(d_7), replace=TRUE, prob=c(0.7,0.3))
 train <- d_7[sample, ]
 test <- d_7[!sample, ] 
 
-md_7<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
-predicted <- predict(md_7, test, type="response")
+md_7<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_7, test, type="response", allow.new.levels=TRUE)
 auc_d_7<-auc(test$MOWA, predicted)
 
 ############################################################
@@ -102,8 +102,8 @@ sample <- sample(c(TRUE, FALSE), nrow(d_8), replace=TRUE, prob=c(0.7,0.3))
 train <- d_8[sample, ]
 test <- d_8[!sample, ] 
 
-md_8<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
-predicted <- predict(md_8, test, type="response")
+md_8<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_8, test, type="response", allow.new.levels=TRUE)
 auc_d_8<-auc(test$MOWA, predicted)
 
 ############################################################
@@ -113,8 +113,8 @@ sample <- sample(c(TRUE, FALSE), nrow(d_9), replace=TRUE, prob=c(0.7,0.3))
 train <- d_9[sample, ]
 test <- d_9[!sample, ] 
 
-md_9<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
-predicted <- predict(md_9, test, type="response")
+md_9<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_9, test, type="response", allow.new.levels=TRUE)
 auc_d_9<-auc(test$MOWA, predicted)
 
 ############################################################
@@ -124,8 +124,8 @@ sample <- sample(c(TRUE, FALSE), nrow(d_10), replace=TRUE, prob=c(0.7,0.3))
 train <- d_10[sample, ]
 test <- d_10[!sample, ] 
 
-md_10<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
-predicted <- predict(md_10, test, type="response")
+md_10<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_10, test, type="response", allow.new.levels=TRUE)
 auc_d_10<-auc(test$MOWA, predicted)
 
 ############################################################
@@ -135,8 +135,8 @@ sample <- sample(c(TRUE, FALSE), nrow(d_11), replace=TRUE, prob=c(0.7,0.3))
 train <- d_11[sample, ]
 test <- d_11[!sample, ] 
 
-md_11<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
-predicted <- predict(md_11, test, type="response")
+md_11<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_11, test, type="response", allow.new.levels=TRUE)
 auc_d_11<-auc(test$MOWA, predicted)
 
 ############################################################
@@ -146,8 +146,8 @@ sample <- sample(c(TRUE, FALSE), nrow(d_12), replace=TRUE, prob=c(0.7,0.3))
 train <- d_12[sample, ]
 test <- d_12[!sample, ] 
 
-md_12<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
-predicted <- predict(md_12, test, type="response")
+md_12<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_12, test, type="response", allow.new.levels=TRUE)
 auc_d_12<-auc(test$MOWA, predicted)
 
 ############################################################
@@ -157,8 +157,8 @@ sample <- sample(c(TRUE, FALSE), nrow(d_13), replace=TRUE, prob=c(0.7,0.3))
 train <- d_13[sample, ]
 test <- d_13[!sample, ] 
 
-md_13<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
-predicted <- predict(md_13, test, type="response")
+md_13<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_13, test, type="response", allow.new.levels=TRUE)
 auc_d_13<-auc(test$MOWA, predicted)
 
 ############################################################
@@ -168,8 +168,8 @@ sample <- sample(c(TRUE, FALSE), nrow(d_14), replace=TRUE, prob=c(0.7,0.3))
 train <- d_14[sample, ]
 test <- d_14[!sample, ] 
 
-md_14<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
-predicted <- predict(md_14, test, type="response")
+md_14<-lme4::glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_14, test, type="response", allow.new.levels=TRUE)
 auc_d_14<-auc(test$MOWA, predicted)
 
 ############################################################
@@ -179,8 +179,8 @@ sample <- sample(c(TRUE, FALSE), nrow(d_15), replace=TRUE, prob=c(0.7,0.3))
 train <- d_15[sample, ]
 test <- d_15[!sample, ] 
 
-md_15<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns, +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
-predicted <- predict(md_15, test, type="response")
+md_15<-glmer(MOWA ~   canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns +  (1|SS), data=train, family = binomial, offset = MOWA_OFF,  na.action=na.fail)
+predicted <- predict(md_15, test, type="response", allow.new.levels=TRUE)
 auc_d_15<-auc(test$MOWA, predicted)
 
 

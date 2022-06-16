@@ -232,6 +232,8 @@ d_in_2<-MuMIn::dredge(in_2, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(
 in_3<-lme4::glmer(MOWA_OCC ~ elev_maximum *  canopy_relief_ratio +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = MOWA_OFF,  na.action=na.fail) 
 d_in_3<-MuMIn::dredge(in_3, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
 
+
+
 #found elev_maximum  * elev_stddev
 ```
 
@@ -259,18 +261,18 @@ save(MOWA_can_dredge_imp, file="2_pipeline/store/models/MOWA_can_dredge_imp.rDAT
 
 
 ```{r echo=FALSE, message = FALSE, results="asis"}
-load("2_pipeline/store/models/m_can_dredge.rData")
+load("2_pipeline/store/models/MOWA_can_dredge.rData")
 
-knitr::kable(m_can_dredge) %>%
+knitr::kable(MOWA_can_dredge) %>%
   kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
   column_spec(1, width= "20em")%>%
   scroll_box(width = "100%", height = "400px")
 ```
 
 ```{r echo=FALSE, message = FALSE, results="asis"}
-load("2_pipeline/store/models/m_can_dredge_imp.rData")
+load("2_pipeline/store/models/MOWA_can_dredge_imp.rData")
 
-knitr::kable(head(m_can_dredge_imp
+knitr::kable(head(MOWA_can_dredge_imp
                   )) %>%
   kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
   column_spec(1, width= "20em")%>%

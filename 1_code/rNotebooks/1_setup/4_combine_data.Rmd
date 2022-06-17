@@ -87,16 +87,16 @@ load("0_data/manual/spatialCov/QPAD/callingLake_QPAD_LC.rData")
 ```{r eval=FALSE}
 # LiDAR
 l<-ss_lidar_df %>%
-  select(SS, canopy_relief_ratio, elev_0pnt15_to_2pnt00_return_proportion, elev_10pnt00_to_15pnt00_return_proportion, elev_15pnt00_to_20pnt00_return_proportion, elev_20pnt00_to_25pnt00_return_proportion, elev_25pnt00_to_30pnt00_return_proportion, elev_2pnt00_to_4pnt00_return_proportion, elev_30pnt00_to_50pnt00_return_proportion, elev_4pnt00_to_6pnt00_return_proportion, elev_6pnt00_to_8pnt00_return_proportion, elev_8pnt00_to_10pnt00_return_proportion , elev_below_0pnt15_return_proportion, elev_cv, elev_kurtosis, elev_maximum , elev_mean, elev_p05 , elev_p10 , elev_p20 , elev_p25 , elev_p30 , elev_p50 , elev_p60 , elev_p70 , elev_p75 , elev_p80 , elev_p95 , elev_p99 , elev_stddev, percentage_first_returns_above_2pnt00, percentage_first_returns_above_mean, total_all_returns)
+  dplyr::select(SS, canopy_relief_ratio, elev_0pnt15_to_2pnt00_return_proportion, elev_10pnt00_to_15pnt00_return_proportion, elev_15pnt00_to_20pnt00_return_proportion, elev_20pnt00_to_25pnt00_return_proportion, elev_25pnt00_to_30pnt00_return_proportion, elev_2pnt00_to_4pnt00_return_proportion, elev_30pnt00_to_50pnt00_return_proportion, elev_4pnt00_to_6pnt00_return_proportion, elev_6pnt00_to_8pnt00_return_proportion, elev_8pnt00_to_10pnt00_return_proportion , elev_below_0pnt15_return_proportion, elev_cv, elev_kurtosis, elev_maximum , elev_mean, elev_p05 , elev_p10 , elev_p20 , elev_p25 , elev_p30 , elev_p50 , elev_p60 , elev_p70 , elev_p75 , elev_p80 , elev_p95 , elev_p99 , elev_stddev, percentage_first_returns_above_2pnt00, percentage_first_returns_above_mean, total_all_returns)
 
 # CAS-FRI
 c<-pkey_cas_cov %>%
-  select(SS, PKEY, rast_forest_age, ss_forest_origDate_mean, ss_forest_origDate_sd, Forest_Type, poly_forest_age
+  dplyr::select(SS, PKEY, rast_forest_age, ss_forest_origDate_mean, ss_forest_origDate_sd, Forest_Type, poly_forest_age
 )
 
 # MODIS
 m<-callingLake_QPAD_LC %>%
-  select(SS, PKEY, LCC2, LCC4)
+  dplyr::select(SS, PKEY, LCC2, LCC4)
 
 ```
 

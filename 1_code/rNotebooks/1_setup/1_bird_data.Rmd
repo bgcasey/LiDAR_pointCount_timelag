@@ -562,8 +562,8 @@ WTSP White throated sparrow (early)
 load("0_data/manual/bird/bird_callingLake_wide_4.rData")
 
 bird_callingLake_wide_5<-bird_callingLake_wide_4%>%
-  dplyr::select(SS:surveyType, AMRE, BTNW, MOWA, SWTH, WTSP, YBSA)%>%
-  dplyr::rename(c(AMRE_OCC=AMRE, BTNW_OCC=BTNW, MOWA_OCC=MOWA, SWTH_OCC=SWTH, WTSP_OCC=WTSP, YBSA_OCC=YBSA))
+  dplyr::select(SS:surveyType, AMRE, BTNW, MOWA, SWTH, WIWR, WTSP, YBSA)%>%
+  dplyr::rename(c(AMRE_OCC=AMRE, BTNW_OCC=BTNW, MOWA_OCC=MOWA, SWTH_OCC=SWTH, WIWR_OCC=WIWR, WTSP_OCC=WTSP, YBSA_OCC=YBSA))
 
 save(bird_callingLake_wide_5, file="0_data/manual/bird/bird_callingLake_wide_5.rData")
 ```
@@ -585,9 +585,9 @@ load("0_data/manual/bird/bird_callingLake_wide_5.rData")
 load("0_data/manual/bird/bird_callingLake_wide_abund.rData")
 
 bird_callingLake_wide_abund_2<-bird_callingLake_wide_abund%>%
-  dplyr::select(SS:surveyType, AMRE, BTNW, MOWA, SWTH, WTSP, YBSA)%>%
+  dplyr::select(SS:surveyType, AMRE, BTNW, MOWA, SWTH, WIWR, WTSP, YBSA)%>%
    dplyr::rename(c(ss_year=year, ss_date=DATE))%>%
-  dplyr::rename(c(AMRE_ABUND=AMRE, BTNW_ABUND=BTNW, MOWA_ABUND=MOWA, SWTH_ABUND=SWTH, WTSP_ABUND=WTSP, YBSA_ABUND=YBSA))
+  dplyr::rename(c(AMRE_ABUND=AMRE, BTNW_ABUND=BTNW, MOWA_ABUND=MOWA, SWTH_ABUND=SWTH, WIWR_ABUND=WIWR, WTSP_ABUND=WTSP, YBSA_ABUND=YBSA))
 
 bird_callingLake_wide_6<-left_join(bird_callingLake_wide_5, bird_callingLake_wide_abund_2)
 save(bird_callingLake_wide_6, file="0_data/manual/bird/bird_callingLake_wide_6.rData")
@@ -606,9 +606,9 @@ load("../../data/avian_lifeHistory/BAM_avianDatabase/AB-data-w-offsets-to-Brenda
 qpad_offsets<-as.data.frame(off)
 
 callingLake_QPAD_offsets <- tibble::rownames_to_column(qpad_offsets, "PKEY")%>%
-      dplyr::select(PKEY, AMRE, BTNW, MOWA, SWTH, WTSP, YBSA)%>%
-      dplyr::rename(c(AMRE_OFF=AMRE, BTNW_OFF=BTNW, MOWA_OFF=MOWA, SWTH_OFF=SWTH, WTSP_OFF=WTSP, YBSA_OFF=YBSA))%>%
-      filter(str_detect(PKEY, "^CL"))
+      dplyr::select(PKEY, AMRE, BTNW, MOWA, SWTH, WIWR, WTSP, YBSA)%>%
+      dplyr::rename(c(AMRE_OFF=AMRE, BTNW_OFF=BTNW, MOWA_OFF=MOWA, SWTH_OFF=SWTH, WIWR_OFF= WIWR, WTSP_OFF=WTSP, YBSA_OFF=YBSA))%>%
+      dplyr::filter(str_detect(PKEY, "^CL"))
 
 save(callingLake_QPAD_offsets, file="0_data/manual/bird/callingLake_QPAD_offsets.rData")
 ```

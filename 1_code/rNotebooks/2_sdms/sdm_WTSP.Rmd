@@ -107,7 +107,7 @@ plm1<-lme4::glmer(WTSP_OCC ~ rast_forest_age + canopy_relief_ratio+ elev_0pnt15_
 
 #Extract variance-covariance matrix for all parameters
 library(merDeriv)
-merDeriv::vcov.glmerMod(plm1)
+# merDeriv::vcov.glmerMod(plm1)
 
 #Check variance inflation factors of fixed effects
 l_vif<-as.data.frame(vif(plm1))
@@ -177,7 +177,7 @@ d_in_4<-MuMIn::dredge(in_4, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(
 in_5<-lme4::glmer(WTSP_OCC ~ elev_stddev  :  elev_0pnt15_to_2pnt00_return_proportion    +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WTSP_OFF,  na.action=na.fail) 
 d_in_5<-MuMIn::dredge(in_5, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
 
-#found elev_maximum  * elev_p50
+#none
 ```
 
 
@@ -187,10 +187,11 @@ d_in_5<-MuMIn::dredge(in_5, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(
 ``` {r eval=FALSE}
 # WTSP_can<-lme4::glmer(WTSP ~  canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WTSP_OFF,  na.action=na.fail) 
 
-WTSP_can<-lme4::glmer(WTSP_OCC ~ canopy_relief_ratio+ elev_0pnt15_to_2pnt00_return_proportion+  elev_2pnt00_to_4pnt00_return_proportion+  elev_maximum *  elev_p50  + elev_stddev+  percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WTSP_OFF,  na.action = na.fail)
+WTSP_can<-lme4::glmer(WTSP_OCC ~ canopy_relief_ratio+ elev_0pnt15_to_2pnt00_return_proportion+  elev_2pnt00_to_4pnt00_return_proportion+  elev_maximum +  elev_p50  + elev_stddev+  percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WTSP_OFF,  na.action = na.fail)
 
 
 WTSP_can_dredge<-MuMIn::dredge(WTSP_can, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
+
 save(WTSP_can_dredge, file="2_pipeline/store/models/WTSP_can_dredge.rData")
 
 #get a subset of top models
@@ -228,7 +229,8 @@ knitr::kable(head(WTSP_can_dredge_imp
 ```{r eval=FALSE}
 # m1<-lme4::glmer(WTSP_OCC ~  canopy_relief_ratio +  elev_maximum  + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WTSP_OFF,  na.action=na.fail) 
 
-m1<-lme4::glmer(WTSP_OCC ~  elev_0pnt15_to_2pnt00_return_proportion +elev_2pnt00_to_4pnt00_return_proportion+elev_p50+percentage_first_returns_above_mean + (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WTSP_OFF,  na.action = na.fail)
+m1<-lme4::glmer(WTSP_OCC ~ elev_0pnt15_to_2pnt00_return_proportion + elev_maximum +elev_stddev +total_all_returns +canopy_relief_ratio +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WTSP_OFF,  na.action = na.fail)
+
 
 l_vif<-as.data.frame(vif(m1))
 
@@ -329,7 +331,7 @@ AUCFun <- function(fit) {
   
 
 #models
-md_0<-lme4::glmer(WTSP_OCC ~  elev_0pnt15_to_2pnt00_return_proportion +elev_2pnt00_to_4pnt00_return_proportion+elev_p50+percentage_first_returns_above_mean + (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.fail, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)))
+md_0<-lme4::glmer(WTSP_OCC ~ elev_0pnt15_to_2pnt00_return_proportion + elev_maximum +elev_stddev +total_all_returns +canopy_relief_ratio +  (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.fail, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)))
 
 
 md_0_bootAUC<-bootMer(md_0, nsim = 500, seed = 101, FUN=AUCFun,
@@ -369,7 +371,7 @@ AUCFun <- function(fit) {
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WTSP_OCC, pred))),3)
   }
 
-md_1<-lme4::glmer(WTSP_OCC ~  elev_0pnt15_to_2pnt00_return_proportion +elev_2pnt00_to_4pnt00_return_proportion+elev_p50+percentage_first_returns_above_mean + (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_1<-lme4::glmer(WTSP_OCC ~ elev_0pnt15_to_2pnt00_return_proportion + elev_maximum +elev_stddev +total_all_returns +canopy_relief_ratio +  (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
 md_1_bootAUC<-bootMer(md_1, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
@@ -403,7 +405,7 @@ AUCFun <- function(fit) {
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WTSP_OCC, pred))),3)
   }
 
-md_2<-lme4::glmer(WTSP_OCC ~  elev_0pnt15_to_2pnt00_return_proportion +elev_2pnt00_to_4pnt00_return_proportion+elev_p50+percentage_first_returns_above_mean + (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_2<-lme4::glmer(WTSP_OCC ~ elev_0pnt15_to_2pnt00_return_proportion + elev_maximum +elev_stddev +total_all_returns +canopy_relief_ratio +  (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
 md_2_bootAUC<-bootMer(md_2, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
@@ -435,7 +437,7 @@ AUCFun <- function(fit) {
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WTSP_OCC, pred))),3)
 }
 
-md_3<-lme4::glmer(WTSP_OCC ~  elev_0pnt15_to_2pnt00_return_proportion +elev_2pnt00_to_4pnt00_return_proportion+elev_p50+percentage_first_returns_above_mean + (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_3<-lme4::glmer(WTSP_OCC ~ elev_0pnt15_to_2pnt00_return_proportion + elev_maximum +elev_stddev +total_all_returns +canopy_relief_ratio +  (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
 md_3_bootAUC<-bootMer(md_3, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
@@ -466,7 +468,7 @@ AUCFun <- function(fit) {
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WTSP_OCC, pred))),3)
 }
 
-md_4<-lme4::glmer(WTSP_OCC ~  elev_0pnt15_to_2pnt00_return_proportion +elev_2pnt00_to_4pnt00_return_proportion+elev_p50+percentage_first_returns_above_mean + (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_4<-lme4::glmer(WTSP_OCC ~ elev_0pnt15_to_2pnt00_return_proportion + elev_maximum +elev_stddev +total_all_returns +canopy_relief_ratio +  (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
 md_4_bootAUC<-bootMer(md_4, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
@@ -497,7 +499,7 @@ AUCFun <- function(fit) {
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WTSP_OCC, pred))),3)
   }
 
-md_5<-lme4::glmer(WTSP_OCC ~  elev_0pnt15_to_2pnt00_return_proportion +elev_2pnt00_to_4pnt00_return_proportion+elev_p50+percentage_first_returns_above_mean + (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_5<-lme4::glmer(WTSP_OCC ~ elev_0pnt15_to_2pnt00_return_proportion + elev_maximum +elev_stddev +total_all_returns +canopy_relief_ratio +  (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
 md_5_bootAUC<-bootMer(md_5, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
@@ -529,7 +531,7 @@ AUCFun <- function(fit) {
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WTSP_OCC, pred))),3)
   }
 
-md_6<-lme4::glmer(WTSP_OCC ~  elev_0pnt15_to_2pnt00_return_proportion +elev_2pnt00_to_4pnt00_return_proportion+elev_p50+percentage_first_returns_above_mean + (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_6<-lme4::glmer(WTSP_OCC ~ elev_0pnt15_to_2pnt00_return_proportion + elev_maximum +elev_stddev +total_all_returns +canopy_relief_ratio +  (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
 md_6_bootAUC<-bootMer(md_6, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
@@ -562,7 +564,7 @@ AUCFun <- function(fit) {
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WTSP_OCC, pred))),3)
 }
 
-md_7<-lme4::glmer(WTSP_OCC ~  elev_0pnt15_to_2pnt00_return_proportion +elev_2pnt00_to_4pnt00_return_proportion+elev_p50+percentage_first_returns_above_mean + (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_7<-lme4::glmer(WTSP_OCC ~ elev_0pnt15_to_2pnt00_return_proportion + elev_maximum +elev_stddev +total_all_returns +canopy_relief_ratio +  (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
 md_7_bootAUC<-bootMer(md_7, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
@@ -593,7 +595,7 @@ AUCFun <- function(fit) {
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WTSP_OCC, pred))),3)
   }
 
-md_8<-lme4::glmer(WTSP_OCC ~  elev_0pnt15_to_2pnt00_return_proportion +elev_2pnt00_to_4pnt00_return_proportion+elev_p50+percentage_first_returns_above_mean + (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_8<-lme4::glmer(WTSP_OCC ~ elev_0pnt15_to_2pnt00_return_proportion + elev_maximum +elev_stddev +total_all_returns +canopy_relief_ratio +  (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
 md_8_bootAUC<-bootMer(md_8, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
@@ -624,7 +626,7 @@ AUCFun <- function(fit) {
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WTSP_OCC, pred))),3)
   }
 
-md_9<-lme4::glmer(WTSP_OCC ~  elev_0pnt15_to_2pnt00_return_proportion +elev_2pnt00_to_4pnt00_return_proportion+elev_p50+percentage_first_returns_above_mean + (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_9<-lme4::glmer(WTSP_OCC ~ elev_0pnt15_to_2pnt00_return_proportion + elev_maximum +elev_stddev +total_all_returns +canopy_relief_ratio +  (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
 md_9_bootAUC<-bootMer(md_9, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
@@ -657,7 +659,7 @@ AUCFun <- function(fit) {
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WTSP_OCC, pred))),3)
   }
 
-md_10<-lme4::glmer(WTSP_OCC ~  elev_0pnt15_to_2pnt00_return_proportion +elev_2pnt00_to_4pnt00_return_proportion+elev_p50+percentage_first_returns_above_mean + (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_10<-lme4::glmer(WTSP_OCC ~ elev_0pnt15_to_2pnt00_return_proportion + elev_maximum +elev_stddev +total_all_returns +canopy_relief_ratio +  (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
 md_10_bootAUC<-bootMer(md_10, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
@@ -688,7 +690,7 @@ AUCFun <- function(fit) {
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WTSP_OCC, pred))),3)
   }
 
-md_11<-lme4::glmer(WTSP_OCC ~  elev_0pnt15_to_2pnt00_return_proportion +elev_2pnt00_to_4pnt00_return_proportion+elev_p50+percentage_first_returns_above_mean + (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_11<-lme4::glmer(WTSP_OCC ~ elev_0pnt15_to_2pnt00_return_proportion + elev_maximum +elev_stddev +total_all_returns +canopy_relief_ratio +  (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
 md_11_bootAUC<-bootMer(md_11, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
@@ -719,7 +721,7 @@ AUCFun <- function(fit) {
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WTSP_OCC, pred))),3)
   }
 
-md_12<-lme4::glmer(WTSP_OCC ~  elev_0pnt15_to_2pnt00_return_proportion +elev_2pnt00_to_4pnt00_return_proportion+elev_p50+percentage_first_returns_above_mean + (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_12<-lme4::glmer(WTSP_OCC ~ elev_0pnt15_to_2pnt00_return_proportion + elev_maximum +elev_stddev +total_all_returns +canopy_relief_ratio +  (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
 md_12_bootAUC<-bootMer(md_12, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
@@ -751,7 +753,7 @@ AUCFun <- function(fit) {
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WTSP_OCC, pred))),3)
   }
 
-md_13<-lme4::glmer(WTSP_OCC ~  elev_0pnt15_to_2pnt00_return_proportion +elev_2pnt00_to_4pnt00_return_proportion+elev_p50+percentage_first_returns_above_mean + (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_13<-lme4::glmer(WTSP_OCC ~ elev_0pnt15_to_2pnt00_return_proportion + elev_maximum +elev_stddev +total_all_returns +canopy_relief_ratio +  (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
 md_13_bootAUC<-bootMer(md_13, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
@@ -782,7 +784,7 @@ AUCFun <- function(fit) {
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WTSP_OCC, pred))),3)
   }
 
-md_14<-lme4::glmer(WTSP_OCC ~  elev_0pnt15_to_2pnt00_return_proportion +elev_2pnt00_to_4pnt00_return_proportion+elev_p50+percentage_first_returns_above_mean + (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_14<-lme4::glmer(WTSP_OCC ~ elev_0pnt15_to_2pnt00_return_proportion + elev_maximum +elev_stddev +total_all_returns +canopy_relief_ratio +  (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
 md_14_bootAUC<-bootMer(md_14, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
@@ -814,7 +816,7 @@ AUCFun <- function(fit) {
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WTSP_OCC, pred))),3)
   }
 
-md_15<-lme4::glmer(WTSP_OCC ~  elev_0pnt15_to_2pnt00_return_proportion +elev_2pnt00_to_4pnt00_return_proportion+elev_p50+percentage_first_returns_above_mean + (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_15<-lme4::glmer(WTSP_OCC ~ elev_0pnt15_to_2pnt00_return_proportion + elev_maximum +elev_stddev +total_all_returns +canopy_relief_ratio +  (1|SS), data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
 
 md_15_bootAUC<-bootMer(md_15, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",

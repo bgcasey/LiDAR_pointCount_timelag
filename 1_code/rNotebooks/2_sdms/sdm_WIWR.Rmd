@@ -107,53 +107,45 @@ plm1<-lme4::glmer(WIWR_OCC ~ rast_forest_age + canopy_relief_ratio+ elev_0pnt15_
 
 #Extract variance-covariance matrix for all parameters
 library(merDeriv)
-merDeriv::vcov.glmerMod(plm1)
+#merDeriv::vcov.glmerMod(plm1)
 
 #Check variance inflation factors of fixed effects
 l_vif<-as.data.frame(vif(plm1))
 
 # Iteratively remove highly correlated variables with VIF > 3 and r >.5 
-plm2<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_0pnt15_to_2pnt00_return_proportion+ elev_10pnt00_to_15pnt00_return_proportion+ elev_15pnt00_to_20pnt00_return_proportion+ elev_20pnt00_to_25pnt00_return_proportion+ elev_25pnt00_to_30pnt00_return_proportion+ elev_2pnt00_to_4pnt00_return_proportion+ elev_30pnt00_to_50pnt00_return_proportion+ elev_4pnt00_to_6pnt00_return_proportion+ elev_6pnt00_to_8pnt00_return_proportion+ elev_8pnt00_to_10pnt00_return_proportion + elev_below_0pnt15_return_proportion+ elev_cv+ elev_kurtosis+ elev_maximum + elev_mean+  elev_p50 + elev_p95 + elev_stddev+  percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude ) 
+plm2<-lme4::glmer(WIWR_OCC ~ rast_forest_age + canopy_relief_ratio+ elev_0pnt15_to_2pnt00_return_proportion+ elev_2pnt00_to_4pnt00_return_proportion+ elev_cv+ elev_kurtosis+ elev_maximum + elev_mean+ elev_p05 + elev_p10 + elev_p20 + elev_p25 + elev_p30 + elev_p50 + elev_p60 + elev_p70 + elev_p75 + elev_p80 + elev_p95 + elev_p99 + elev_stddev+ percentage_first_returns_above_2pnt00+ percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude ) 
 
 l_vif<-as.data.frame(vif(plm2))
 
 
-plm3<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_0pnt15_to_2pnt00_return_proportion+  elev_2pnt00_to_4pnt00_return_proportion+ elev_cv+ elev_kurtosis+ elev_maximum + elev_mean+  elev_p50 + elev_p95 + elev_stddev+  percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude ) 
+plm3<-lme4::glmer(WIWR_OCC ~ rast_forest_age + canopy_relief_ratio+ elev_0pnt15_to_2pnt00_return_proportion+ elev_2pnt00_to_4pnt00_return_proportion+ elev_cv+ elev_kurtosis+ elev_maximum + elev_mean+ elev_p50 + elev_p95 + elev_p99 + elev_stddev+ percentage_first_returns_above_2pnt00+ percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude ) 
 
 l_vif<-as.data.frame(vif(plm3))
 
-plm4<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_0pnt15_to_2pnt00_return_proportion+  elev_2pnt00_to_4pnt00_return_proportion+ elev_cv+  elev_maximum +   elev_p50 + elev_p95 + elev_stddev+  percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude ) 
+
+plm4<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_0pnt15_to_2pnt00_return_proportion+ elev_2pnt00_to_4pnt00_return_proportion+ elev_kurtosis+ elev_maximum +  elev_p50 + elev_p95 + elev_stddev+ percentage_first_returns_above_2pnt00+ percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude ) 
 
 l_vif<-as.data.frame(vif(plm4))
 
-plm5<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_0pnt15_to_2pnt00_return_proportion+  elev_2pnt00_to_4pnt00_return_proportion+  elev_maximum +   elev_p50 + elev_p95 + elev_stddev+  percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude ) 
+
+plm5<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_0pnt15_to_2pnt00_return_proportion+ elev_2pnt00_to_4pnt00_return_proportion+ elev_kurtosis+ elev_maximum +  elev_p50 + elev_stddev+ percentage_first_returns_above_2pnt00+ percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude ) 
 
 l_vif<-as.data.frame(vif(plm5))
 
-plm6<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_0pnt15_to_2pnt00_return_proportion+  elev_2pnt00_to_4pnt00_return_proportion+  elev_maximum +   elev_p50  + elev_stddev+  percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude ) 
+plm6<-lme4::glmer(WIWR_OCC ~ elev_0pnt15_to_2pnt00_return_proportion+ elev_2pnt00_to_4pnt00_return_proportion+ elev_kurtosis+ elev_maximum +  elev_p50 + elev_stddev+ percentage_first_returns_above_2pnt00+ percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude )
 
 l_vif<-as.data.frame(vif(plm6))
 
 ###################
 #candidates
 ###################
-# [1] "canopy_relief_ratio"                     "elev_0pnt15_to_2pnt00_return_proportion"
-# [3] "elev_2pnt00_to_4pnt00_return_proportion" "elev_maximum"                           
+# 1] "elev_0pnt15_to_2pnt00_return_proportion" "elev_2pnt00_to_4pnt00_return_proportion"
+# [3] "elev_kurtosis"                           "elev_maximum"                           
 # [5] "elev_p50"                                "elev_stddev"                            
-# [7] "percentage_first_returns_above_mean"     "total_all_returns"   
+# [7] "percentage_first_returns_above_2pnt00"   "percentage_first_returns_above_mean"    
+# [9] "total_all_returns"     
 
 ```
-
-
-**LiDAR candidate variables**
-- canopy_relief_ratio                    
-- elev_0pnt15_to_2pnt00_return_proportion
-- elev_2pnt00_to_4pnt00_return_proportion
-- elev_maximum                           
-- elev_p50                               
-- elev_stddev                            
-- percentage_first_returns_above_mean    
-- total_all_returns 
 
 
 ###### Interaction effects {-}
@@ -177,7 +169,10 @@ d_in_4<-MuMIn::dredge(in_4, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(
 in_5<-lme4::glmer(WIWR_OCC ~ elev_stddev  :  elev_0pnt15_to_2pnt00_return_proportion    +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action=na.fail) 
 d_in_5<-MuMIn::dredge(in_5, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
 
-#found elev_maximum  * elev_p50
+#found elev_maximum  * elev_stddev 
+#elev_maximum *  elev_0pnt15_to_2pnt00_return_proportion 
+# elev_maximum *  canopy_relief_ratio
+
 ```
 
 
@@ -187,7 +182,7 @@ d_in_5<-MuMIn::dredge(in_5, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(
 ``` {r eval=FALSE}
 # WIWR_can<-lme4::glmer(WIWR ~  canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action=na.fail) 
 
-WIWR_can<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_0pnt15_to_2pnt00_return_proportion+  elev_2pnt00_to_4pnt00_return_proportion+  elev_maximum *  elev_p50  + elev_stddev+  percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.fail)
+WIWR_can<-lme4::glmer(WIWR_OCC ~ elev_0pnt15_to_2pnt00_return_proportion +elev_2pnt00_to_4pnt00_return_proportion+elev_kurtosis+elev_maximum * elev_stddev +elev_p50  +percentage_first_returns_above_2pnt00 +percentage_first_returns_above_mean  +total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.fail)
 
 
 WIWR_can_dredge<-MuMIn::dredge(WIWR_can, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))

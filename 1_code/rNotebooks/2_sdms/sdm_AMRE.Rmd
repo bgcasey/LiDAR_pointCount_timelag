@@ -53,10 +53,10 @@ x<-d%>%
   #filter(lidar_year==2009)%>%
   dplyr::summarise(across(13:15, sum)) #
 
-xBTNW<-x$BTNW
-med = median(xBTNW)
+xAMRE<-x$AMRE
+med = median(xAMRE)
 # subtract median from each value of x and get absolute deviation
-abs_dev = abs(xBTNW-med)
+abs_dev = abs(xAMRE-med)
 # get MAD
 mad = 1.4826 * median(abs_dev)
 
@@ -65,10 +65,10 @@ Tmin = med-(1*mad)
 Tmax = med+(1*mad) 
 
 # find outlier values
-xBTNW[which(xBTNW < Tmin | xBTNW > Tmax)]
+xAMRE[which(xAMRE < Tmin | xAMRE > Tmax)]
 
 # remove outlier
-yBTNW=xBTNW[which(xBTNW > Tmin & xBTNW < Tmax)]
+yAMRE=xAMRE[which(xAMRE > Tmin & xAMRE < Tmax)]
 
 ```
 

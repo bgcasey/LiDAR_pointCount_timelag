@@ -345,7 +345,7 @@ md_0_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_
 
                       
 WIWR_predictMap_m_0<-raster::predict(scaled_stack, md_0, re.form=NA, type='response')
-writeRaster(WIWR_predictMap_m_0,file="3_output/maps/predictedDistributions/WIWR/WIWR_predictMap_m_0", format="GTiff", overwrite=T)
+writeRaster(WIWR_predictMap_m_0,file="3_output/maps/predictedDistributions/WIWR/WIWR_predictMap_m_00", format="GTiff", overwrite=T)
 ##########################
 dd<-sdm_d%>%filter(SS_lidar_timelag==-1)
 

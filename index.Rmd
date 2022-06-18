@@ -105,8 +105,17 @@ library(knitr)
 
 # SDMs
 
-{r child = '1_code/rNotebooks/2_sdms/sdm_BTNW.Rmd'}
+```{r child = '1_code/rNotebooks/2_sdms/sdm_MOWA.Rmd'}
+```
 
+```{r child = '1_code/rNotebooks/2_sdms/sdm_SWTH.Rmd'}
+```
+
+```{r child = '1_code/rNotebooks/2_sdms/sdm_AMRE.Rmd'}
+```
+
+```{r child = '1_code/rNotebooks/2_sdms/sdm_BTNW.Rmd'}
+```
 
 ```{r child = '1_code/rNotebooks/2_sdms/sdm_MOWA.Rmd'}
 ```
@@ -114,8 +123,22 @@ library(knitr)
 ```{r child = '1_code/rNotebooks/2_sdms/sdm_SWTH.Rmd'}
 ```
 
+```{r child = '1_code/rNotebooks/2_sdms/sdm_WIWR.Rmd'}
+```
+
+```{r child = '1_code/rNotebooks/2_sdms/sdm_WTSP.Rmd'}
+```
+
+```{r child = '1_code/rNotebooks/2_sdms/sdm_YBSA.Rmd'}
+```
+
+
+
 
 # Compare SDMs accross years
+
+```{r child = '1_code/rNotebooks/3_compare/compare_AMRE.Rmd'}
+```
 
 ```{r child = '1_code/rNotebooks/3_compare/compare_BTNW.Rmd'}
 ```
@@ -124,6 +147,15 @@ library(knitr)
 ```
 
 ```{r child = '1_code/rNotebooks/3_compare/compare_SWTH.Rmd'}
+```
+
+```{r child = '1_code/rNotebooks/3_compare/compare_WIWR.Rmd'}
+```
+
+```{r child = '1_code/rNotebooks/3_compare/compare_WTSP.Rmd'}
+```
+
+```{r child = '1_code/rNotebooks/3_compare/compare_YBSA.Rmd'}
 ```
 
 # Results summary

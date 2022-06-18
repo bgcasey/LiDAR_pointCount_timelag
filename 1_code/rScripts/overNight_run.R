@@ -1,4 +1,4 @@
-```{r eval=FALSE}
+
 #stats function for AUC
 
 dd<-sdm_d%>%filter(SS_lidar_timelag==0)
@@ -3415,7 +3415,8 @@ save(YBSA_models_bootAUC_4, file="2_pipeline/store/models/YBSA_models_bootAUC_4.
 ## stack rasters
 ##############################################################
 
-map_list<-list.files(path='3_output/maps/predictedDistributions/YBSA/predictMap', pattern = "*.tif$", full.names = TRUE)
+map_list<-listwordle
+.files(path='3_output/maps/predictedDistributions/YBSA/predictMap', pattern = "*.tif$", full.names = TRUE)
 YBSA_stack<-raster::stack(map_list)
 
 #save stack as r object

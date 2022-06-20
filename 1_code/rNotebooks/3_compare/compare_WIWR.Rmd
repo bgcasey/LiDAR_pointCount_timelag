@@ -460,7 +460,7 @@ knitr::include_graphics("3_output/figures/timelag_stats/WIWR_lm_fa_all.png", dpi
 ```{r echo=FALSE, message = FALSE, results="asis"}
 load("2_pipeline/store/models/WIWR_predCor_to_forestAge_df.rData")
 
-knitr::kable(head(WIWR_predCor_to_forestAge_df)) %>%
+knitr::kable(WIWR_predCor_to_forestAge_df) %>%
   kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
   column_spec(1, width= "20em")%>%
   scroll_box(width = "100%", height = "400px")

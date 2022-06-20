@@ -168,3 +168,6 @@ library(knitr)
 
 
 # Appendix
+
+<!--chapter:end:index.Rmd-->
+

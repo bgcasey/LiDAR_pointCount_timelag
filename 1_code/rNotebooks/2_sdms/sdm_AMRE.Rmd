@@ -46,28 +46,40 @@ scaled_stack<-scale(lidar_stack)
 ```
 
 ### Test for outlier detection years {-}
+ ()
+use absolute deviation around the median (https://asset-pdf.scinapse.io/prod/2040975718/2040975718.pdf)
 ```{r eval=FALSE}
 x<-d%>%
   filter(SS_lidar_timelag<1)%>%
   group_by(SS_lidar_timelag)%>%
   #filter(lidar_year==2009)%>%
-  dplyr::summarise(across(13:15, sum)) #
+  dplyr::summarise(across(13:20, sum)) #
 
-xAMRE<-x$AMRE
+xAMRE<-x$AMRE_OCC
 med = median(xAMRE)
 # subtract median from each value of x and get absolute deviation
 abs_dev = abs(xAMRE-med)
 # get MAD
 mad = 1.4826 * median(abs_dev)
 
+
+
 # get threshold values for outliers
-Tmin = med-(1*mad) 
-Tmax = med+(1*mad) 
+Tmin = med-(2*mad) 
+Tmax = med+(2*mad) 
 
 # find outlier values
 xAMRE[which(xAMRE < Tmin | xAMRE > Tmax)]
 
 # remove outlier
+yAMRE=xAMRE[which(xAMRE > Tmin & xAMRE < Tmax)]
+
+
+#try with quantiles
+Tmin <- quantile(xAMRE, 0.15)
+Tmax <- quantile(xAMRE, 0.85)
+
+xAMRE[which(xAMRE < Tmin | xAMRE > Tmax)]
 yAMRE=xAMRE[which(xAMRE > Tmin & xAMRE < Tmax)]
 
 ```

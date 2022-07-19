@@ -53,5 +53,8 @@ renv/
 rsconnect/
 5_cache/
 images/
+wc10/
+occupancy/
+chapter_all/
 _bookdown.yml
 

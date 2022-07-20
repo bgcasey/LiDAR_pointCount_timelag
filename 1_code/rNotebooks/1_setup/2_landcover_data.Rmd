@@ -561,6 +561,51 @@ save(pkey_cas_cov, file="0_data/manual/spatialCov/CASFRI/pkey_cas_cov.rData")
 ```
 
 
+##### Calculate Forest age classes
+
+0 0-9 stand initiation: shrub-herb
+1 10-19 late stand initiation: sapling
+2 20-33 early stem exclusion
+3 33-80 late stem exclusion
+4 80-99 early canopy transition
+5 100+late canopy transition/gap dynamics
+
+
+```{r}
+load("0_data/manual/spatialCov/CASFRI/pkey_cas_cov.rData")
+
+x<-pkey_cas_cov
+hist(x$rast_forest_age)
+x$forest_age_class_r <- cut(
+  x$rast_forest_age,
+  breaks = c(0, 10, 20, 34, 81, 100, Inf),
+  labels = c("0", "1", "2", "3", "4", "5"),
+  right  = FALSE
+)
+#plot(x$forest_age_class_r)
+
+x$forest_age_class_p <- cut(
+  x$poly_forest_age,
+  breaks = c(0, 10, 20, 34, 81, 100, Inf),
+  labels = c("0", "1", "2", "3", "4", "5"),
+  right  = FALSE
+)
+
+#plot(x$forest_age_class_p)
+#compare forest age class from polygons vs forest age class from raster
+x1<-x[c(2,6, 58)]%>%
+  rename(forest_age_class=forest_age_class_r)
+x2<-x[c(2,59)]%>%
+  rename(forest_age_class=forest_age_class_p)
+aj<-anti_join(x1,x2)
+
+pkey_cas_cov<-x
+
+save(pkey_cas_cov, file="0_data/manual/spatialCov/CASFRI/pkey_cas_cov.rData")
+
+```
+
+
 ### 2005 MODIS Landcover {-}
 
 http://www.cec.org/north-american-environmental-atlas/land-cover-2005-modis-250m/

@@ -27,7 +27,7 @@ library(dplyr)
 ```{r}
 load("0_data/manual/data_main.rData")
 
-data_main<-data_main%>%dplyr::select(-poly_forest_age)
+#data_main<-data_main%>%dplyr::select(-poly_forest_age)
 ```
 
 

@@ -91,7 +91,7 @@ l<-ss_lidar_df %>%
 
 # CAS-FRI
 c<-pkey_cas_cov %>%
-  dplyr::select(SS, PKEY, rast_forest_age, ss_forest_origDate_mean, ss_forest_origDate_sd, Forest_Type, poly_forest_age
+  dplyr::select(SS, PKEY, rast_forest_age, forest_age_class_r, ss_forest_origDate_mean, ss_forest_origDate_sd, Forest_Type, poly_forest_age, forest_age_class_p, 
 )
 
 # MODIS

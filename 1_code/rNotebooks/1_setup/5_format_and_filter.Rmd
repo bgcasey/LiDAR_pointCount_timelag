@@ -127,6 +127,42 @@ d3$total_all_returns <-scale(d3$total_all_returns , center=TRUE, scale=TRUE)
 d3$rast_forest_age<-scale(d3$rast_forest_age, center=TRUE, scale=TRUE)
 #d3$poly_forest_age<-scale(d3$poly_forest_age, center=TRUE, scale=TRUE)
 
+d3$ndvi_1990<-scale(d3$ndvi_1990, center=TRUE, scale=TRUE)
+d3$ndvi_1991<-scale(d3$ndvi_1991, center=TRUE, scale=TRUE)
+d3$ndvi_1992<-scale(d3$ndvi_1992, center=TRUE, scale=TRUE)
+d3$ndvi_1993<-scale(d3$ndvi_1993, center=TRUE, scale=TRUE)
+d3$ndvi_1994<-scale(d3$ndvi_1994, center=TRUE, scale=TRUE)
+d3$ndvi_1995<-scale(d3$ndvi_1995, center=TRUE, scale=TRUE)
+d3$ndvi_1996<-scale(d3$ndvi_1996, center=TRUE, scale=TRUE)
+d3$ndvi_1997<-scale(d3$ndvi_1997, center=TRUE, scale=TRUE)
+d3$ndvi_1998<-scale(d3$ndvi_1998, center=TRUE, scale=TRUE)
+d3$ndvi_1999<-scale(d3$ndvi_1999, center=TRUE, scale=TRUE)
+d3$ndvi_2000<-scale(d3$ndvi_2000, center=TRUE, scale=TRUE)
+d3$ndvi_2001<-scale(d3$ndvi_2001, center=TRUE, scale=TRUE)
+d3$ndvi_2002<-scale(d3$ndvi_2002, center=TRUE, scale=TRUE)
+d3$ndvi_2003<-scale(d3$ndvi_2003, center=TRUE, scale=TRUE)
+d3$ndvi_2004<-scale(d3$ndvi_2004, center=TRUE, scale=TRUE)
+d3$ndvi_2005<-scale(d3$ndvi_2005, center=TRUE, scale=TRUE)
+d3$ndvi_2006<-scale(d3$ndvi_2006, center=TRUE, scale=TRUE)
+d3$ndvi_2007<-scale(d3$ndvi_2007, center=TRUE, scale=TRUE)
+d3$ndvi_2008<-scale(d3$ndvi_2008, center=TRUE, scale=TRUE)
+d3$ndvi_2009<-scale(d3$ndvi_2009, center=TRUE, scale=TRUE)
+d3$ndvi_2010<-scale(d3$ndvi_2010, center=TRUE, scale=TRUE)
+d3$ndvi_2011<-scale(d3$ndvi_2011, center=TRUE, scale=TRUE)
+d3$ndvi_2012<-scale(d3$ndvi_2012, center=TRUE, scale=TRUE)
+d3$ndvi_2013<-scale(d3$ndvi_2013, center=TRUE, scale=TRUE)
+d3$ndvi_2014<-scale(d3$ndvi_2014, center=TRUE, scale=TRUE)
+d3$ndvi_2015<-scale(d3$ndvi_2015, center=TRUE, scale=TRUE)
+d3$ndvi_2016<-scale(d3$ndvi_2016, center=TRUE, scale=TRUE)
+d3$ndvi_2017<-scale(d3$ndvi_2017, center=TRUE, scale=TRUE)
+d3$ndvi_2018<-scale(d3$ndvi_2018, center=TRUE, scale=TRUE)
+d3$ndvi_2019<-scale(d3$ndvi_2019, center=TRUE, scale=TRUE)
+d3$ndvi_2020<-scale(d3$ndvi_2020, center=TRUE, scale=TRUE)
+
+
+sdm_d3<-d3
+save(sdm_d3, file="2_pipeline/tmp/sdm_d3.rData")
+
 ```
 
 

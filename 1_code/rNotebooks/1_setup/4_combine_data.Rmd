@@ -43,6 +43,10 @@ load("0_data/manual/spatialCov/LiDAR/ss_lidar_df.rData")
 # Classified landcover
 load("0_data/manual/spatialCov/CASFRI/pkey_cas_cov.rData")
 load("0_data/manual/spatialCov/QPAD/callingLake_QPAD_LC.rData")
+
+# NDVI
+load("0_data/manual/spatialCov/ndvi/ss_ndvi_df.rData")
+
 ```
 
 
@@ -82,7 +86,41 @@ load("0_data/manual/spatialCov/QPAD/callingLake_QPAD_LC.rData")
   - elev_stddev                              
   - percentage_first_returns_above_2pnt00    
   - percentage_first_returns_above_mean      
-  - total_all_returns       
+  - total_all_returns
+  
+- **LiDAR**  
+  - ndvi_1990
+  - ndvi_1991
+  - ndvi_1992
+  - ndvi_1993
+  - ndvi_1994
+  - ndvi_1995
+  - ndvi_1996
+  - ndvi_1997
+  - ndvi_1998
+  - ndvi_1999
+  - ndvi_2000
+  - ndvi_2001
+  - ndvi_2002
+  - ndvi_2003
+  - ndvi_2004
+  - ndvi_2005
+  - ndvi_2006
+  - ndvi_2007
+  - ndvi_2008
+  - ndvi_2009
+  - ndvi_2010
+  - ndvi_2011
+  - ndvi_2012
+  - ndvi_2013
+  - ndvi_2014
+  - ndvi_2015
+  - ndvi_2016
+  - ndvi_2017
+  - ndvi_2018
+  - ndvi_2019
+  - ndvi_2020
+  
 
 ```{r eval=FALSE}
 # LiDAR
@@ -98,6 +136,8 @@ c<-pkey_cas_cov %>%
 m<-callingLake_QPAD_LC %>%
   dplyr::select(SS, PKEY, LCC2, LCC4)
 
+# Landsat NDVI
+n<-ss_ndvi_df
 ```
 
 
@@ -105,7 +145,8 @@ m<-callingLake_QPAD_LC %>%
 
 ```{r eval=FALSE}
 spatialCov_all<-left_join(c, m)%>%
-  left_join(l)
+  left_join(l)%>%
+  left_join()
 
 save(spatialCov_all, file = "2_pipeline/store/spatialCov_all.rData")
 ```
@@ -143,14 +184,101 @@ knitr::kable(head(data_main)) %>%
 ```
 
 
+#### Combine raster data into a single raster stack
 
 
+```{r eval=False}
+#import raster stacks
+#LiDAR
+lidar_stack<-stackOpen("0_data/manual/spatialCov/LiDAR/lidar_stack.stk")
+# scaled_lidar_stack<-scale(lidar_stack)
+
+#NDVI
+ndvi_stack<-stackOpen("0_data/external/CL_Landsat_NDVI/ndvi_stack.stk")
+#ndvi_stack_pr<-projectRaster(ndvi_stack, crs=lidar_stack)
+
+# scaled_ndvi_stack<-scale(ndvi_stack)
+
+#Forest Age
+Age_stack<-stackOpen("0_data/manual/spatialCov/CASFRI/AgeRasters/Age_stack.stk")
+Age_stack_pr<-projectRaster(Age_stack, crs=lidar_stack)
+
+#age class
+ageClass_stack<-stackOpen("0_data/manual/spatialCov/CASFRI/ageClassRasters/ageClass_stack.stk")
+ageClass_stack_pr<-projectRaster(ageClass_stack, crs=lidar_stack)
 
 
+#study area
+load("0_data/manual/bird/studyarea_big.rData")
+ 
+# Crop rasters to study area
+ndvi_stack_c<- raster::crop(ndvi_stack, as_Spatial(st_geometry(c_bb))) 
+lidar_stack_c<- raster::crop(lidar_stack, as_Spatial(st_geometry(c_bb)))
+Age_stack_pr_c<- raster::crop(Age_stack_pr, as_Spatial(st_geometry(c_bb))) 
+ageClass_stack_pr_c<- raster::crop(ageClass_stack_pr, as_Spatial(st_geometry(c_bb))) 
+
+                             
+#resample so they have the same resolution
+ndvi_stack_c_rs<-resample(ndvi_stack_c, ageClass_stack_pr_c)
+Age_stack_c_rs<-resample(Age_stack_pr_c, ageClass_stack_pr_c)
+lidar_stack_c_rs<-resample(lidar_stack_c, ageClass_stack_pr_c)
+
+lidar_stack_c_rs<-lidar_stack_c_c_rs
+# ndvi_stack_c_rs<-resample(ndvi_stack_c, ageClass_stack)
+# Age_stack_c_rs<-resample(Age_stack_pr, lidar_stack_c)
+# ageClass_stack_pr_c_rs<-resample(ageClass_stack_pr_c, lidar_stack_c)
+
+#rename ndvi raster names to remove "cl_" prefix
+names(ndvi_stack_c_rs) <- substring(names(ndvi_stack_c_rs), 4)
+
+# Stack covariates
+cov_stack<-stack(lidar_stack_c_rs, ndvi_stack_c_rs, Age_stack_c_rs, ageClass_stack_pr_c)
+
+##### save transformed rasters
+#first unstack
+d1<-cov_stack
+d2 <- unstack(d1)
+# save seperate rasters
+outputnames <- paste("0_data/manual/spatialCov/transformed_and_resampled/", names(d1), ".tif", sep="")
+for(i in seq_along(d2)){writeRaster(d2[[i]], file=outputnames[i], overwrite=TRUE)}
+
+# restack
+#list the files
+cov_list<-list.files(path="0_data/manual/spatialCov/transformed_and_resampled", pattern = "*.tif$", full.names = TRUE)
+cov_stack2<-raster::stack(cov_list)
+
+stackSave(cov_stack2,file="0_data/manual/spatialCov/transformed_and_resampled/cov_stack2.stk")
 
 
+################################
+##Scale rasters for predictions bsed on scaled covariates
+################################
+
+scaled_stack<-scale(subset(cov_stack2, c(1:23, 47:111)))
+
+#add back the age class rasters
+scaled_stack1<-stack(scaled_stack, subset(cov_stack2, 24:46))
+
+##### save transformed rasters
+#first unstack
+d3<-scaled_stack1
+d4 <- unstack(d3)
+# save seperate rasters
+outputnames <- paste("0_data/manual/spatialCov/scaled_cov/", names(d3), ".tif", sep="")
+for(i in seq_along(d4)){writeRaster(d4[[i]], file=outputnames[i], overwrite=TRUE)}
+
+# restack
+#list the files
+scaled_cov_list<-list.files(path="0_data/manual/spatialCov/scaled_cov", pattern = "*.tif$", full.names = TRUE)
+scaled_stack2<-raster::stack(scaled_cov_list)
+stackSave(scaled_stack2,file="0_data/manual/spatialCov/scaled_cov/scaled_stack2.stk")
+
+scaled_cov<-stackOpen("0_data/manual/spatialCov/scaled_cov/scaled_stack2.stk")
 
 
+cov_stack2<-stackOpen("0_data/manual/spatialCov/transformed_and_resampled/cov_stack2.stk")
+
+```
 
 
 

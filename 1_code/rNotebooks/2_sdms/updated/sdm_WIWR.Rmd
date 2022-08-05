@@ -37,23 +37,28 @@ library(pROC)
 ### Load data {-}
 
 ```{r eval=FALSE}
-load("2_pipeline/tmp/sdm_d.rData")
-d<-sdm_d
+#load("2_pipeline/tmp/sdm_d.rData")
+load("2_pipeline/tmp/sdm_d3.rData")
+d3<-sdm_d3
 
-#import raster stack
-lidar_stack<-stackOpen("0_data/manual/spatialCov/LiDAR/lidar_stack.stk")
-scaled_stack<-scale(lidar_stack)
+#d3<-d3%>%filter(lidar_year==2009)
+# 
+# 
+# d3ab<-d3%>%filter(SS_lidar_timelag==0)%>%
+#   filter(lidar_year==2009)
+
+scaled_stack<-stackOpen("0_data/manual/spatialCov/scaled_cov/scaled_stack2.stk")
 ```
 
 ### Test for outlier detection years {-}
 ```{r eval=FALSE}
-x<-d%>%
+x<-d3%>%
   filter(SS_lidar_timelag<1)%>%
   group_by(SS_lidar_timelag)%>%
   #filter(lidar_year==2009)%>%
-  dplyr::summarise(across(13:15, sum)) #
+  dplyr::summarise(across(13:19, sum)) #
 
-xWIWR<-x$WIWR
+xWIWR<-x$WIWR_OCC
 med = median(xWIWR)
 # subtract median from each value of x and get absolute deviation
 abs_dev = abs(xWIWR-med)
@@ -78,13 +83,13 @@ yWIWR=xWIWR[which(xWIWR > Tmin & xWIWR < Tmax)]
 #### Evaluate random effects {-}
 
 ```{r eval=FALSE}
-WIWR_m0<-glm(WIWR_OCC ~ 1, data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude)
+WIWR_m0<-glm(WIWR_OCC ~ 1, data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude)
 
-WIWR_m1<-lme4::glmer(WIWR_OCC ~ 1 + (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude)
+WIWR_m1<-lme4::glmer(WIWR_OCC ~ 1 + (1|SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude)
 
-WIWR_m2<-lme4::glmer(WIWR_OCC ~ 1 + (1|SS) + (1|ss_year), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude)
+WIWR_m2<-lme4::glmer(WIWR_OCC ~ 1 + (1|SS) + (1|ss_year), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude)
 
-WIWR_m3<-lme4::glmer(WIWR_OCC ~ 1 + (1|ss_year/SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude)
+WIWR_m3<-lme4::glmer(WIWR_OCC ~ 1 + (1|ss_year/SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude)
 
 # # Compare models
 anova(WIWR_m2, WIWR_m1)
@@ -102,90 +107,119 @@ save(WIWR_null_ms, file="2_pipeline/store/models/WIWR_null_ms.rData")
 ```{r eval=FALSE}
 
 #plug in all LiDAR variables
-plm1<-lme4::glmer(WIWR_OCC ~ rast_forest_age + canopy_relief_ratio+ elev_0pnt15_to_2pnt00_return_proportion+ elev_10pnt00_to_15pnt00_return_proportion+ elev_15pnt00_to_20pnt00_return_proportion+ elev_20pnt00_to_25pnt00_return_proportion+ elev_25pnt00_to_30pnt00_return_proportion+ elev_2pnt00_to_4pnt00_return_proportion+ elev_30pnt00_to_50pnt00_return_proportion+ elev_4pnt00_to_6pnt00_return_proportion+ elev_6pnt00_to_8pnt00_return_proportion+ elev_8pnt00_to_10pnt00_return_proportion + elev_below_0pnt15_return_proportion+ elev_cv+ elev_kurtosis+ elev_maximum + elev_mean+ elev_p05 + elev_p10 + elev_p20 + elev_p25 + elev_p30 + elev_p50 + elev_p60 + elev_p70 + elev_p75 + elev_p80 + elev_p95 + elev_p99 + elev_stddev+ percentage_first_returns_above_2pnt00+ percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude ) 
-
-
-#Extract variance-covariance matrix for all parameters
-library(merDeriv)
-#merDeriv::vcov.glmerMod(plm1)
+plm1<-lme4::glmer(WIWR_OCC ~ ndvi_lag_0 + canopy_relief_ratio+  elev_0pnt15_to_2pnt00_return_proportion+ elev_2pnt00_to_4pnt00_return_proportion + elev_4pnt00_to_6pnt00_return_proportion+  elev_below_0pnt15_return_proportion+ elev_cv+ elev_maximum + elev_mean+ elev_p50 + elev_p95 + elev_p99 + elev_stddev+ percentage_first_returns_above_2pnt00+ percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude ) 
 
 #Check variance inflation factors of fixed effects
 l_vif<-as.data.frame(vif(plm1))
 
 # Iteratively remove highly correlated variables with VIF > 3 and r >.5 
-plm2<-lme4::glmer(WIWR_OCC ~ rast_forest_age + canopy_relief_ratio+ elev_0pnt15_to_2pnt00_return_proportion+ elev_2pnt00_to_4pnt00_return_proportion+ elev_cv+ elev_kurtosis+ elev_maximum + elev_mean+ elev_p05 + elev_p10 + elev_p20 + elev_p25 + elev_p30 + elev_p50 + elev_p60 + elev_p70 + elev_p75 + elev_p80 + elev_p95 + elev_p99 + elev_stddev+ percentage_first_returns_above_2pnt00+ percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude ) 
+plm2<-lme4::glmer(WIWR_OCC ~ ndvi_lag_0 + canopy_relief_ratio+  elev_0pnt15_to_2pnt00_return_proportion+ elev_2pnt00_to_4pnt00_return_proportion + elev_4pnt00_to_6pnt00_return_proportion+ elev_cv+ elev_maximum + elev_mean+ elev_p50 + elev_p95 + elev_p99 + elev_stddev+  percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude ) 
 
 l_vif<-as.data.frame(vif(plm2))
 
-
-plm3<-lme4::glmer(WIWR_OCC ~ rast_forest_age + canopy_relief_ratio+ elev_0pnt15_to_2pnt00_return_proportion+ elev_2pnt00_to_4pnt00_return_proportion+ elev_cv+ elev_kurtosis+ elev_maximum + elev_mean+ elev_p50 + elev_p95 + elev_p99 + elev_stddev+ percentage_first_returns_above_2pnt00+ percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude ) 
+plm3<-lme4::glmer(WIWR_OCC ~ ndvi_lag_0 + canopy_relief_ratio+  elev_0pnt15_to_2pnt00_return_proportion+ elev_2pnt00_to_4pnt00_return_proportion + elev_4pnt00_to_6pnt00_return_proportion+ elev_cv+ elev_maximum + elev_mean+ elev_p50 + elev_p95  + elev_stddev+  percentage_first_returns_above_mean +  (1|SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude )  
 
 l_vif<-as.data.frame(vif(plm3))
 
-
-plm4<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_0pnt15_to_2pnt00_return_proportion+ elev_2pnt00_to_4pnt00_return_proportion+ elev_kurtosis+ elev_maximum +  elev_p50 + elev_p95 + elev_stddev+ percentage_first_returns_above_2pnt00+ percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude ) 
+plm4<-lme4::glmer(WIWR_OCC ~ ndvi_lag_0 + canopy_relief_ratio+  elev_0pnt15_to_2pnt00_return_proportion+ elev_2pnt00_to_4pnt00_return_proportion + elev_4pnt00_to_6pnt00_return_proportion+ elev_cv+ elev_maximum + elev_p50 + elev_p95  + elev_stddev+  percentage_first_returns_above_mean +  (1|SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude )  
 
 l_vif<-as.data.frame(vif(plm4))
 
+a<-lme4::glmer(WIWR_OCC ~  elev_stddev  +  (1|SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude )
 
-plm5<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_0pnt15_to_2pnt00_return_proportion+ elev_2pnt00_to_4pnt00_return_proportion+ elev_kurtosis+ elev_maximum +  elev_p50 + elev_stddev+ percentage_first_returns_above_2pnt00+ percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude ) 
+b<-lme4::glmer(WIWR_OCC ~  elev_cv +  (1|SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude )
+
+
+plm5<-lme4::glmer(WIWR_OCC ~ ndvi_lag_0 + canopy_relief_ratio+  elev_0pnt15_to_2pnt00_return_proportion+ elev_2pnt00_to_4pnt00_return_proportion + elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum + elev_p50  + elev_stddev+  percentage_first_returns_above_mean +  (1|SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude )  
 
 l_vif<-as.data.frame(vif(plm5))
 
-plm6<-lme4::glmer(WIWR_OCC ~ elev_0pnt15_to_2pnt00_return_proportion+ elev_2pnt00_to_4pnt00_return_proportion+ elev_kurtosis+ elev_maximum +  elev_p50 + elev_stddev+ percentage_first_returns_above_2pnt00+ percentage_first_returns_above_mean+ total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.exclude )
-
-l_vif<-as.data.frame(vif(plm6))
-
-###################
-#candidates
-###################
-# 1] "elev_0pnt15_to_2pnt00_return_proportion" "elev_2pnt00_to_4pnt00_return_proportion"
-# [3] "elev_kurtosis"                           "elev_maximum"                           
-# [5] "elev_p50"                                "elev_stddev"                            
-# [7] "percentage_first_returns_above_2pnt00"   "percentage_first_returns_above_mean"    
-# [9] "total_all_returns"     
-
 ```
+
 
 
 ###### Interaction effects {-}
 
 ```{r eval=FALSE}
-in_1<-lme4::glmer(WIWR_OCC ~ elev_maximum  * elev_stddev    +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action=na.fail) 
+in_1<-lme4::glmer(WIWR_OCC ~ elev_maximum  * elev_stddev   +  (1|SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action=na.fail) 
 d_in_1<-MuMIn::dredge(in_1, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
 
 
-in_2<-lme4::glmer(WIWR_OCC ~ elev_maximum *  elev_0pnt15_to_2pnt00_return_proportion +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action=na.fail) 
+in_2<-lme4::glmer(WIWR_OCC ~ elev_maximum *  elev_0pnt15_to_2pnt00_return_proportion +  (1|SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action=na.fail) 
 d_in_2<-MuMIn::dredge(in_2, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
 
 
-in_3<-lme4::glmer(WIWR_OCC ~ elev_maximum *  canopy_relief_ratio +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action=na.fail) 
-d_in_3<-MuMIn::dredge(in_3, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
+# in_3<-lme4::glmer(WIWR_OCC ~ elev_maximum *  canopy_relief_ratio +  (1|SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action=na.fail) 
+# d_in_3<-MuMIn::dredge(in_3, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
 
 
-in_4<-lme4::glmer(WIWR_OCC ~ elev_maximum  * elev_p50    +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action=na.fail) 
+in_4<-lme4::glmer(WIWR_OCC ~ elev_maximum  * elev_p50    +  (1|SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action=na.fail) 
 d_in_4<-MuMIn::dredge(in_4, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
 
-in_5<-lme4::glmer(WIWR_OCC ~ elev_stddev  :  elev_0pnt15_to_2pnt00_return_proportion    +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action=na.fail) 
+in_5<-lme4::glmer(WIWR_OCC ~ elev_cv  :  elev_0pnt15_to_2pnt00_return_proportion    +  (1|SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action=na.fail) 
 d_in_5<-MuMIn::dredge(in_5, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
 
-#found elev_maximum  * elev_stddev 
-#elev_maximum *  elev_0pnt15_to_2pnt00_return_proportion 
-# elev_maximum *  canopy_relief_ratio
+#none
+```
+
+
+###### nonlinear effects {-}
+```{r eval=FALSE}
+
+nl1<-lme4::glmer(WIWR_OCC ~ndvi_lag_0 + (1 | SS), data=d3, subset=SS_lidar_timelag==0, family = binomial,offset = WIWR_OFF, na.action = na.exclude, control=glmerControl(optCtrl=list(maxfun=1e9))) 
+
+ 
+nl2<-lme4::glmer(WIWR_OCC ~ poly(ndvi_lag_0,2) + (1 | SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,na.action = na.exclude, control=glmerControl(optCtrl=list(maxfun=1e9))) 
+
+nl3<-lme4::glmer(WIWR_OCC ~poly(ndvi_lag_0,3) + (1 | SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,na.action = na.exclude, control=glmerControl(optCtrl=list(maxfun=1e9))) 
+
+nl4<-lme4::glmer(WIWR_OCC ~poly(ndvi_lag_0,4) + (1 | SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,na.action = na.exclude, control=glmerControl(optCtrl=list(maxfun=1e9))) 
+
+print(AIC(nl1, nl2, nl3, nl4))
+
+
+#plot
+d5<-d3
+d5$ndvi_lag_0<-as.numeric(d5$ndvi_lag_0)
+pred<-effect_plot(nl3, pred=ndvi_lag_0, data = d5, plot.points=TRUE, interval=TRUE)
+plot(pred)
+
+
+
+nl1<-lme4::glmer(WIWR_OCC ~rast_forest_age + (1 | SS), data=d, subset=SS_lidar_timelag==0, family = binomial,offset = WIWR_OFF, na.action = na.exclude, control=glmerControl(optCtrl=list(maxfun=1e9))) 
+
+ 
+nl2<-lme4::glmer(WIWR_OCC ~ poly(rast_forest_age,2) + (1 | SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,na.action = na.exclude, control=glmerControl(optCtrl=list(maxfun=1e9))) 
+
+nl3<-lme4::glmer(WIWR_OCC ~poly(rast_forest_age,3) + (1 | SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,na.action = na.exclude, control=glmerControl(optCtrl=list(maxfun=1e9))) 
+
+nl4<-lme4::glmer(WIWR_OCC ~poly(rast_forest_age,4) + (1 | SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,na.action = na.exclude, control=glmerControl(optCtrl=list(maxfun=1e9))) 
+
+print(AIC(mp1, mp2, mp3, mp4))
+
 
 ```
+
+
 
 
 ### Build models {-}
 
 
 ``` {r eval=FALSE}
-# WIWR_can<-lme4::glmer(WIWR ~  canopy_relief_ratio +  elev_maximum + elev_stddev + total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action=na.fail) 
+WIWR_can<-lme4::glmer(WIWR_OCC ~ ndvi_lag_0 + canopy_relief_ratio+  elev_0pnt15_to_2pnt00_return_proportion+ elev_2pnt00_to_4pnt00_return_proportion + elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum + elev_p50 * elev_stddev +   percentage_first_returns_above_mean +  (1|SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.fail )  
+}
 
-WIWR_can<-lme4::glmer(WIWR_OCC ~ elev_0pnt15_to_2pnt00_return_proportion +elev_2pnt00_to_4pnt00_return_proportion+elev_kurtosis+elev_maximum * elev_stddev +elev_p50  +percentage_first_returns_above_2pnt00 +percentage_first_returns_above_mean  +total_all_returns +  (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.fail)
+AUCFun <- function(x) {
+  library(pROC)
+  pred<-predict(x, type="response", allow.new.levels=TRUE)
+  R2<-round(c(r.squaredGLMM(x)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
+  }
 
+WIWR_can_dredge<-MuMIn::dredge(WIWR_can, extra = c(AUC=function(x) AUCFun(x)))
 
-WIWR_can_dredge<-MuMIn::dredge(WIWR_can, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
+# WIWR_can_dredge<-MuMIn::dredge(WIWR_can, extra = c(r2=function(x) round(r.squaredGLMM(x)[1,c(1,2)],3)))
+
 save(WIWR_can_dredge, file="2_pipeline/store/models/WIWR_can_dredge.rData")
 
 #get a subset of top models
@@ -195,6 +229,7 @@ save(WIWR_can_dredge_sub, file="2_pipeline/store/models/WIWR_can_dredge_sub.rDAT
 #calculate variable importance weights
 # m_can_dredge_imp<-importance(m_can_dredge)
 WIWR_can_dredge_imp<-sw(WIWR_can_dredge)
+print(WIWR_can_dredge_imp)
 save(WIWR_can_dredge_imp, file="2_pipeline/store/models/WIWR_can_dredge_imp.rDATA")
 ```
 
@@ -222,18 +257,26 @@ knitr::kable(head(WIWR_can_dredge_imp
 
 ```{r eval=FALSE}
 
+# m1<-lme4::glmer(WIWR_OCC ~ ndvi_2009 + elev_2pnt00_to_4pnt00_return_proportion+  elev_cv+  elev_maximum + percentage_first_returns_above_2pnt00 +  (1|SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.fail ) 
 
-m1<-lme4::glmer(WIWR_OCC ~  elev_maximum * elev_stddev  + (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.fail)
-
-# m2<-lme4::glmer(WIWR_OCC ~  elev_maximum * elev_stddev + total_all_returns + elev_2pnt00_to_4pnt00_return_proportion + (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.fail)
-# 
-# m3<-lme4::glmer(WIWR_OCC ~  elev_maximum + elev_stddev + total_all_returns + elev_2pnt00_to_4pnt00_return_proportion + (1|SS), data=d, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.fail)
-
+m1<-lme4::glmer(WIWR_OCC ~ ndvi_lag_0 + canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean +  (1|SS), data=d3, subset=SS_lidar_timelag==0, family = binomial, offset = WIWR_OFF,  na.action = na.fail )  
 
 #compare with the null
 anova(m1, WIWR_m1)
 
+# Data: d3
+# Subset: SS_lidar_timelag == 0
+# Models:
+# WIWR_m1: WIWR_OCC ~ 1 + (1 | SS)
+# m1: WIWR_OCC ~ ndvi_lag_0 + canopy_relief_ratio + elev_4pnt00_to_6pnt00_return_proportion + elev_maximum + percentage_first_returns_above_mean + (1 | SS)
+#         npar    AIC    BIC  logLik deviance  Chisq Df Pr(>Chisq)    
+# WIWR_m1    2 660.97 669.79 -328.48   656.97                         
+# m1         7 604.03 634.89 -295.02   590.03 66.936  5  4.443e-13 ***
+# ---
+# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
 ```
+
 
 
 ######## Diagnostic Plots {-}
@@ -242,7 +285,6 @@ anova(m1, WIWR_m1)
 png("3_output/figures/diagnostic/glmm/WIWR_check_m1.png", width = 600, height = 800, units = "px", pointsize = 12)
 performance::check_model(m1)
 dev.off() 
-
 
 WIWR_dharma_resid_m1 <- simulateResiduals(fittedModel = m1, n = 500)
 
@@ -266,8 +308,6 @@ png("3_output/figures/diagnostic/glmm/WIWR_effects_m1.png", width = 1200, height
 plot(allEffects(m1))
 dev.off() 
 
-# summ(lm21)
-# export_summs(lm21)
 ```
 
 ```{r  echo=FALSE, out.width = '100%'}
@@ -297,7 +337,10 @@ Bootstrap model at different time lags using the `lme4::bootMer` function. We ra
 ```{r eval=FALSE}
 #stats function for AUC
 
-dd<-sdm_d%>%filter(SS_lidar_timelag==0)
+#dd<-d3%>%filter(SS_lidar_timelag==0)
+
+dd<-d3%>%filter(SS_lidar_timelag==0)
+
 
 # AUCFun <- function(x) {
 #   library(pROC)
@@ -307,21 +350,28 @@ dd<-sdm_d%>%filter(SS_lidar_timelag==0)
 
 
 #both AUC and R2
+# AUCFun <- function(fit) {
+#   library(pROC)
+#   pred<-predict(fit, type="response", allow.new.levels=TRUE)
+#   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
+#   }
+#   
 AUCFun <- function(fit) {
   library(pROC)
-  pred<-predict(fit, dd, type="response", allow.new.levels=TRUE)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
   }
-  
+
 
 #models
-md_0<-lme4::glmer(WIWR_OCC ~  elev_maximum * elev_stddev  + (1|SS), data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.fail, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)))
+md_0<-lme4::glmer(WIWR_OCC ~ ndvi_lag_0 +  canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.fail, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)))
 
 
-md_0_bootAUC<-bootMer(md_0, nsim = 500, seed = 101, FUN=AUCFun,
+md_0_bootAUC<-bootMer(md_0, nsim = 5, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
-        use.u = TRUE)
+        use.u = FALSE)
+
 
 # meanAUC<-mean(md_0_bootAUC$t)
 # std.err<-sd(md_0_bootAUC$t)/sqrt(length(md_0_bootAUC$t))
@@ -344,23 +394,23 @@ AUC_sd<-sd(md_0_bootAUC$t[,3])
 md_0_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
                       
-WIWR_predictMap_m_0<-raster::predict(scaled_stack, md_0, re.form=NA, type='response')
-writeRaster(WIWR_predictMap_m_0,file="3_output/maps/predictedDistributions/WIWR/WIWR_predictMap_m_00", format="GTiff", overwrite=T)
+#WIWR_predictMap_m_0<-raster::predict(scaled_stack, md_0, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_0,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_00", format="GTiff", overwrite=T)
 ##########################
-dd<-sdm_d%>%filter(SS_lidar_timelag==-1)
+dd<-d3%>%filter(SS_lidar_timelag==-1)
 
 AUCFun <- function(fit) {
   library(pROC)
-  pred<-predict(fit, dd, type="response", allow.new.levels=TRUE)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
   }
 
-md_1<-lme4::glmer(WIWR_OCC ~  elev_maximum * elev_stddev  + (1|SS), data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_1<-lme4::glmer(WIWR_OCC ~ ndvi_lag_1 +  canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_1_bootAUC<-bootMer(md_1, nsim = 500, seed = 101, FUN=AUCFun,
+md_1_bootAUC<-bootMer(md_1, nsim = 5, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
-        use.u = TRUE)
+        use.u = FALSE)
 
 R2m_mean<-mean(md_1_bootAUC$t[,1])
 R2m_stdErr<-sd(md_1_bootAUC$t[,1])/sqrt(length(md_1_bootAUC$t[,1]))
@@ -378,23 +428,23 @@ AUC_sd<-sd(md_1_bootAUC$t[,3])
 
 md_1_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-WIWR_predictMap_m_01<-raster::predict(scaled_stack, md_1, re.form=NA, type='response')
-writeRaster(WIWR_predictMap_m_01,file="3_output/maps/predictedDistributions/WIWR/WIWR_predictMap_m_01", format="GTiff", overwrite=T)
+#WIWR_predictMap_m_01<-raster::predict(scaled_stack, md_1, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_01,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_01", format="GTiff", overwrite=T)
 ##########################
-dd<-sdm_d%>%filter(SS_lidar_timelag==-2)
+dd<-d3%>%filter(SS_lidar_timelag==-2)
 
 AUCFun <- function(fit) {
   library(pROC)
-  pred<-predict(fit, dd, type="response", allow.new.levels=TRUE)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
   }
 
-md_2<-lme4::glmer(WIWR_OCC ~  elev_maximum * elev_stddev  + (1|SS), data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_2<-lme4::glmer(WIWR_OCC ~ ndvi_lag_2 +  canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_2_bootAUC<-bootMer(md_2, nsim = 500, seed = 101, FUN=AUCFun,
+md_2_bootAUC<-bootMer(md_2, nsim = 5, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
-        use.u = TRUE)
+        use.u = FALSE)
 
 R2m_mean<-mean(md_2_bootAUC$t[,1])
 R2m_stdErr<-sd(md_2_bootAUC$t[,1])/sqrt(length(md_2_bootAUC$t[,1]))
@@ -409,24 +459,24 @@ AUC_sd<-sd(md_2_bootAUC$t[,3])
 
 md_2_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-WIWR_predictMap_m_02<-raster::predict(scaled_stack, md_2, re.form=NA, type='response')
-writeRaster(WIWR_predictMap_m_02,file="3_output/maps/predictedDistributions/WIWR/WIWR_predictMap_m_02", format="GTiff", overwrite=T)
+#WIWR_predictMap_m_02<-raster::predict(scaled_stack, md_2, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_02,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_02", format="GTiff", overwrite=T)
 ##########################
-dd<-sdm_d%>%filter(SS_lidar_timelag==-3)
+dd<-d3%>%filter(SS_lidar_timelag==-3)
 
 
 AUCFun <- function(fit) {
   library(pROC)
-  pred<-predict(fit, dd, type="response", allow.new.levels=TRUE)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
 }
 
-md_3<-lme4::glmer(WIWR_OCC ~  elev_maximum * elev_stddev  + (1|SS), data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_3<-lme4::glmer(WIWR_OCC ~ ndvi_lag_3 +  canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_3_bootAUC<-bootMer(md_3, nsim = 500, seed = 101, FUN=AUCFun,
+md_3_bootAUC<-bootMer(md_3, nsim = 5, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
-        use.u = TRUE)
+        use.u = FALSE)
 
 R2m_mean<-mean(md_3_bootAUC$t[,1])
 R2m_stdErr<-sd(md_3_bootAUC$t[,1])/sqrt(length(md_3_bootAUC$t[,1]))
@@ -441,23 +491,23 @@ AUC_sd<-sd(md_3_bootAUC$t[,3])
 
 md_3_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-WIWR_predictMap_m_03<-raster::predict(scaled_stack, md_3, re.form=NA, type='response')
-writeRaster(WIWR_predictMap_m_03,file="3_output/maps/predictedDistributions/WIWR/WIWR_predictMap_m_03", format="GTiff", overwrite=T)
+#WIWR_predictMap_m_03<-raster::predict(scaled_stack, md_3, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_03,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_03", format="GTiff", overwrite=T)
 ##########################
-dd<-sdm_d%>%filter(SS_lidar_timelag==-4)
+dd<-d3%>%filter(SS_lidar_timelag==-4)
 
 AUCFun <- function(fit) {
   library(pROC)
-  pred<-predict(fit, dd, type="response", allow.new.levels=TRUE)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
 }
 
-md_4<-lme4::glmer(WIWR_OCC ~  elev_maximum * elev_stddev  + (1|SS), data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_4<-lme4::glmer(WIWR_OCC ~ ndvi_lag_4 +  canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_4_bootAUC<-bootMer(md_4, nsim = 500, seed = 101, FUN=AUCFun,
+md_4_bootAUC<-bootMer(md_4, nsim = 5, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
-        use.u = TRUE)
+        use.u = FALSE)
 
 R2m_mean<-mean(md_4_bootAUC$t[,1])
 R2m_stdErr<-sd(md_4_bootAUC$t[,1])/sqrt(length(md_4_bootAUC$t[,1]))
@@ -472,23 +522,23 @@ AUC_sd<-sd(md_4_bootAUC$t[,3])
 
 md_4_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-WIWR_predictMap_m_04<-raster::predict(scaled_stack, md_4, re.form=NA, type='response')
-writeRaster(WIWR_predictMap_m_04,file="3_output/maps/predictedDistributions/WIWR/WIWR_predictMap_m_04", format="GTiff", overwrite=T)
+#WIWR_predictMap_m_04<-raster::predict(scaled_stack, md_4, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_04,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_04", format="GTiff", overwrite=T)
 ##########################
-dd<-sdm_d%>%filter(SS_lidar_timelag==-5)
+dd<-d3%>%filter(SS_lidar_timelag==-5)
 
 AUCFun <- function(fit) {
   library(pROC)
-  pred<-predict(fit, dd, type="response", allow.new.levels=TRUE)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
   }
 
-md_5<-lme4::glmer(WIWR_OCC ~  elev_maximum * elev_stddev  + (1|SS), data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_5<-lme4::glmer(WIWR_OCC ~ ndvi_lag_5 +  canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_5_bootAUC<-bootMer(md_5, nsim = 500, seed = 101, FUN=AUCFun,
+md_5_bootAUC<-bootMer(md_5, nsim = 5, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
-        use.u = TRUE)
+        use.u = FALSE)
 
 R2m_mean<-mean(md_5_bootAUC$t[,1])
 R2m_stdErr<-sd(md_5_bootAUC$t[,1])/sqrt(length(md_5_bootAUC$t[,1]))
@@ -503,24 +553,24 @@ AUC_sd<-sd(md_5_bootAUC$t[,3])
 
 md_5_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-WIWR_predictMap_m_05<-raster::predict(scaled_stack, md_5, re.form=NA, type='response')
-writeRaster(WIWR_predictMap_m_05,file="3_output/maps/predictedDistributions/WIWR/WIWR_predictMap_m_05", format="GTiff", overwrite=T)
+#WIWR_predictMap_m_05<-raster::predict(scaled_stack, md_5, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_05,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_05", format="GTiff", overwrite=T)
 ##########################
-dd<-sdm_d%>%filter(SS_lidar_timelag==-6)
+dd<-d3%>%filter(SS_lidar_timelag==-6)
 
 
 AUCFun <- function(fit) {
   library(pROC)
-  pred<-predict(fit, dd, type="response", allow.new.levels=TRUE)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
   }
 
-md_6<-lme4::glmer(WIWR_OCC ~  elev_maximum * elev_stddev  + (1|SS), data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_6<-lme4::glmer(WIWR_OCC ~ ndvi_lag_6 +  canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_6_bootAUC<-bootMer(md_6, nsim = 500, seed = 101, FUN=AUCFun,
+md_6_bootAUC<-bootMer(md_6, nsim = 5, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
-        use.u = TRUE)
+        use.u = FALSE)
 
 R2m_mean<-mean(md_6_bootAUC$t[,1])
 R2m_stdErr<-sd(md_6_bootAUC$t[,1])/sqrt(length(md_6_bootAUC$t[,1]))
@@ -536,24 +586,24 @@ AUC_sd<-sd(md_6_bootAUC$t[,3])
 md_6_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
 
-WIWR_predictMap_m_06<-raster::predict(scaled_stack, md_6, re.form=NA, type='response')
-writeRaster(WIWR_predictMap_m_06,file="3_output/maps/predictedDistributions/WIWR/WIWR_predictMap_m_06", format="GTiff", overwrite=T)
+#WIWR_predictMap_m_06<-raster::predict(scaled_stack, md_6, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_06,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_06", format="GTiff", overwrite=T)
 
 ##########################
-dd<-sdm_d%>%filter(SS_lidar_timelag==-7)
+dd<-d3%>%filter(SS_lidar_timelag==-7)
 
 AUCFun <- function(fit) {
   library(pROC)
-  pred<-predict(fit, dd, type="response", allow.new.levels=TRUE)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
 }
 
-md_7<-lme4::glmer(WIWR_OCC ~  elev_maximum * elev_stddev  + (1|SS), data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_7<-lme4::glmer(WIWR_OCC ~ ndvi_lag_7 +  canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_7_bootAUC<-bootMer(md_7, nsim = 500, seed = 101, FUN=AUCFun,
+md_7_bootAUC<-bootMer(md_7, nsim = 5, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
-        use.u = TRUE)
+        use.u = FALSE)
 
 R2m_mean<-mean(md_7_bootAUC$t[,1])
 R2m_stdErr<-sd(md_7_bootAUC$t[,1])/sqrt(length(md_7_bootAUC$t[,1]))
@@ -568,23 +618,23 @@ AUC_sd<-sd(md_7_bootAUC$t[,3])
 
 md_7_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-WIWR_predictMap_m_07<-raster::predict(scaled_stack, md_7, re.form=NA, type='response')
-writeRaster(WIWR_predictMap_m_07,file="3_output/maps/predictedDistributions/WIWR/WIWR_predictMap_m_07", format="GTiff", overwrite=T)
+#WIWR_predictMap_m_07<-raster::predict(scaled_stack, md_7, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_07,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_07", format="GTiff", overwrite=T)
 ##########################
-dd<-sdm_d%>%filter(SS_lidar_timelag==-8)
+dd<-d3%>%filter(SS_lidar_timelag==-8)
 
 AUCFun <- function(fit) {
   library(pROC)
-  pred<-predict(fit, dd, type="response", allow.new.levels=TRUE)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
   }
 
-md_8<-lme4::glmer(WIWR_OCC ~  elev_maximum * elev_stddev  + (1|SS), data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_8<-lme4::glmer(WIWR_OCC ~ ndvi_lag_8 +  canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_8_bootAUC<-bootMer(md_8, nsim = 500, seed = 101, FUN=AUCFun,
+md_8_bootAUC<-bootMer(md_8, nsim = 5, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
-        use.u = TRUE)
+        use.u = FALSE)
 
 R2m_mean<-mean(md_8_bootAUC$t[,1])
 R2m_stdErr<-sd(md_8_bootAUC$t[,1])/sqrt(length(md_8_bootAUC$t[,1]))
@@ -599,23 +649,23 @@ AUC_sd<-sd(md_8_bootAUC$t[,3])
 
 md_8_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-WIWR_predictMap_m_08<-raster::predict(scaled_stack, md_8, re.form=NA, type='response')
-writeRaster(WIWR_predictMap_m_08,file="3_output/maps/predictedDistributions/WIWR/WIWR_predictMap_m_08", format="GTiff", overwrite=T)
+#WIWR_predictMap_m_08<-raster::predict(scaled_stack, md_8, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_08,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_08", format="GTiff", overwrite=T)
 ##########################
-dd<-sdm_d%>%filter(SS_lidar_timelag==-9)
+dd<-d3%>%filter(SS_lidar_timelag==-9)
 
 AUCFun <- function(fit) {
   library(pROC)
-  pred<-predict(fit, dd, type="response", allow.new.levels=TRUE)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
   }
 
-md_9<-lme4::glmer(WIWR_OCC ~  elev_maximum * elev_stddev  + (1|SS), data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_9<-lme4::glmer(WIWR_OCC ~ ndvi_lag_9 +  canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_9_bootAUC<-bootMer(md_9, nsim = 500, seed = 101, FUN=AUCFun,
+md_9_bootAUC<-bootMer(md_9, nsim = 5, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
-        use.u = TRUE)
+        use.u = FALSE)
 
 R2m_mean<-mean(md_9_bootAUC$t[,1])
 R2m_stdErr<-sd(md_9_bootAUC$t[,1])/sqrt(length(md_9_bootAUC$t[,1]))
@@ -631,24 +681,24 @@ AUC_sd<-sd(md_9_bootAUC$t[,3])
 md_9_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
 
-WIWR_predictMap_m_09<-raster::predict(scaled_stack, md_9, re.form=NA, type='response')
-writeRaster(WIWR_predictMap_m_09,file="3_output/maps/predictedDistributions/WIWR/WIWR_predictMap_m_09", format="GTiff", overwrite=T)
+#WIWR_predictMap_m_09<-raster::predict(scaled_stack, md_9, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_09,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_09", format="GTiff", overwrite=T)
 
 ##########################
-dd<-sdm_d%>%filter(SS_lidar_timelag==-10)
+dd<-d3%>%filter(SS_lidar_timelag==-10)
 
 AUCFun <- function(fit) {
   library(pROC)
-  pred<-predict(fit, dd, type="response", allow.new.levels=TRUE)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
   }
 
-md_10<-lme4::glmer(WIWR_OCC ~  elev_maximum * elev_stddev  + (1|SS), data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_10<-lme4::glmer(WIWR_OCC ~ ndvi_lag_10 +  canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_10_bootAUC<-bootMer(md_10, nsim = 500, seed = 101, FUN=AUCFun,
+md_10_bootAUC<-bootMer(md_10, nsim = 5, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
-        use.u = TRUE)
+        use.u = FALSE)
 
 R2m_mean<-mean(md_10_bootAUC$t[,1])
 R2m_stdErr<-sd(md_10_bootAUC$t[,1])/sqrt(length(md_10_bootAUC$t[,1]))
@@ -663,23 +713,23 @@ AUC_sd<-sd(md_10_bootAUC$t[,3])
 
 md_10_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-WIWR_predictMap_m_10<-raster::predict(scaled_stack, md_10, re.form=NA, type='response')
-writeRaster(WIWR_predictMap_m_10,file="3_output/maps/predictedDistributions/WIWR/WIWR_predictMap_m_10", format="GTiff", overwrite=T)
+#WIWR_predictMap_m_10<-raster::predict(scaled_stack, md_10, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_10,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_10", format="GTiff", overwrite=T)
 ##########################
-dd<-sdm_d%>%filter(SS_lidar_timelag==-11)
+dd<-d3%>%filter(SS_lidar_timelag==-11)
 
 AUCFun <- function(fit) {
   library(pROC)
-  pred<-predict(fit, dd, type="response", allow.new.levels=TRUE)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
   }
 
-md_11<-lme4::glmer(WIWR_OCC ~  elev_maximum * elev_stddev  + (1|SS), data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_11<-lme4::glmer(WIWR_OCC ~ ndvi_lag_11 +  canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_11_bootAUC<-bootMer(md_11, nsim = 500, seed = 101, FUN=AUCFun,
+md_11_bootAUC<-bootMer(md_11, nsim = 5, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
-        use.u = TRUE)
+        use.u = FALSE)
 
 R2m_mean<-mean(md_11_bootAUC$t[,1])
 R2m_stdErr<-sd(md_11_bootAUC$t[,1])/sqrt(length(md_11_bootAUC$t[,1]))
@@ -694,23 +744,23 @@ AUC_sd<-sd(md_11_bootAUC$t[,3])
 
 md_11_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-WIWR_predictMap_m_11<-raster::predict(scaled_stack, md_11, re.form=NA, type='response')
-writeRaster(WIWR_predictMap_m_11,file="3_output/maps/predictedDistributions/WIWR/WIWR_predictMap_m_11", format="GTiff", overwrite=T)
+#WIWR_predictMap_m_11<-raster::predict(scaled_stack, md_11, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_11,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_11", format="GTiff", overwrite=T)
 ##########################
-dd<-sdm_d%>%filter(SS_lidar_timelag==-12)
+dd<-d3%>%filter(SS_lidar_timelag==-12)
 
 AUCFun <- function(fit) {
   library(pROC)
-  pred<-predict(fit, dd, type="response", allow.new.levels=TRUE)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
   }
 
-md_12<-lme4::glmer(WIWR_OCC ~  elev_maximum * elev_stddev  + (1|SS), data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_12<-lme4::glmer(WIWR_OCC ~ ndvi_lag_12 +  canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_12_bootAUC<-bootMer(md_12, nsim = 500, seed = 101, FUN=AUCFun,
+md_12_bootAUC<-bootMer(md_12, nsim = 5, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
-        use.u = TRUE)
+        use.u = FALSE)
 
 R2m_mean<-mean(md_12_bootAUC$t[,1])
 R2m_stdErr<-sd(md_12_bootAUC$t[,1])/sqrt(length(md_12_bootAUC$t[,1]))
@@ -725,24 +775,24 @@ AUC_sd<-sd(md_12_bootAUC$t[,3])
 
 md_12_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-WIWR_predictMap_m_12<-raster::predict(scaled_stack, md_12, re.form=NA, type='response')
-writeRaster(WIWR_predictMap_m_12,file="3_output/maps/predictedDistributions/WIWR/WIWR_predictMap_m_12", format="GTiff", overwrite=T)
+#WIWR_predictMap_m_12<-raster::predict(scaled_stack, md_12, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_12,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_12", format="GTiff", overwrite=T)
 
 ##########################
-dd<-sdm_d%>%filter(SS_lidar_timelag==-13)
+dd<-d3%>%filter(SS_lidar_timelag==-13)
 
 AUCFun <- function(fit) {
   library(pROC)
-  pred<-predict(fit, dd, type="response", allow.new.levels=TRUE)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
   }
 
-md_13<-lme4::glmer(WIWR_OCC ~  elev_maximum * elev_stddev  + (1|SS), data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_13<-lme4::glmer(WIWR_OCC ~ ndvi_lag_13 +  canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_13_bootAUC<-bootMer(md_13, nsim = 500, seed = 101, FUN=AUCFun,
+md_13_bootAUC<-bootMer(md_13, nsim = 5, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
-        use.u = TRUE)
+        use.u = FALSE)
 
 R2m_mean<-mean(md_13_bootAUC$t[,1])
 R2m_stdErr<-sd(md_13_bootAUC$t[,1])/sqrt(length(md_13_bootAUC$t[,1]))
@@ -757,23 +807,23 @@ AUC_sd<-sd(md_13_bootAUC$t[,3])
 
 md_13_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-WIWR_predictMap_m_13<-raster::predict(scaled_stack, md_13, re.form=NA, type='response')
-writeRaster(WIWR_predictMap_m_13,file="3_output/maps/predictedDistributions/WIWR/WIWR_predictMap_m_13", format="GTiff", overwrite=T)
+#WIWR_predictMap_m_13<-raster::predict(scaled_stack, md_13, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_13,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_13", format="GTiff", overwrite=T)
 ##########################
-dd<-sdm_d%>%filter(SS_lidar_timelag==-14)
+dd<-d3%>%filter(SS_lidar_timelag==-14)
 
 AUCFun <- function(fit) {
   library(pROC)
-  pred<-predict(fit, dd, type="response", allow.new.levels=TRUE)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
   }
 
-md_14<-lme4::glmer(WIWR_OCC ~  elev_maximum * elev_stddev  + (1|SS), data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_14<-lme4::glmer(WIWR_OCC ~ ndvi_lag_14 +  canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_14_bootAUC<-bootMer(md_14, nsim = 500, seed = 101, FUN=AUCFun,
+md_14_bootAUC<-bootMer(md_14, nsim = 5, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
-        use.u = TRUE)
+        use.u = FALSE)
 
 R2m_mean<-mean(md_14_bootAUC$t[,1])
 R2m_stdErr<-sd(md_14_bootAUC$t[,1])/sqrt(length(md_14_bootAUC$t[,1]))
@@ -788,24 +838,24 @@ AUC_sd<-sd(md_14_bootAUC$t[,3])
 
 md_14_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-WIWR_predictMap_m_14<-raster::predict(scaled_stack, md_14, re.form=NA, type='response')
-writeRaster(WIWR_predictMap_m_14,file="3_output/maps/predictedDistributions/WIWR/WIWR_predictMap_m_14", format="GTiff", overwrite=T)
+#WIWR_predictMap_m_14<-raster::predict(scaled_stack, md_14, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_14,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_14", format="GTiff", overwrite=T)
 ##########################
-dd<-sdm_d%>%filter(SS_lidar_timelag==-15)
+dd<-d3%>%filter(SS_lidar_timelag==-15)
 set.seed(1)
 
 AUCFun <- function(fit) {
   library(pROC)
-  pred<-predict(fit, dd, type="response", allow.new.levels=TRUE)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
   }
 
-md_15<-lme4::glmer(WIWR_OCC ~  elev_maximum * elev_stddev  + (1|SS), data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+md_15<-lme4::glmer(WIWR_OCC ~ ndvi_lag_15 +  canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
 
-md_15_bootAUC<-bootMer(md_15, nsim = 500, seed = 101, FUN=AUCFun,
+md_15_bootAUC<-bootMer(md_15, nsim = 5, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
-        use.u = TRUE)
+        use.u = FALSE)
 
 R2m_mean<-mean(md_15_bootAUC$t[,1])
 R2m_stdErr<-sd(md_15_bootAUC$t[,1])/sqrt(length(md_15_bootAUC$t[,1]))
@@ -822,9 +872,755 @@ AUC_sd<-sd(md_15_bootAUC$t[,3])
 
 md_15_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
+#WIWR_predictMap_m_15<-raster::predict(scaled_stack, md_15, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_15,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_15", format="GTiff", overwrite=T)
 
-WIWR_predictMap_m_15<-raster::predict(scaled_stack, md_15, re.form=NA, type='response')
-writeRaster(WIWR_predictMap_m_15,file="3_output/maps/predictedDistributions/WIWR/WIWR_predictMap_m_15", format="GTiff", overwrite=T)
+#######################################
+
+# create an AUC dataframe
+lag<-c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)
+model<-c("md_0", "md_1", "md_2", "md_3", "md_4", "md_5", "md_6", "md_7", "md_8", "md_9", "md_10", "md_11", "md_12", "md_13", "md_14", "md_15")
+
+WIWR_models_AUC_4<-as.data.frame(rbind(md_0_meanAUC, md_1_meanAUC, md_2_meanAUC, md_3_meanAUC, md_4_meanAUC, md_5_meanAUC, md_6_meanAUC, md_7_meanAUC, md_8_meanAUC, md_9_meanAUC, md_10_meanAUC, md_11_meanAUC, md_12_meanAUC, md_13_meanAUC, md_14_meanAUC, md_15_meanAUC))%>%
+  cbind(lag)
+
+WIWR_AUC_lm_test<-lm(AUC_mean~ lag, data=WIWR_models_AUC_4)
+summary(WIWR_AUC_lm_test)
+
+WIWR_AUC_lm_test_2<-lm(AUC_mean~ lag, 2), data=WIWR_models_AUC_4)
+summary(WIWR_AUC_lm_test_2)
+
+
+
+WIWR_AUC_lm_test_3<-lm(log(AUC_mean) ~ lag, data=WIWR_models_AUC_4)
+summary(WIWR_AUC_lm_test_3)
+
+
+
+WIWR_AUC_lm_test_2<-nls(AUC_mean ~ exp(a + b * lag), data=WIWR_models_AUC_4, start = list(a = 0, b = 0))
+summary(WIWR_AUC_lm_test_2)
+
+WIWR_r2c_lm_test<-lm(R2c_mean~ lag, data=WIWR_models_AUC_4)
+summary(WIWR_r2c_lm_test)
+
+WIWR_r2m_lm_test<-lm(R2m_mean~ lag, data=WIWR_models_AUC_4)
+summary(WIWR_r2m_lm_test)
+
+
+
+
+## add weather data
+ERA5<-read.csv("0_data/external/CL_ERA5/ERA5_time_series.csv")
+
+
+Year<-c(2009, 2008, 2007, 2006, 2005, 2004, 2003, 2002, 2001, 2000, 1999, 1998, 1997, 1996, 1995, 1994)
+
+
+sw<-cbind(WIWR_models_AUC_4, Year)%>%
+  left_join(ERA5)
+
+x2<-x[c(-1),]%>%
+  arrange(desc(SS_lidar_timelag))
+  
+
+swx<-cbind(sw, x2)
+
+auc_0<-lm(AUC_mean~ lag, data=swx)
+auc_1<-lm(AUC_mean~ lag + total_precipitation, data=sw)
+auc_2<-lm(AUC_mean~ lag + maximum_2m_air_temperature, data=sw)
+auc_3<-lm(AUC_mean~ lag + maximum_2m_air_temperature + total_precipitation, data=sw)
+auc_3<-lm(AUC_mean~ lag + as.numeric(scale(WIWR_OCC)), data=swx)
+auc_4<-lm(AUC_mean~ WIWR_OCC, data=swx)
+
+summary(auc_3)
+anova(auc_0, auc_1, auc_2)
+
+
+
+AUC_cor_test <- cor.test(WIWR_models_AUC_4$AUC_mean, WIWR_models_AUC_4$lag, method = "pearson")
+ 
+
+
+all_md_0=as.data.frame(md_0_bootAUC$t[,3])
+all_md_1<-as.data.frame(md_1_bootAUC$t[,3])
+all_md_2<-as.data.frame(md_2_bootAUC$t[,3])
+all_md_3<-as.data.frame(md_3_bootAUC$t[,3])
+all_md_4<-as.data.frame(md_4_bootAUC$t[,3])
+all_md_5<-as.data.frame(md_5_bootAUC$t[,3])
+all_md_6<-as.data.frame(md_6_bootAUC$t[,3])
+all_md_7<-as.data.frame(md_7_bootAUC$t[,3])
+all_md_8<-as.data.frame(md_8_bootAUC$t[,3])
+all_md_9<-as.data.frame(md_9_bootAUC$t[,3])
+all_md_10<-as.data.frame(md_10_bootAUC$t[,3])
+all_md_11<-as.data.frame(md_11_bootAUC$t[,3])
+all_md_12<-as.data.frame(md_12_bootAUC$t[,3])
+all_md_13<-as.data.frame(md_13_bootAUC$t[,3])
+all_md_14<-as.data.frame(md_14_bootAUC$t[,3])
+all_md_15<-as.data.frame(md_15_bootAUC$t[,3])
+
+
+colnames(all_md_0)<-c('AUC')
+colnames(all_md_1)<-c('AUC')
+colnames(all_md_2)<-c('AUC')
+colnames(all_md_3)<-c('AUC')
+colnames(all_md_4)<-c('AUC')
+colnames(all_md_5)<-c('AUC')
+colnames(all_md_6)<-c('AUC')
+colnames(all_md_7)<-c('AUC')
+colnames(all_md_8)<-c('AUC')
+colnames(all_md_9)<-c('AUC')
+colnames(all_md_10)<-c('AUC')
+colnames(all_md_11)<-c('AUC')
+colnames(all_md_12)<-c('AUC')
+colnames(all_md_13)<-c('AUC')
+colnames(all_md_14)<-c('AUC')
+colnames(all_md_15)<-c('AUC')
+
+all_md_0$lag<-0
+all_md_1$lag<-1
+all_md_2$lag<-2
+all_md_3$lag<-3
+all_md_4$lag<-4
+all_md_5$lag<-5
+all_md_6$lag<-6
+all_md_7$lag<-7
+all_md_8$lag<-8
+all_md_9$lag<-9
+all_md_10$lag<-10
+all_md_11$lag<-11
+all_md_12$lag<-12
+all_md_13$lag<-13
+all_md_14$lag<-14
+all_md_15$lag<-15
+
+WIWR_auc_boot_all<-rbind(all_md_0, all_md_1, all_md_2, all_md_3, all_md_4, all_md_5, all_md_6, all_md_7, all_md_8, all_md_9, all_md_10, all_md_11, all_md_12, all_md_13, all_md_14, all_md_15)
+
+save(WIWR_auc_boot_all, file="2_pipeline/store/models/WIWR_auc_boot_all.rData")
+
+
+WIWR_auc_boot_all_lm<-lm(AUC~ lag, data=all_md_AUC)
+
+save(WIWR_auc_boot_all_lm, file="2_pipeline/store/models/WIWR_auc_boot_all_lm.rData")
+
+
+```
+
+
+#### no NDVI
+
+```{r eval=FALSE}
+#stats function for AUC
+
+#dd<-d3%>%filter(SS_lidar_timelag==0)
+
+dd<-d3%>%filter(SS_lidar_timelag==0)
+
+
+# AUCFun <- function(x) {
+#   library(pROC)
+#   pred<-predict(x, type="response", allow.new.levels=TRUE)
+#   AUC<-as.numeric(auc(d_0$WIWR_OCC, pred))
+# }
+
+
+#both AUC and R2
+# AUCFun <- function(fit) {
+#   library(pROC)
+#   pred<-predict(fit, type="response", allow.new.levels=TRUE)
+#   R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
+#   }
+#   
+AUCFun <- function(fit) {
+  library(pROC)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
+  R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
+  }
+
+
+#models
+md_0<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.fail, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)))
+
+
+md_0_bootAUC<-bootMer(md_0, nsim = 5, seed = 101, FUN=AUCFun,
+        type = "parametric",
+        verbose = TRUE, .progress = "none",
+        use.u = FALSE)
+
+
+# meanAUC<-mean(md_0_bootAUC$t)
+# std.err<-sd(md_0_bootAUC$t)/sqrt(length(md_0_bootAUC$t))
+# CI.lower <- meanAUC - std.err*1.96
+# CI.upper <- meanAUC + std.err*1.96
+# 
+# md_0_meanAUC<-data.frame(meanAUC, std.err, CI.lower, CI.upper)
+
+R2m_mean<-mean(md_0_bootAUC$t[,1])
+R2m_stdErr<-sd(md_0_bootAUC$t[,1])/sqrt(length(md_0_bootAUC$t[,1]))
+R2c_mean<-mean(md_0_bootAUC$t[,2])
+R2c_stdErr<-sd(md_0_bootAUC$t[,2])/sqrt(length(md_0_bootAUC$t[,2]))
+AUC_mean<-mean(md_0_bootAUC$t[,3])
+AUC_stdErr<-sd(md_0_bootAUC$t[,3])/sqrt(length(md_0_bootAUC$t[,3]))
+
+R2m_sd<-sd(md_0_bootAUC$t[,1])
+R2c_sd<-sd(md_0_bootAUC$t[,2])
+AUC_sd<-sd(md_0_bootAUC$t[,3])
+
+md_0_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
+
+                      
+#WIWR_predictMap_m_0<-raster::predict(scaled_stack, md_0, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_0,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_00", format="GTiff", overwrite=T)
+##########################
+dd<-d3%>%filter(SS_lidar_timelag==-1)
+
+AUCFun <- function(fit) {
+  library(pROC)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
+  R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
+  }
+
+md_1<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+ 
+md_1_bootAUC<-bootMer(md_1, nsim = 5, seed = 101, FUN=AUCFun,
+        type = "parametric",
+        verbose = TRUE, .progress = "none",
+        use.u = FALSE)
+
+R2m_mean<-mean(md_1_bootAUC$t[,1])
+R2m_stdErr<-sd(md_1_bootAUC$t[,1])/sqrt(length(md_1_bootAUC$t[,1]))
+R2m_sd<-sd(md_1_bootAUC$t[,1])
+R2c_mean<-mean(md_1_bootAUC$t[,2])
+R2c_stdErr<-sd(md_1_bootAUC$t[,2])/sqrt(length(md_1_bootAUC$t[,2]))
+R2c_sd<-sd(md_1_bootAUC$t[,2])
+AUC_mean<-mean(md_1_bootAUC$t[,3])
+AUC_stdErr<-sd(md_1_bootAUC$t[,3])/sqrt(length(md_1_bootAUC$t[,3]))
+AUC_sd<-sd(md_1_bootAUC$t[,3])
+
+R2m_sd<-sd(md_1_bootAUC$t[,1])
+R2c_sd<-sd(md_1_bootAUC$t[,2])
+AUC_sd<-sd(md_1_bootAUC$t[,3])
+
+md_1_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
+
+#WIWR_predictMap_m_01<-raster::predict(scaled_stack, md_1, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_01,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_01", format="GTiff", overwrite=T)
+##########################
+dd<-d3%>%filter(SS_lidar_timelag==-2)
+
+AUCFun <- function(fit) {
+  library(pROC)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
+  R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
+  }
+
+md_2<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+ 
+md_2_bootAUC<-bootMer(md_2, nsim = 5, seed = 101, FUN=AUCFun,
+        type = "parametric",
+        verbose = TRUE, .progress = "none",
+        use.u = FALSE)
+
+R2m_mean<-mean(md_2_bootAUC$t[,1])
+R2m_stdErr<-sd(md_2_bootAUC$t[,1])/sqrt(length(md_2_bootAUC$t[,1]))
+R2c_mean<-mean(md_2_bootAUC$t[,2])
+R2c_stdErr<-sd(md_2_bootAUC$t[,2])/sqrt(length(md_2_bootAUC$t[,2]))
+AUC_mean<-mean(md_2_bootAUC$t[,3])
+AUC_stdErr<-sd(md_2_bootAUC$t[,3])/sqrt(length(md_2_bootAUC$t[,3]))
+
+R2m_sd<-sd(md_2_bootAUC$t[,1])
+R2c_sd<-sd(md_2_bootAUC$t[,2])
+AUC_sd<-sd(md_2_bootAUC$t[,3])
+
+md_2_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
+
+#WIWR_predictMap_m_02<-raster::predict(scaled_stack, md_2, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_02,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_02", format="GTiff", overwrite=T)
+##########################
+dd<-d3%>%filter(SS_lidar_timelag==-3)
+
+
+AUCFun <- function(fit) {
+  library(pROC)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
+  R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
+}
+
+md_3<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+ 
+md_3_bootAUC<-bootMer(md_3, nsim = 5, seed = 101, FUN=AUCFun,
+        type = "parametric",
+        verbose = TRUE, .progress = "none",
+        use.u = FALSE)
+
+R2m_mean<-mean(md_3_bootAUC$t[,1])
+R2m_stdErr<-sd(md_3_bootAUC$t[,1])/sqrt(length(md_3_bootAUC$t[,1]))
+R2c_mean<-mean(md_3_bootAUC$t[,2])
+R2c_stdErr<-sd(md_3_bootAUC$t[,2])/sqrt(length(md_3_bootAUC$t[,2]))
+AUC_mean<-mean(md_3_bootAUC$t[,3])
+AUC_stdErr<-sd(md_3_bootAUC$t[,3])/sqrt(length(md_3_bootAUC$t[,3]))
+
+R2m_sd<-sd(md_3_bootAUC$t[,1])
+R2c_sd<-sd(md_3_bootAUC$t[,2])
+AUC_sd<-sd(md_3_bootAUC$t[,3])
+
+md_3_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
+
+#WIWR_predictMap_m_03<-raster::predict(scaled_stack, md_3, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_03,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_03", format="GTiff", overwrite=T)
+##########################
+dd<-d3%>%filter(SS_lidar_timelag==-4)
+
+AUCFun <- function(fit) {
+  library(pROC)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
+  R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
+}
+
+md_4<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+ 
+md_4_bootAUC<-bootMer(md_4, nsim = 5, seed = 101, FUN=AUCFun,
+        type = "parametric",
+        verbose = TRUE, .progress = "none",
+        use.u = FALSE)
+
+R2m_mean<-mean(md_4_bootAUC$t[,1])
+R2m_stdErr<-sd(md_4_bootAUC$t[,1])/sqrt(length(md_4_bootAUC$t[,1]))
+R2c_mean<-mean(md_4_bootAUC$t[,2])
+R2c_stdErr<-sd(md_4_bootAUC$t[,2])/sqrt(length(md_4_bootAUC$t[,2]))
+AUC_mean<-mean(md_4_bootAUC$t[,3])
+AUC_stdErr<-sd(md_4_bootAUC$t[,3])/sqrt(length(md_4_bootAUC$t[,3]))
+
+R2m_sd<-sd(md_4_bootAUC$t[,1])
+R2c_sd<-sd(md_4_bootAUC$t[,2])
+AUC_sd<-sd(md_4_bootAUC$t[,3])
+
+md_4_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
+
+#WIWR_predictMap_m_04<-raster::predict(scaled_stack, md_4, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_04,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_04", format="GTiff", overwrite=T)
+##########################
+dd<-d3%>%filter(SS_lidar_timelag==-5)
+
+AUCFun <- function(fit) {
+  library(pROC)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
+  R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
+  }
+
+md_5<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+ 
+md_5_bootAUC<-bootMer(md_5, nsim = 5, seed = 101, FUN=AUCFun,
+        type = "parametric",
+        verbose = TRUE, .progress = "none",
+        use.u = FALSE)
+
+R2m_mean<-mean(md_5_bootAUC$t[,1])
+R2m_stdErr<-sd(md_5_bootAUC$t[,1])/sqrt(length(md_5_bootAUC$t[,1]))
+R2c_mean<-mean(md_5_bootAUC$t[,2])
+R2c_stdErr<-sd(md_5_bootAUC$t[,2])/sqrt(length(md_5_bootAUC$t[,2]))
+AUC_mean<-mean(md_5_bootAUC$t[,3])
+AUC_stdErr<-sd(md_5_bootAUC$t[,3])/sqrt(length(md_5_bootAUC$t[,3]))
+
+R2m_sd<-sd(md_5_bootAUC$t[,1])
+R2c_sd<-sd(md_5_bootAUC$t[,2])
+AUC_sd<-sd(md_5_bootAUC$t[,3])
+
+md_5_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
+
+#WIWR_predictMap_m_05<-raster::predict(scaled_stack, md_5, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_05,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_05", format="GTiff", overwrite=T)
+##########################
+dd<-d3%>%filter(SS_lidar_timelag==-6)
+
+
+AUCFun <- function(fit) {
+  library(pROC)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
+  R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
+  }
+
+md_6<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+ 
+md_6_bootAUC<-bootMer(md_6, nsim = 5, seed = 101, FUN=AUCFun,
+        type = "parametric",
+        verbose = TRUE, .progress = "none",
+        use.u = FALSE)
+
+R2m_mean<-mean(md_6_bootAUC$t[,1])
+R2m_stdErr<-sd(md_6_bootAUC$t[,1])/sqrt(length(md_6_bootAUC$t[,1]))
+R2c_mean<-mean(md_6_bootAUC$t[,2])
+R2c_stdErr<-sd(md_6_bootAUC$t[,2])/sqrt(length(md_6_bootAUC$t[,2]))
+AUC_mean<-mean(md_6_bootAUC$t[,3])
+AUC_stdErr<-sd(md_6_bootAUC$t[,3])/sqrt(length(md_6_bootAUC$t[,3]))
+
+R2m_sd<-sd(md_6_bootAUC$t[,1])
+R2c_sd<-sd(md_6_bootAUC$t[,2])
+AUC_sd<-sd(md_6_bootAUC$t[,3])
+
+md_6_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
+
+
+#WIWR_predictMap_m_06<-raster::predict(scaled_stack, md_6, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_06,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_06", format="GTiff", overwrite=T)
+
+##########################
+dd<-d3%>%filter(SS_lidar_timelag==-7)
+
+AUCFun <- function(fit) {
+  library(pROC)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
+  R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
+}
+
+md_7<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+ 
+md_7_bootAUC<-bootMer(md_7, nsim = 5, seed = 101, FUN=AUCFun,
+        type = "parametric",
+        verbose = TRUE, .progress = "none",
+        use.u = FALSE)
+
+R2m_mean<-mean(md_7_bootAUC$t[,1])
+R2m_stdErr<-sd(md_7_bootAUC$t[,1])/sqrt(length(md_7_bootAUC$t[,1]))
+R2c_mean<-mean(md_7_bootAUC$t[,2])
+R2c_stdErr<-sd(md_7_bootAUC$t[,2])/sqrt(length(md_7_bootAUC$t[,2]))
+AUC_mean<-mean(md_7_bootAUC$t[,3])
+AUC_stdErr<-sd(md_7_bootAUC$t[,3])/sqrt(length(md_7_bootAUC$t[,3]))
+
+R2m_sd<-sd(md_7_bootAUC$t[,1])
+R2c_sd<-sd(md_7_bootAUC$t[,2])
+AUC_sd<-sd(md_7_bootAUC$t[,3])
+
+md_7_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
+
+#WIWR_predictMap_m_07<-raster::predict(scaled_stack, md_7, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_07,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_07", format="GTiff", overwrite=T)
+##########################
+dd<-d3%>%filter(SS_lidar_timelag==-8)
+
+AUCFun <- function(fit) {
+  library(pROC)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
+  R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
+  }
+
+md_8<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+ 
+md_8_bootAUC<-bootMer(md_8, nsim = 5, seed = 101, FUN=AUCFun,
+        type = "parametric",
+        verbose = TRUE, .progress = "none",
+        use.u = FALSE)
+
+R2m_mean<-mean(md_8_bootAUC$t[,1])
+R2m_stdErr<-sd(md_8_bootAUC$t[,1])/sqrt(length(md_8_bootAUC$t[,1]))
+R2c_mean<-mean(md_8_bootAUC$t[,2])
+R2c_stdErr<-sd(md_8_bootAUC$t[,2])/sqrt(length(md_8_bootAUC$t[,2]))
+AUC_mean<-mean(md_8_bootAUC$t[,3])
+AUC_stdErr<-sd(md_8_bootAUC$t[,3])/sqrt(length(md_8_bootAUC$t[,3]))
+
+R2m_sd<-sd(md_8_bootAUC$t[,1])
+R2c_sd<-sd(md_8_bootAUC$t[,2])
+AUC_sd<-sd(md_8_bootAUC$t[,3])
+
+md_8_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
+
+#WIWR_predictMap_m_08<-raster::predict(scaled_stack, md_8, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_08,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_08", format="GTiff", overwrite=T)
+##########################
+dd<-d3%>%filter(SS_lidar_timelag==-9)
+
+AUCFun <- function(fit) {
+  library(pROC)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
+  R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
+  }
+
+md_9<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+ 
+md_9_bootAUC<-bootMer(md_9, nsim = 5, seed = 101, FUN=AUCFun,
+        type = "parametric",
+        verbose = TRUE, .progress = "none",
+        use.u = FALSE)
+
+R2m_mean<-mean(md_9_bootAUC$t[,1])
+R2m_stdErr<-sd(md_9_bootAUC$t[,1])/sqrt(length(md_9_bootAUC$t[,1]))
+R2c_mean<-mean(md_9_bootAUC$t[,2])
+R2c_stdErr<-sd(md_9_bootAUC$t[,2])/sqrt(length(md_9_bootAUC$t[,2]))
+AUC_mean<-mean(md_9_bootAUC$t[,3])
+AUC_stdErr<-sd(md_9_bootAUC$t[,3])/sqrt(length(md_9_bootAUC$t[,3]))
+
+R2m_sd<-sd(md_9_bootAUC$t[,1])
+R2c_sd<-sd(md_9_bootAUC$t[,2])
+AUC_sd<-sd(md_9_bootAUC$t[,3])
+
+md_9_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
+
+
+#WIWR_predictMap_m_09<-raster::predict(scaled_stack, md_9, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_09,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_09", format="GTiff", overwrite=T)
+
+##########################
+dd<-d3%>%filter(SS_lidar_timelag==-10)
+
+AUCFun <- function(fit) {
+  library(pROC)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
+  R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
+  }
+
+md_10<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+ 
+md_10_bootAUC<-bootMer(md_10, nsim = 5, seed = 101, FUN=AUCFun,
+        type = "parametric",
+        verbose = TRUE, .progress = "none",
+        use.u = FALSE)
+
+R2m_mean<-mean(md_10_bootAUC$t[,1])
+R2m_stdErr<-sd(md_10_bootAUC$t[,1])/sqrt(length(md_10_bootAUC$t[,1]))
+R2c_mean<-mean(md_10_bootAUC$t[,2])
+R2c_stdErr<-sd(md_10_bootAUC$t[,2])/sqrt(length(md_10_bootAUC$t[,2]))
+AUC_mean<-mean(md_10_bootAUC$t[,3])
+AUC_stdErr<-sd(md_10_bootAUC$t[,3])/sqrt(length(md_10_bootAUC$t[,3]))
+
+R2m_sd<-sd(md_10_bootAUC$t[,1])
+R2c_sd<-sd(md_10_bootAUC$t[,2])
+AUC_sd<-sd(md_10_bootAUC$t[,3])
+
+md_10_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
+
+#WIWR_predictMap_m_10<-raster::predict(scaled_stack, md_10, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_10,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_10", format="GTiff", overwrite=T)
+##########################
+dd<-d3%>%filter(SS_lidar_timelag==-11)
+
+AUCFun <- function(fit) {
+  library(pROC)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
+  R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
+  }
+
+md_11<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+ 
+md_11_bootAUC<-bootMer(md_11, nsim = 5, seed = 101, FUN=AUCFun,
+        type = "parametric",
+        verbose = TRUE, .progress = "none",
+        use.u = FALSE)
+
+R2m_mean<-mean(md_11_bootAUC$t[,1])
+R2m_stdErr<-sd(md_11_bootAUC$t[,1])/sqrt(length(md_11_bootAUC$t[,1]))
+R2c_mean<-mean(md_11_bootAUC$t[,2])
+R2c_stdErr<-sd(md_11_bootAUC$t[,2])/sqrt(length(md_11_bootAUC$t[,2]))
+AUC_mean<-mean(md_11_bootAUC$t[,3])
+AUC_stdErr<-sd(md_11_bootAUC$t[,3])/sqrt(length(md_11_bootAUC$t[,3]))
+
+R2m_sd<-sd(md_11_bootAUC$t[,1])
+R2c_sd<-sd(md_11_bootAUC$t[,2])
+AUC_sd<-sd(md_11_bootAUC$t[,3])
+
+md_11_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
+
+#WIWR_predictMap_m_11<-raster::predict(scaled_stack, md_11, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_11,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_11", format="GTiff", overwrite=T)
+##########################
+dd<-d3%>%filter(SS_lidar_timelag==-12)
+
+AUCFun <- function(fit) {
+  library(pROC)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
+  R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
+  }
+
+md_12<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+ 
+md_12_bootAUC<-bootMer(md_12, nsim = 5, seed = 101, FUN=AUCFun,
+        type = "parametric",
+        verbose = TRUE, .progress = "none",
+        use.u = FALSE)
+
+R2m_mean<-mean(md_12_bootAUC$t[,1])
+R2m_stdErr<-sd(md_12_bootAUC$t[,1])/sqrt(length(md_12_bootAUC$t[,1]))
+R2c_mean<-mean(md_12_bootAUC$t[,2])
+R2c_stdErr<-sd(md_12_bootAUC$t[,2])/sqrt(length(md_12_bootAUC$t[,2]))
+AUC_mean<-mean(md_12_bootAUC$t[,3])
+AUC_stdErr<-sd(md_12_bootAUC$t[,3])/sqrt(length(md_12_bootAUC$t[,3]))
+
+R2m_sd<-sd(md_12_bootAUC$t[,1])
+R2c_sd<-sd(md_12_bootAUC$t[,2])
+AUC_sd<-sd(md_12_bootAUC$t[,3])
+
+md_12_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
+
+#WIWR_predictMap_m_12<-raster::predict(scaled_stack, md_12, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_12,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_12", format="GTiff", overwrite=T)
+
+##########################
+dd<-d3%>%filter(SS_lidar_timelag==-13)
+
+AUCFun <- function(fit) {
+  library(pROC)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
+  R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
+  }
+
+md_13<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+ 
+md_13_bootAUC<-bootMer(md_13, nsim = 5, seed = 101, FUN=AUCFun,
+        type = "parametric",
+        verbose = TRUE, .progress = "none",
+        use.u = FALSE)
+
+R2m_mean<-mean(md_13_bootAUC$t[,1])
+R2m_stdErr<-sd(md_13_bootAUC$t[,1])/sqrt(length(md_13_bootAUC$t[,1]))
+R2c_mean<-mean(md_13_bootAUC$t[,2])
+R2c_stdErr<-sd(md_13_bootAUC$t[,2])/sqrt(length(md_13_bootAUC$t[,2]))
+AUC_mean<-mean(md_13_bootAUC$t[,3])
+AUC_stdErr<-sd(md_13_bootAUC$t[,3])/sqrt(length(md_13_bootAUC$t[,3]))
+
+R2m_sd<-sd(md_13_bootAUC$t[,1])
+R2c_sd<-sd(md_13_bootAUC$t[,2])
+AUC_sd<-sd(md_13_bootAUC$t[,3])
+
+md_13_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
+
+#WIWR_predictMap_m_13<-raster::predict(scaled_stack, md_13, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_13,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_13", format="GTiff", overwrite=T)
+##########################
+dd<-d3%>%filter(SS_lidar_timelag==-14)
+
+AUCFun <- function(fit) {
+  library(pROC)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
+  R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
+  }
+
+md_14<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+ 
+md_14_bootAUC<-bootMer(md_14, nsim = 5, seed = 101, FUN=AUCFun,
+        type = "parametric",
+        verbose = TRUE, .progress = "none",
+        use.u = FALSE)
+
+R2m_mean<-mean(md_14_bootAUC$t[,1])
+R2m_stdErr<-sd(md_14_bootAUC$t[,1])/sqrt(length(md_14_bootAUC$t[,1]))
+R2c_mean<-mean(md_14_bootAUC$t[,2])
+R2c_stdErr<-sd(md_14_bootAUC$t[,2])/sqrt(length(md_14_bootAUC$t[,2]))
+AUC_mean<-mean(md_14_bootAUC$t[,3])
+AUC_stdErr<-sd(md_14_bootAUC$t[,3])/sqrt(length(md_14_bootAUC$t[,3]))
+
+R2m_sd<-sd(md_14_bootAUC$t[,1])
+R2c_sd<-sd(md_14_bootAUC$t[,2])
+AUC_sd<-sd(md_14_bootAUC$t[,3])
+
+md_14_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
+
+#WIWR_predictMap_m_14<-raster::predict(scaled_stack, md_14, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_14,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_14", format="GTiff", overwrite=T)
+##########################
+dd<-d3%>%filter(SS_lidar_timelag==-15)
+set.seed(1)
+
+AUCFun <- function(fit) {
+  library(pROC)
+  pred<-predict(fit, type="response", allow.new.levels=TRUE)
+  R2<-round(c(r.squaredGLMM(fit)[1,c(1,2)], AUC=as.numeric(auc(dd$WIWR_OCC, pred))),3)
+  }
+
+md_15<-lme4::glmer(WIWR_OCC ~ canopy_relief_ratio+ elev_4pnt00_to_6pnt00_return_proportion+ elev_maximum +   percentage_first_returns_above_mean+(1|SS) , data=dd, family = binomial, offset = WIWR_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
+
+md_15_bootAUC<-bootMer(md_15, nsim = 5, seed = 101, FUN=AUCFun,
+        type = "parametric",
+        verbose = TRUE, .progress = "none",
+        use.u = FALSE)
+
+R2m_mean<-mean(md_15_bootAUC$t[,1])
+R2m_stdErr<-sd(md_15_bootAUC$t[,1])/sqrt(length(md_15_bootAUC$t[,1]))
+R2c_mean<-mean(md_15_bootAUC$t[,2])
+R2c_stdErr<-sd(md_15_bootAUC$t[,2])/sqrt(length(md_15_bootAUC$t[,2]))
+AUC_mean<-mean(md_15_bootAUC$t[,3])
+AUC_stdErr<-sd(md_15_bootAUC$t[,3])/sqrt(length(md_15_bootAUC$t[,3]))
+R2m_range<-range(md_15_bootAUC$t[,1])
+
+
+R2m_sd<-sd(md_15_bootAUC$t[,1])
+R2c_sd<-sd(md_15_bootAUC$t[,2])
+AUC_sd<-sd(md_15_bootAUC$t[,3])
+
+md_15_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
+
+# create an AUC dataframe
+lag<-c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)
+model<-c("md_0", "md_1", "md_2", "md_3", "md_4", "md_5", "md_6", "md_7", "md_8", "md_9", "md_10", "md_11", "md_12", "md_13", "md_14", "md_15")
+
+WIWR_models_AUC_4<-as.data.frame(rbind(md_0_meanAUC, md_1_meanAUC, md_2_meanAUC, md_3_meanAUC, md_4_meanAUC, md_5_meanAUC, md_6_meanAUC, md_7_meanAUC, md_8_meanAUC, md_9_meanAUC, md_10_meanAUC, md_11_meanAUC, md_12_meanAUC, md_13_meanAUC, md_14_meanAUC, md_15_meanAUC))%>%
+  cbind(lag)
+
+WIWR_AUC_lm_test<-lm(AUC_mean~ lag, data=WIWR_models_AUC_4)
+summary(WIWR_AUC_lm_test)
+
+WIWR_AUC_lm_test_2<-lm(AUC_mean~ poly(lag, 2), data=WIWR_models_AUC_4)
+summary(WIWR_AUC_lm_test_2)
+
+
+
+WIWR_AUC_lm_test_3<-lm(log(AUC_mean) ~ lag, data=WIWR_models_AUC_4)
+summary(WIWR_AUC_lm_test_3)
+
+
+fit <- nls(AUC_mean ~ SSasymp(t, lag, log_alpha), data = WIWR_models_AUC_4)
+fit
+
+WIWR_AUC_lm_test_2<-nls(AUC_mean ~ exp(a + b * lag), data=WIWR_models_AUC_4, start = list(a = 0, b = 0))
+summary(WIWR_AUC_lm_test_2)
+
+WIWR_r2c_lm_test<-lm(R2c_mean~ lag, data=WIWR_models_AUC_4)
+summary(WIWR_r2c_lm_test)
+
+WIWR_r2m_lm_test<-lm(R2m_mean~ lag, data=WIWR_models_AUC_4)
+summary(WIWR_r2m_lm_test)
+
+
+
+
+## add weather data
+ERA5<-read.csv("0_data/external/CL_ERA5/ERA5_time_series.csv")
+
+
+Year<-c(2009, 2008, 2007, 2006, 2005, 2004, 2003, 2002, 2001, 2000, 1999, 1998, 1997, 1996, 1995, 1994)
+
+
+sw<-cbind(WIWR_models_AUC_4, Year)%>%
+  left_join(ERA5)
+
+x2<-x[c(-1),]%>%
+  arrange(desc(SS_lidar_timelag))
+  
+
+swx<-cbind(sw, x2)
+
+auc_0<-lm(AUC_mean~ lag, data=swx)
+auc_1<-lm(AUC_mean~ lag + total_precipitation, data=sw)
+auc_2<-lm(AUC_mean~ lag + maximum_2m_air_temperature, data=sw)
+auc_3<-lm(AUC_mean~ lag + maximum_2m_air_temperature + total_precipitation, data=sw)
+auc_3<-lm(AUC_mean~ lag + as.numeric(scale(WIWR_OCC)), data=swx)
+auc_4<-lm(AUC_mean~ WIWR_OCC, data=swx)
+
+summary(auc_3)
+anova(auc_0, auc_1, auc_2)
+
+
+
+AUC_cor_test <- cor.test(WIWR_models_AUC_4$AUC_mean, WIWR_models_AUC_4$lag, method = "pearson")
+ 
+
+md_15_t<-as.data.frame(md_15_bootAUC$t[,3])
+md_15_t$lag<-15
+
+#WIWR_predictMap_m_15<-raster::predict(scaled_stack, md_15, re.form=NA, type='response')
+#writeRaster(#WIWR_predictMap_m_15,file="3_output/maps/predictedDistributions/WIWR/#WIWR_predictMap_m_15", format="GTiff", overwrite=T)
+
+```
+
+
+
 
 
 ####################################################################
@@ -840,6 +1636,34 @@ model<-c("md_0", "md_1", "md_2", "md_3", "md_4", "md_5", "md_6", "md_7", "md_8",
 
 WIWR_models_AUC_4<-as.data.frame(rbind(md_0_meanAUC, md_1_meanAUC, md_2_meanAUC, md_3_meanAUC, md_4_meanAUC, md_5_meanAUC, md_6_meanAUC, md_7_meanAUC, md_8_meanAUC, md_9_meanAUC, md_10_meanAUC, md_11_meanAUC, md_12_meanAUC, md_13_meanAUC, md_14_meanAUC, md_15_meanAUC))%>%
   cbind(lag)
+
+WIWR_AUC_lm_test<-lm(AUC_mean~ lag, data=WIWR_models_AUC_4)
+summary(WIWR_AUC_lm_test)
+
+WIWR_r2c_lm_test<-lm(R2c_mean~ lag, data=WIWR_models_AUC_4)
+summary(WIWR_r2c_lm_test)
+
+WIWR_r2m_lm_test<-lm(R2m_mean~ lag, data=WIWR_models_AUC_4)
+summary(WIWR_r2m_lm_test)
+
+ggplot(WIWR_models_AUC_4, aes(x=lag, y=AUC_mean)) + 
+    geom_errorbar(aes(ymin=AUC_mean-1.96*AUC_stdErr, ymax=AUC_mean+ 1.96*AUC_stdErr, width=.2))+
+    geom_point(size=1) + 
+    geom_segment(x=0, xend=15, y=.7, yend=.7, col="red", linetype="longdash")+
+    geom_smooth(method = lm)+
+    theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+          panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+          axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          legend.position="none")
+
+
 
 save(WIWR_models_AUC_4, file="2_pipeline/store/models/WIWR_models_AUC_4.rData")
 
@@ -871,499 +1695,4 @@ knitr::kable(WIWR_models_AUC_4) %>%
 ```
 
 
-### Compare timelag models {-}
-
-#### Compare lag stats {-}
-
-```{r eval=FALSE}
-load("2_pipeline/store/models/WIWR_models_AUC_4.rData")
-
-WIWR_models_AUC_4<-WIWR_models_AUC_4%>%
-  rename(LiDAR_timelag=lag)
-
-ggplot(WIWR_models_AUC_4, aes(x=LiDAR_timelag, y=AUC_mean)) + 
-  geom_errorbar(aes(ymin=AUC_mean-1.96*AUC_stdErr, ymax=AUC_mean+ 1.96*AUC_stdErr, width=.2))+
-  geom_point(size=1) + 
-  geom_segment(x=0, xend=15, y=.7, yend=.7, col="red", linetype="longdash")+
-  geom_smooth(method = lm)+
-  theme(panel.background = element_blank(),
-          text = element_text(size=10),
-          axis.ticks=element_blank(),
-          #strip.background =element_rect(fill="white"),
-         panel.border = element_rect(color = "black", fill = NA, size = .2),
-          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
-         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
-          #panel.background = element_rect(fill="white"),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          legend.position="none")
- ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_AUC_lm_test.png"), width =6, height=5)
-  
-WIWR_AUC_lm_test<-lm(AUC_mean~ LiDAR_timelag, data=WIWR_models_AUC_4)
-save(WIWR_AUC_lm_test,file="2_pipeline/store/models/WIWR_AUC_lm_test.rData")
-
-AUC_cor_test <- cor.test(WIWR_models_AUC_4$AUC_mean, WIWR_models_AUC_4$LiDAR_timelag, method = "pearson")
-
-#########################
-
-ggplot(WIWR_models_AUC_4, aes(x=LiDAR_timelag, y=R2m_mean)) + 
-  geom_errorbar(aes(ymin=R2m_mean- 1.96* R2m_stdErr, ymax=R2m_mean+ 1.96* R2m_stdErr, width=.2))+
-  geom_point() + 
-  geom_segment(x=0, xend=15, y=.7, yend=.7, col="red", linetype="longdash")+
-  geom_smooth(method = lm) +
-  theme(panel.background = element_blank(),
-          text = element_text(size=10),
-          axis.ticks=element_blank(),
-          #strip.background =element_rect(fill="white"),
-         panel.border = element_rect(color = "black", fill = NA, size = .2),
-          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
-         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
-          #panel.background = element_rect(fill="white"),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          legend.position="none")
- ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_R2m_test.png"), width =6, height=5)
-  
-WIWR_R2m_test<-lm(R2m_mean~ LiDAR_timelag, data=WIWR_models_AUC_4)
-save(WIWR_R2m_test,file="2_pipeline/store/models/WIWR_R2m_test.rData")
-
-########################
-ggplot(WIWR_models_AUC_4, aes(x=LiDAR_timelag, y=R2c_mean)) + 
-  geom_errorbar(aes(ymin=R2c_mean- 1.96* R2c_stdErr, ymax=R2c_mean+ 1.96* R2c_stdErr, width=.2))+
-  geom_point() + 
-  geom_segment(x=0, xend=15, y=.7, yend=.7, col="red", linetype="longdash")+
-  geom_smooth(method = lm)+
-  theme(panel.background = element_blank(),
-          text = element_text(size=10),
-          axis.ticks=element_blank(),
-          #strip.background =element_rect(fill="white"),
-         panel.border = element_rect(color = "black", fill = NA, size = .2),
-          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
-         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
-          #panel.background = element_rect(fill="white"),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          legend.position="none")
- ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_R2c_test.png"), width =6, height=5)
-  
-WIWR_R2c_test<-lm(R2c_mean~ LiDAR_timelag, data=WIWR_models_AUC_4)
-save(WIWR_R2c_test,file="2_pipeline/store/models/WIWR_R2c_test.rData")
-
-```
-
-AUC ~ timelag
-
-```{r  echo=FALSE, out.width = '100%', fig.cap="WIWR AUC time lag"}
-knitr::include_graphics("3_output/figures/timelag_stats/WIWR_AUC_lm_test.png", dpi = 300)
-```
-
-```{r echo=FALSE}
-load("2_pipeline/store/models/WIWR_AUC_lm_test.rData")
-print(summary(WIWR_AUC_lm_test))
-```
-
-R2m ~ timelag
-
-```{r  echo=FALSE, out.width = '100%', fig.cap="WIWR R2m time lag"}
-knitr::include_graphics("3_output/figures/timelag_stats/WIWR_R2m_test.png", dpi = 300)
-```
-
-```{r echo=FALSE}
-load("2_pipeline/store/models/WIWR_R2m_test.rData")
-print(summary(WIWR_R2m_test))
-```
-
-R2c ~ timelag
-
-```{r  echo=FALSE, out.width = '100%', fig.cap="WIWR R2c time lag"}
-knitr::include_graphics("3_output/figures/timelag_stats/WIWR_R2c_test.png", dpi = 300)
-```
-
-```{r echo=FALSE}
-load("2_pipeline/store/models/WIWR_R2c_test.rData")
-print(summary(WIWR_R2c_test))
-```
-
-
-
-#### Compare predictive maps {-}
-
-##### Reclassify predictive maps {-}
-```{r eval=FALSE}
-# Load stack of predictive rasters
-WIWR_stack<-stackOpen("3_output/maps/predictedDistributions/WIWR/WIWR_stack.stk")
-
-# reclassify to a binary above and below 50% occupancy probability
-
-reclass_df <- c(0, .5, 0,
-              .5, 1, 1)
-
-reclass_m <- matrix(reclass_df,
-                ncol = 3,
-                byrow = TRUE)
-
-WIWR_stack_reclass <- reclassify(WIWR_stack,
-                     reclass_m)
-
-# save reclass raster brick (save as .grd to preserve layer names)
-writeRaster(WIWR_stack_reclass, "3_output/maps/predictedDistributions/WIWR/WIWR_stack_reclass.grd", overwrite=TRUE, format="raster") 
-
-# load reclass rasters as a brick
-WIWR_stack_reclass<-brick("3_output/maps/predictedDistributions/WIWR/WIWR_stack_reclass.grd")
-
-```
-
-##### Pearson correlation of predictive maps {-}
-
-```{r eval=FALSE}
-WIWR_stack<-stackOpen("3_output/maps/predictedDistributions/WIWR/WIWR_stack.stk")
-
-predCor_0_01<-rasterCorrelation(WIWR_stack$WIWR_predictMap_m_00, WIWR_stack$WIWR_predictMap_m_01, s = 3, type = "pearson")
-predCor_0_02<-rasterCorrelation(WIWR_stack$WIWR_predictMap_m_00, WIWR_stack$WIWR_predictMap_m_02, s = 3, type = "pearson")
-predCor_0_03<-rasterCorrelation(WIWR_stack$WIWR_predictMap_m_00, WIWR_stack$WIWR_predictMap_m_03, s = 3, type = "pearson")
-predCor_0_04<-rasterCorrelation(WIWR_stack$WIWR_predictMap_m_00, WIWR_stack$WIWR_predictMap_m_04, s = 3, type = "pearson")
-predCor_0_05<-rasterCorrelation(WIWR_stack$WIWR_predictMap_m_00, WIWR_stack$WIWR_predictMap_m_05, s = 3, type = "pearson")
-predCor_0_06<-rasterCorrelation(WIWR_stack$WIWR_predictMap_m_00, WIWR_stack$WIWR_predictMap_m_06, s = 3, type = "pearson")
-predCor_0_07<-rasterCorrelation(WIWR_stack$WIWR_predictMap_m_00, WIWR_stack$WIWR_predictMap_m_07, s = 3, type = "pearson")
-predCor_0_08<-rasterCorrelation(WIWR_stack$WIWR_predictMap_m_00, WIWR_stack$WIWR_predictMap_m_08, s = 3, type = "pearson")
-predCor_0_09<-rasterCorrelation(WIWR_stack$WIWR_predictMap_m_00, WIWR_stack$WIWR_predictMap_m_09, s = 3, type = "pearson")
-predCor_0_10<-rasterCorrelation(WIWR_stack$WIWR_predictMap_m_00, WIWR_stack$WIWR_predictMap_m_10, s = 3, type = "pearson")
-predCor_0_11<-rasterCorrelation(WIWR_stack$WIWR_predictMap_m_00, WIWR_stack$WIWR_predictMap_m_11, s = 3, type = "pearson")
-predCor_0_12<-rasterCorrelation(WIWR_stack$WIWR_predictMap_m_00, WIWR_stack$WIWR_predictMap_m_12, s = 3, type = "pearson")
-predCor_0_13<-rasterCorrelation(WIWR_stack$WIWR_predictMap_m_00, WIWR_stack$WIWR_predictMap_m_13, s = 3, type = "pearson")
-predCor_0_14<-rasterCorrelation(WIWR_stack$WIWR_predictMap_m_00, WIWR_stack$WIWR_predictMap_m_14, s = 3, type = "pearson")
-predCor_0_15<-rasterCorrelation(WIWR_stack$WIWR_predictMap_m_00, WIWR_stack$WIWR_predictMap_m_15, s = 3, type = "pearson")
-
-
-writeRaster(predCor_0_01, file="3_output/maps/predictedDistributions/WIWR/predCor/predCor_0_01.tif", overwrite=TRUE)
-writeRaster(predCor_0_02, file="3_output/maps/predictedDistributions/WIWR/predCor/predCor_0_02.tif", overwrite=TRUE)
-writeRaster(predCor_0_03, file="3_output/maps/predictedDistributions/WIWR/predCor/predCor_0_03.tif", overwrite=TRUE)
-writeRaster(predCor_0_04, file="3_output/maps/predictedDistributions/WIWR/predCor/predCor_0_04.tif", overwrite=TRUE)
-writeRaster(predCor_0_05, file="3_output/maps/predictedDistributions/WIWR/predCor/predCor_0_05.tif", overwrite=TRUE)
-writeRaster(predCor_0_06, file="3_output/maps/predictedDistributions/WIWR/predCor/predCor_0_06.tif", overwrite=TRUE)
-writeRaster(predCor_0_07, file="3_output/maps/predictedDistributions/WIWR/predCor/predCor_0_07.tif", overwrite=TRUE)
-writeRaster(predCor_0_08, file="3_output/maps/predictedDistributions/WIWR/predCor/predCor_0_08.tif", overwrite=TRUE)
-writeRaster(predCor_0_09, file="3_output/maps/predictedDistributions/WIWR/predCor/predCor_0_09.tif", overwrite=TRUE)
-writeRaster(predCor_0_10, file="3_output/maps/predictedDistributions/WIWR/predCor/predCor_0_10.tif", overwrite=TRUE)
-writeRaster(predCor_0_11, file="3_output/maps/predictedDistributions/WIWR/predCor/predCor_0_11.tif", overwrite=TRUE)
-writeRaster(predCor_0_12, file="3_output/maps/predictedDistributions/WIWR/predCor/predCor_0_12.tif", overwrite=TRUE)
-writeRaster(predCor_0_13, file="3_output/maps/predictedDistributions/WIWR/predCor/predCor_0_13.tif", overwrite=TRUE)
-writeRaster(predCor_0_14, file="3_output/maps/predictedDistributions/WIWR/predCor/predCor_0_14.tif", overwrite=TRUE)
-writeRaster(predCor_0_15, file="3_output/maps/predictedDistributions/WIWR/predCor/predCor_0_15.tif", overwrite=TRUE)
-
-
-
-map_list<-list.files(path='3_output/maps/predictedDistributions/WIWR/predCor', pattern = "*.tif$", full.names = TRUE)
-WIWR_predCor_stack<-raster::stack(map_list)
-
-#save stack as r object
-stackSave(WIWR_predCor_stack,file="3_output/maps/predictedDistributions/WIWR/predCor/WIWR_predCor_stack.stk")
-
-```
-
-
-
-
-
-##### Pearson correlation ~ forest age {-}
-
-```{r eval=FALSE}
-library(ggeffects)
-
-WIWR_predCor_stack<-stackOpen("3_output/maps/predictedDistributions/WIWR/predCor/WIWR_predCor_stack.stk")
-
-lidar_forestAge_raster<-raster("0_data/manual/spatialCov/CASFRI/lidar_forestAge_raster.tif")
-
-lidar_forestAge_raster_pr<-projectRaster(lidar_forestAge_raster, crs=WIWR_predCor_stack)
-
-#study area
-load("0_data/manual/bird/studyarea_big.rData")
- 
-pc<- raster::crop(WIWR_predCor_stack, as_Spatial(st_geometry(c_bb))) 
-fa<- raster::crop(lidar_forestAge_raster_pr, as_Spatial(st_geometry(c_bb))) 
-
-#resample so they have the same resolution
-pc_rs<-resample(pc, fa)
-
-# Stack covariates
-fa_co <- stack(pc_rs, fa)
-
-WIWR_fa_co_df<-as.data.frame(na.omit(values(fa_co)))%>%
-  dplyr::rename(forest_age=lidar_forestAge_raster)
-          
-save(WIWR_fa_co_df, file="2_pipeline/store/WIWR_fa_co_df.rData")
-
-load("2_pipeline/store/WIWR_fa_co_df.rData")
-
-
-#######################################################################################
-############### Plot Effect ######################################################
-#######################################################################################
-lm_fa_00to01 <- lm(predCor_0_01 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to01, terms="forest_age [all]", data=WIWR_fa_co_df)
-png("3_output/figures/timelag_stats/WIWR_lm_fa_00to01.png", width = 800, height = 600, units = "px", pointsize = 12)
-plot(t) + labs(
-    x = "Forest age when LiDAR was acquired.", 
-    y = "Pearson correlation (r)",
-    title=""
-  )
-dev.off()
-#######################################################################################
-lm_fa_00to02 <- lm(predCor_0_02 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to02, terms="forest_age [all]", data=WIWR_fa_co_df)
-png("3_output/figures/timelag_stats/WIWR_lm_fa_00to02.png", width = 800, height = 600, units = "px", pointsize = 12)
-plot(t) + labs(
-    x = "Forest age when LiDAR was acquired.", 
-    y = "Pearson correlation (r)",
-    title=""
-  )
-dev.off()
-#######################################################################################
-lm_fa_00to03 <- lm(predCor_0_03 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to03, terms="forest_age [all]", data=WIWR_fa_co_df)
-png("3_output/figures/timelag_stats/WIWR_lm_fa_00to03.png", width = 800, height = 600, units = "px", pointsize = 12)
-plot(t) + labs(
-    x = "Forest age when LiDAR was acquired.", 
-    y = "Pearson correlation (r)",
-    title=""
-  )
-dev.off()
-#######################################################################################
-lm_fa_00to04 <- lm(predCor_0_04 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to04, terms="forest_age [all]", data=WIWR_fa_co_df)
-png("3_output/figures/timelag_stats/WIWR_lm_fa_00to04.png", width = 800, height = 600, units = "px", pointsize = 12)
-plot(t) + labs(
-    x = "Forest age when LiDAR was acquired.", 
-    y = "Pearson correlation (r)",
-    title=""
-  )
-dev.off()
-#######################################################################################
-lm_fa_00to05 <- lm(predCor_0_05 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to05, terms="forest_age [all]", data=WIWR_fa_co_df)
-png("3_output/figures/timelag_stats/WIWR_lm_fa_00to05.png", width = 800, height = 600, units = "px", pointsize = 12)
-plot(t) + labs(
-    x = "Forest age when LiDAR was acquired.", 
-    y = "Pearson correlation (r)",
-    title=""
-  )
-dev.off()
-#######################################################################################
-lm_fa_00to06 <- lm(predCor_0_06 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to06, terms="forest_age [all]", data=WIWR_fa_co_df)
-png("3_output/figures/timelag_stats/WIWR_lm_fa_00to06.png", width = 800, height = 600, units = "px", pointsize = 12)
-plot(t) + labs(
-    x = "Forest age when LiDAR was acquired.", 
-    y = "Pearson correlation (r)",
-    title=""
-  )
-dev.off()
-#######################################################################################
-lm_fa_00to07 <- lm(predCor_0_07 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to07, terms="forest_age [all]", data=WIWR_fa_co_df)
-png("3_output/figures/timelag_stats/WIWR_lm_fa_00to07.png", width = 800, height = 600, units = "px", pointsize = 12)
-plot(t) + labs(
-    x = "Forest age when LiDAR was acquired.", 
-    y = "Pearson correlation (r)",
-    title=""
-  )
-dev.off()
-#######################################################################################
-lm_fa_00to08 <- lm(predCor_0_08 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to08, terms="forest_age [all]", data=WIWR_fa_co_df)
-png("3_output/figures/timelag_stats/WIWR_lm_fa_00to08.png", width = 800, height = 600, units = "px", pointsize = 12)
-plot(t) + labs(
-    x = "Forest age when LiDAR was acquired.", 
-    y = "Pearson correlation (r)",
-    title=""
-  )
-dev.off()
-#######################################################################################
-lm_fa_00to09 <- lm(predCor_0_09 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to09, terms="forest_age [all]", data=WIWR_fa_co_df)
-png("3_output/figures/timelag_stats/WIWR_lm_fa_00to09.png", width = 800, height = 600, units = "px", pointsize = 12)
-plot(t) + labs(
-    x = "Forest age when LiDAR was acquired.", 
-    y = "Pearson correlation (r)",
-    title=""
-  )
-dev.off()
-#######################################################################################
-lm_fa_00to10 <- lm(predCor_0_10 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to10, terms="forest_age [all]", data=WIWR_fa_co_df)
-png("3_output/figures/timelag_stats/WIWR_lm_fa_00to10.png", width = 800, height = 600, units = "px", pointsize = 12)
-plot(t) + labs(
-    x = "Forest age when LiDAR was acquired.", 
-    y = "Pearson correlation (r)",
-    title=""
-  )
-dev.off()
-#######################################################################################
-lm_fa_00to11 <- lm(predCor_0_11 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to11, terms="forest_age [all]", data=WIWR_fa_co_df)
-png("3_output/figures/timelag_stats/WIWR_lm_fa_00to11.png", width = 800, height = 600, units = "px", pointsize = 12)
-plot(t) + labs(
-    x = "Forest age when LiDAR was acquired.", 
-    y = "Pearson correlation (r)",
-    title=""
-  )
-dev.off()
-#######################################################################################
-lm_fa_00to12 <- lm(predCor_0_12 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to12, terms="forest_age [all]", data=WIWR_fa_co_df)
-png("3_output/figures/timelag_stats/WIWR_lm_fa_00to12.png", width = 800, height = 600, units = "px", pointsize = 12)
-plot(t) + labs(
-    x = "Forest age when LiDAR was acquired.", 
-    y = "Pearson correlation (r)",
-    title=""
-  )
-dev.off()
-#######################################################################################
-lm_fa_00to13 <- lm(predCor_0_13 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to13, terms="forest_age [all]", data=WIWR_fa_co_df)
-png("3_output/figures/timelag_stats/WIWR_lm_fa_00to13.png", width = 800, height = 600, units = "px", pointsize = 12)
-plot(t) + labs(
-    x = "Forest age when LiDAR was acquired.", 
-    y = "Pearson correlation (r)",
-    title=""
-  )
-dev.off()
-#######################################################################################
-lm_fa_00to14 <- lm(predCor_0_14 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to14, terms="forest_age [all]", data=WIWR_fa_co_df)
-png("3_output/figures/timelag_stats/WIWR_lm_fa_00to14.png", width = 800, height = 600, units = "px", pointsize = 12)
-plot(t) + labs(
-    x = "Forest age when LiDAR was acquired.", 
-    y = "Pearson correlation (r)",
-    title=""
-  )
-dev.off()
-#######################################################################################
-lm_fa_00to15 <- lm(predCor_0_15 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to15, terms="forest_age [all]", data=WIWR_fa_co_df)
-png("3_output/figures/timelag_stats/WIWR_lm_fa_00to15.png", width = 800, height = 600, units = "px", pointsize = 12)
-plot(t) + labs(
-    x = "Forest age when LiDAR was acquired.", 
-    y = "Pearson correlation (r)",
-    title=""
-  )
-dev.off()
-#######################################################################################
-#### save models
-#######################################################################################
-
-# save models
-WIWR_predCor_to_forestAge <-list(lm_fa_00to01, lm_fa_00to02, lm_fa_00to03, lm_fa_00to04, lm_fa_00to05, lm_fa_00to06, lm_fa_00to07, lm_fa_00to08, lm_fa_00to09, lm_fa_00to10, lm_fa_00to11, lm_fa_00to12, lm_fa_00to13, lm_fa_00to14, lm_fa_00to15)
-names(WIWR_predCor_to_forestAge) <- c("lm_fa_00to01", "lm_fa_00to02", "lm_fa_00to03", "lm_fa_00to04", "lm_fa_00to05", "lm_fa_00to06", "lm_fa_00to07", "lm_fa_00to08", "lm_fa_00to09", "lm_fa_00to10", "lm_fa_00to11", "lm_fa_00to12", "lm_fa_00to13", "lm_fa_00to14", "lm_fa_00to15")
-save(WIWR_predCor_to_forestAge, file="2_pipeline/store/models/WIWR_predCor_to_forestAge.rData")
-
-
-library(purrr)
-library(broom)
-WIWR_predCor_to_forestAge_df<-purrr::map_df(WIWR_predCor_to_forestAge, broom::glance, .id = 'formula')
-save(WIWR_predCor_to_forestAge_df, file="2_pipeline/store/models/WIWR_predCor_to_forestAge_df.rData")
-
-
-#######################################################################################
-#### Plot all on the same plot
-
-ggplot() +
-  geom_smooth(aes(x = forest_age, y = predCor_0_02, col = "0 and 02 years"), data = WIWR_fa_co_df, 
-              method = "lm", se = FALSE) + 
-  geom_smooth(aes(x = forest_age, y = predCor_0_04, col = "0 and 04 years"), data = WIWR_fa_co_df, 
-              method = "lm", se = FALSE) + 
-  geom_smooth(aes(x = forest_age, y = predCor_0_06, col = "0 and 06 years"), data = WIWR_fa_co_df, 
-              method = "lm", se = FALSE) + 
-  geom_smooth(aes(x = forest_age, y = predCor_0_08, col = "0 and 08 years"), data = WIWR_fa_co_df, 
-              method = "lm", se = FALSE) + 
-  geom_smooth(aes(x = forest_age, y = predCor_0_10, col = "0 and 10 years"), data = WIWR_fa_co_df, 
-              method = "lm", se = FALSE)+
-    scale_colour_manual(name="", 
-                      values = c("#fa9fb5","#f768a1","#dd3497","#ae017e","#7a0177")) +
-  labs(
-    x = "Forest age when LiDAR was acquired", 
-    y = "Pearson correlation (r)")+
-    theme(panel.background = element_blank(),
-          text = element_text(size=10),
-          axis.ticks=element_blank(),
-          #strip.background =element_rect(fill="white"),
-         panel.border = element_rect(color = "black", fill = NA, size = .2),
-          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
-         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
-          #panel.background = element_rect(fill="white"),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank())
-  ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_lm_fa_all.png"), width =8, height=5)
-
-```
-
-```{r  echo=FALSE, out.width = '100%'}
-knitr::include_graphics("3_output/figures/timelag_stats/WIWR_lm_fa_all.png", dpi = 300)
-```
-
-```{r echo=FALSE, message = FALSE, results="asis"}
-load("2_pipeline/store/models/WIWR_predCor_to_forestAge_df.rData")
-
-knitr::kable(head(WIWR_predCor_to_forestAge_df)) %>%
-  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
-  column_spec(1, width= "20em")%>%
-  scroll_box(width = "100%", height = "400px")
-```
-
-
-
-
-##### Scatter plots of occupancy probability {-}
-
-```{r eval=FALSE}
-
-WIWR_stack<-stackOpen("3_output/maps/predictedDistributions/WIWR/WIWR_stack.stk")
-lidar_forestAge_raster<-raster("0_data/manual/spatialCov/CASFRI/lidar_forestAge_raster.tif")
-
-lidar_forestAge_raster_pr<-projectRaster(lidar_forestAge_raster, crs=WIWR_stack)
-
-#study area
-load("0_data/manual/bird/studyarea_big.rData")
- 
-pd<- raster::crop(WIWR_stack, as_Spatial(st_geometry(c_bb))) 
-fa<- raster::crop(lidar_forestAge_raster_pr, as_Spatial(st_geometry(c_bb))) 
-
-#resample so they have the same resolution
-pd_rs<-resample(pd, fa)
-
-# Stack covariates
-pd_fa <- stack(pd_rs, fa)
-
-WIWR_pd_fa_df<-as.data.frame(na.omit(values(pd_fa)))%>%
-  dplyr::rename(forest_age=lidar_forestAge_raster)
-          
-save(WIWR_pd_fa_df, file="2_pipeline/store/WIWR_pd_fa_df.rData")
-
-load("2_pipeline/store/WIWR_pd_fa_df.rData")
-
-install.packages("viridis")
-library(viridis)
-
-WIWR_pd_fa_df %>%
-  ggplot(aes(WIWR_predictMap_m_00, WIWR_predictMap_m_15, color=forest_age)) +
-  geom_point(alpha=0.4, size=.1) +
-  scale_color_viridis() +
-  labs(y="occupancy probability (15 year time lag)", x="occupancy probability (no time lag)", color="forest age (years)") +
-   theme(panel.background = element_blank(),
-          text = element_text(size=10),
-          axis.ticks=element_blank(),
-          #strip.background =element_rect(fill="white"),
-         panel.border = element_rect(color = "black", fill = NA, size = .2),
-          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
-         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
-          #panel.background = element_rect(fill="white"),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank())
-ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_scatter_00to15.png"), width = 7, height=5)
-```
-
-
-```{r  echo=FALSE, out.width = '100%'}
-knitr::include_graphics("3_output/figures/timelag_stats/WIWR_scatter_00to15.png", dpi = 300)
-```
 

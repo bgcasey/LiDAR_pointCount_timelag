@@ -184,6 +184,61 @@ knitr::kable(head(data_main)) %>%
 ```
 
 
+
+#### Lag NDVI {-}
+
+```{r eval=FALSE}
+l_08<-data_main%>%
+  filter(lidar_year=="2008")
+
+l_08$ndvi_lag_0<-l_08$ndvi_2008
+l_08$ndvi_lag_1<-l_08$ndvi_2007
+l_08$ndvi_lag_2<-l_08$ndvi_2006
+l_08$ndvi_lag_3<-l_08$ndvi_2005
+l_08$ndvi_lag_4<-l_08$ndvi_2004
+l_08$ndvi_lag_5<-l_08$ndvi_2003
+l_08$ndvi_lag_6<-l_08$ndvi_2002
+l_08$ndvi_lag_7<-l_08$ndvi_2001
+l_08$ndvi_lag_8<-l_08$ndvi_2000
+l_08$ndvi_lag_9<-l_08$ndvi_1999
+l_08$ndvi_lag_10<-l_08$ndvi_1998
+l_08$ndvi_lag_11<-l_08$ndvi_1997
+l_08$ndvi_lag_12<-l_08$ndvi_1996
+l_08$ndvi_lag_13<-l_08$ndvi_1995
+l_08$ndvi_lag_14<-l_08$ndvi_1994
+l_08$ndvi_lag_15<-l_08$ndvi_1993
+l_08$ndvi_lag_16<-l_08$ndvi_1992
+
+
+
+l_09<-data_main%>%
+  filter(lidar_year=="2009")
+
+l_09$ndvi_lag_0<-l_09$ndvi_2009
+l_09$ndvi_lag_1<-l_09$ndvi_2008
+l_09$ndvi_lag_2<-l_09$ndvi_2007
+l_09$ndvi_lag_3<-l_09$ndvi_2006
+l_09$ndvi_lag_4<-l_09$ndvi_2005
+l_09$ndvi_lag_5<-l_09$ndvi_2004
+l_09$ndvi_lag_6<-l_09$ndvi_2003
+l_09$ndvi_lag_7<-l_09$ndvi_2002
+l_09$ndvi_lag_8<-l_09$ndvi_2001
+l_09$ndvi_lag_9<-l_09$ndvi_2000
+l_09$ndvi_lag_10<-l_09$ndvi_1999
+l_09$ndvi_lag_11<-l_09$ndvi_1998
+l_09$ndvi_lag_12<-l_09$ndvi_1997
+l_09$ndvi_lag_13<-l_09$ndvi_1996
+l_09$ndvi_lag_14<-l_09$ndvi_1995
+l_09$ndvi_lag_15<-l_09$ndvi_1994
+l_09$ndvi_lag_16<-l_09$ndvi_1993
+
+data_main_2<-rbind(l_08, l_09)
+
+save(data_main_2, file = "0_data/manual/data_main_2.rData")
+```
+
+
+
 #### Combine raster data into a single raster stack
 
 

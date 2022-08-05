@@ -60,12 +60,19 @@ f3b<-data_main %>%
 f3c<-rbind(f3a, f3b)
 
 
-data_main_filter<-f2
+f4a<-data_main %>%
+  filter(rast_forest_age > 33 & ss_forest_origDate_sd<11)
+f4b<-data_main %>%
+  filter(rast_forest_age < 34 & ss_forest_origDate_sd<6)
+f4c<-rbind(f4a, f4b)
+
+
+data_main_filter<-f4c
 
 save(data_main_filter, file = "2_pipeline/store/data_main_filter.rData")
 ```
 
-### Reclasify data {-}
+### Reclassify data {-}
 
 ```{r eval=FALSE}
 d<-data_main_filter

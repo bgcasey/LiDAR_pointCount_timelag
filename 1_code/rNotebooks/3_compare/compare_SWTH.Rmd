@@ -1,6 +1,6 @@
 ## SWTH
 
-```{r include=FALSE, cache=FALSE}
+```{r setup, include=FALSE, cache=FALSE}
 #Set root directory to R project root
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 ```
@@ -21,7 +21,7 @@ pre[class] {
 
 ### Load packages {-}
 
-```{r  message = FALSE}
+```{r eval=FALSE,  message = FALSE}
 library(dplyr)
 library(ggplot2)
 library(raster)
@@ -32,7 +32,7 @@ library(sf)
 
 ### Compare lag stats {-}
 
-```{r }
+```{r eval=FALSE}
 load("2_pipeline/store/models/SWTH_models_AUC_4.rData")
 
 SWTH_models_AUC_4<-SWTH_models_AUC_4%>%
@@ -146,7 +146,7 @@ print(summary(SWTH_R2c_test))
 ### Compare predictive maps {-}
 
 #### Reclassify predictive maps {-}
-```{r }
+```{r eval=FALSE}
 # Load stack of predictive rasters
 SWTH_stack<-stackOpen("3_output/maps/predictedDistributions/SWTH/SWTH_stack.stk")
 
@@ -172,7 +172,7 @@ SWTH_stack_reclass<-brick("3_output/maps/predictedDistributions/SWTH/SWTH_stack_
 
 #### Pearson correlation of predictive maps {-}
 
-```{r }
+```{r eval=FALSE}
 SWTH_stack<-stackOpen("3_output/maps/predictedDistributions/SWTH/SWTH_stack.stk")
 
 predCor_0_01<-rasterCorrelation(SWTH_stack$SWTH_predictMap_m_00, SWTH_stack$SWTH_predictMap_m_01, s = 3, type = "pearson")
@@ -224,7 +224,7 @@ stackSave(SWTH_predCor_stack,file="3_output/maps/predictedDistributions/SWTH/pre
 
 #### Pearson correlation ~ forest age {-}
 
-```{r }
+```{r eval=FALSE}
 library(ggeffects)
 
 SWTH_predCor_stack<-stackOpen("3_output/maps/predictedDistributions/SWTH/predCor/SWTH_predCor_stack.stk")
@@ -949,7 +949,7 @@ knitr::kable(SWTH_predCor_to_forestAge_df) %>%
 
 #### Scatter plots of occupancy probability {-}
 
-```{r }
+```{r eval=FALSE}
 
 SWTH_stack<-stackOpen("3_output/maps/predictedDistributions/SWTH/SWTH_stack.stk")
 lidar_forestAge_raster<-raster("0_data/manual/spatialCov/CASFRI/lidar_forestAge_raster.tif")

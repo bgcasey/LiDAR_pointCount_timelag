@@ -951,40 +951,6 @@ knitr::kable(WTSP_predCor_to_forestAge_df) %>%
 
 ```{r }
 
-
-WTSP_predCor_stack<-stackOpen("3_output/maps/predictedDistributions/WTSP/predCor/WTSP_predCor_stack.stk")
-
-lidar_forestAge_raster<-raster("0_data/manual/spatialCov/CASFRI/lidar_forestAge_raster.tif")
-ageClass_00<-raster("0_data/manual/spatialCov/CASFRI/ageClassRasters/ageClass_00.tif")
-
-lidar_forestAge_raster_pr<-projectRaster(lidar_forestAge_raster, crs=WTSP_predCor_stack)
-ageClass_00_pr<-projectRaster(ageClass_00, method='ngb',crs=WTSP_predCor_stack)
-
-#study area
-load("0_data/manual/bird/studyarea_big.rData")
-
-pc<- raster::crop(WTSP_predCor_stack, as_Spatial(st_geometry(c_bb)))
-fa<- raster::crop(lidar_forestAge_raster_pr, as_Spatial(st_geometry(c_bb)))
-ac<- raster::crop(ageClass_00_pr, as_Spatial(st_geometry(c_bb)))
-#resample so they have the same resolution
-
-pc_rs<-resample(pc, fa)
-
-# Stack covariates
-fa_co_ac <- stack(pc_rs, fa, ac)
-
-WTSP_fa_co_ac_df<-as.data.frame(na.omit(values(fa_co_ac)))%>%
-  dplyr::rename(forest_age=lidar_forestAge_raster)%>%
-  dplyr::rename(forest_age_class=ageClass_00)
-
-WTSP_fa_co_ac_df$forest_age_class<-ordered(as.factor(WTSP_fa_co_ac_df$forest_age_class))
-
-save(WTSP_fa_co_ac_df, file="2_pipeline/store/WTSP_fa_co_ac_df.rData")
-
-load("2_pipeline/store/WTSP_fa_co_ac_df.rData")
-
-
-
 WTSP_stack<-stackOpen("3_output/maps/predictedDistributions/WTSP/WTSP_stack.stk")
 lidar_forestAge_raster<-raster("0_data/manual/spatialCov/CASFRI/lidar_forestAge_raster.tif")
 ageClass_00<-raster("0_data/manual/spatialCov/CASFRI/ageClassRasters/ageClass_00.tif")

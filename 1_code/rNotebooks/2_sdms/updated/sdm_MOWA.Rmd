@@ -964,4 +964,179 @@ knitr::kable(MOWA_models_AUC_4) %>%
 ```
 
 
+### Estimate relative importance of predictors
+
+Calculate semi partial R squared values for all fixed effects using the `r2glmmm` package. 
+
+```{r eval=FALSE}
+
+library(r2glmm)
+load("2_pipeline/store/models/MOWA_models_4.rData")
+
+load("2_pipeline/tmp/sdm_d3.rData")
+d3<-sdm_d3
+
+
+
+dd<-d3%>%filter(SS_lidar_timelag==0)
+MOWA_r2beta_md_0<-r2beta(model = MOWA_models_4$md_0, method = 'sgv', data=dd, partial = T)
+
+#plot
+png("3_output/figures/r2/MOWA_r2beta_md_0.png", width = 800, height = 500, units = "px", pointsize = 12)
+plot(MOWA_r2beta_md_0, maxcov=10)
+dev.off() 
+
+#Spread to combine with other models in a single data frame
+MOWA_r2beta_md_0<-spread(MOWA_r2beta_md_0[c(1,6)], Effect, Rsq)
+MOWA_r2beta_md_0$response<-"MOWA"
+MOWA_r2beta_md_0$name<-"MOWA_md_0"
+MOWA_r2beta_md_0<-dplyr::select(MOWA_r2beta_md_0, "response", "name", "Model", 1:ncol(MOWA_r2beta_md_0))
+
+
+dd<-d3%>%filter(SS_lidar_timelag==-1)
+MOWA_r2beta_md_1<-r2beta(model = MOWA_models_4$md_1, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+MOWA_r2beta_md_1<-spread(MOWA_r2beta_md_1[c(1,6)], Effect, Rsq)
+MOWA_r2beta_md_1$response<-"MOWA"
+MOWA_r2beta_md_1$name<-"MOWA_md_1"
+MOWA_r2beta_md_1<-dplyr::select(MOWA_r2beta_md_1, "response", "name", "Model", 1:ncol(MOWA_r2beta_md_1))
+
+dd<-d3%>%filter(SS_lidar_timelag==-2)
+MOWA_r2beta_md_2<-r2beta(model = MOWA_models_4$md_2, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+MOWA_r2beta_md_2<-spread(MOWA_r2beta_md_2[c(1,6)], Effect, Rsq)
+MOWA_r2beta_md_2$response<-"MOWA"
+MOWA_r2beta_md_2$name<-"MOWA_md_2"
+MOWA_r2beta_md_2<-dplyr::select(MOWA_r2beta_md_2, "response", "name", "Model", 1:ncol(MOWA_r2beta_md_2))
+
+dd<-d3%>%filter(SS_lidar_timelag==-3)
+MOWA_r2beta_md_3<-r2beta(model = MOWA_models_4$md_3, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+MOWA_r2beta_md_3<-spread(MOWA_r2beta_md_3[c(1,6)], Effect, Rsq)
+MOWA_r2beta_md_3$response<-"MOWA"
+MOWA_r2beta_md_3$name<-"MOWA_md_3"
+MOWA_r2beta_md_3<-dplyr::select(MOWA_r2beta_md_3, "response", "name", "Model", 1:ncol(MOWA_r2beta_md_3))
+
+dd<-d3%>%filter(SS_lidar_timelag==-4)
+MOWA_r2beta_md_4<-r2beta(model = MOWA_models_4$md_4, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+MOWA_r2beta_md_4<-spread(MOWA_r2beta_md_4[c(1,6)], Effect, Rsq)
+MOWA_r2beta_md_4$response<-"MOWA"
+MOWA_r2beta_md_4$name<-"MOWA_md_4"
+MOWA_r2beta_md_4<-dplyr::select(MOWA_r2beta_md_4, "response", "name", "Model", 1:ncol(MOWA_r2beta_md_4))
+
+dd<-d3%>%filter(SS_lidar_timelag==-5)
+MOWA_r2beta_md_5<-r2beta(model = MOWA_models_4$md_5, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+MOWA_r2beta_md_5<-spread(MOWA_r2beta_md_5[c(1,6)], Effect, Rsq)
+MOWA_r2beta_md_5$response<-"MOWA"
+MOWA_r2beta_md_5$name<-"MOWA_md_5"
+MOWA_r2beta_md_5<-dplyr::select(MOWA_r2beta_md_5, "response", "name", "Model", 1:ncol(MOWA_r2beta_md_5))
+
+dd<-d3%>%filter(SS_lidar_timelag==-6)
+MOWA_r2beta_md_6<-r2beta(model = MOWA_models_4$md_6, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+MOWA_r2beta_md_6<-spread(MOWA_r2beta_md_6[c(1,6)], Effect, Rsq)
+MOWA_r2beta_md_6$response<-"MOWA"
+MOWA_r2beta_md_6$name<-"MOWA_md_6"
+MOWA_r2beta_md_6<-dplyr::select(MOWA_r2beta_md_6, "response", "name", "Model", 1:ncol(MOWA_r2beta_md_6))
+
+dd<-d3%>%filter(SS_lidar_timelag==-7)
+MOWA_r2beta_md_7<-r2beta(model = MOWA_models_4$md_7, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+MOWA_r2beta_md_7<-spread(MOWA_r2beta_md_7[c(1,6)], Effect, Rsq)
+MOWA_r2beta_md_7$response<-"MOWA"
+MOWA_r2beta_md_7$name<-"MOWA_md_7"
+MOWA_r2beta_md_7<-dplyr::select(MOWA_r2beta_md_7, "response", "name", "Model", 1:ncol(MOWA_r2beta_md_7))
+
+dd<-d3%>%filter(SS_lidar_timelag==-8)
+MOWA_r2beta_md_8<-r2beta(model = MOWA_models_4$md_8, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+MOWA_r2beta_md_8<-spread(MOWA_r2beta_md_8[c(1,6)], Effect, Rsq)
+MOWA_r2beta_md_8$response<-"MOWA"
+MOWA_r2beta_md_8$name<-"MOWA_md_8"
+MOWA_r2beta_md_8<-dplyr::select(MOWA_r2beta_md_8, "response", "name", "Model", 1:ncol(MOWA_r2beta_md_8))
+
+dd<-d3%>%filter(SS_lidar_timelag==-9)
+MOWA_r2beta_md_9<-r2beta(model = MOWA_models_4$md_9, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+MOWA_r2beta_md_9<-spread(MOWA_r2beta_md_9[c(1,6)], Effect, Rsq)
+MOWA_r2beta_md_9$response<-"MOWA"
+MOWA_r2beta_md_9$name<-"MOWA_md_9"
+MOWA_r2beta_md_9<-dplyr::select(MOWA_r2beta_md_9, "response", "name", "Model", 1:ncol(MOWA_r2beta_md_9))
+
+dd<-d3%>%filter(SS_lidar_timelag==-10)
+MOWA_r2beta_md_10<-r2beta(model = MOWA_models_4$md_10, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+MOWA_r2beta_md_10<-spread(MOWA_r2beta_md_10[c(1,6)], Effect, Rsq)
+MOWA_r2beta_md_10$response<-"MOWA"
+MOWA_r2beta_md_10$name<-"MOWA_md_10"
+MOWA_r2beta_md_10<-dplyr::select(MOWA_r2beta_md_10, "response", "name", "Model", 1:ncol(MOWA_r2beta_md_10))
+
+dd<-d3%>%filter(SS_lidar_timelag==-11)
+MOWA_r2beta_md_11<-r2beta(model = MOWA_models_4$md_11, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+MOWA_r2beta_md_11<-spread(MOWA_r2beta_md_11[c(1,6)], Effect, Rsq)
+MOWA_r2beta_md_11$response<-"MOWA"
+MOWA_r2beta_md_11$name<-"MOWA_md_11"
+MOWA_r2beta_md_11<-dplyr::select(MOWA_r2beta_md_11, "response", "name", "Model", 1:ncol(MOWA_r2beta_md_11))
+
+dd<-d3%>%filter(SS_lidar_timelag==-12)
+MOWA_r2beta_md_12<-r2beta(model = MOWA_models_4$md_12, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+MOWA_r2beta_md_12<-spread(MOWA_r2beta_md_12[c(1,6)], Effect, Rsq)
+MOWA_r2beta_md_12$response<-"MOWA"
+MOWA_r2beta_md_12$name<-"MOWA_md_12"
+MOWA_r2beta_md_12<-dplyr::select(MOWA_r2beta_md_12, "response", "name", "Model", 1:ncol(MOWA_r2beta_md_12))
+
+dd<-d3%>%filter(SS_lidar_timelag==-13)
+MOWA_r2beta_md_13<-r2beta(model = MOWA_models_4$md_13, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+MOWA_r2beta_md_13<-spread(MOWA_r2beta_md_13[c(1,6)], Effect, Rsq)
+MOWA_r2beta_md_13$response<-"MOWA"
+MOWA_r2beta_md_13$name<-"MOWA_md_13"
+MOWA_r2beta_md_13<-dplyr::select(MOWA_r2beta_md_13, "response", "name", "Model", 1:ncol(MOWA_r2beta_md_13))
+
+dd<-d3%>%filter(SS_lidar_timelag==-14)
+MOWA_r2beta_md_14<-r2beta(model = MOWA_models_4$md_14, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+MOWA_r2beta_md_14<-spread(MOWA_r2beta_md_14[c(1,6)], Effect, Rsq)
+MOWA_r2beta_md_14$response<-"MOWA"
+MOWA_r2beta_md_14$name<-"MOWA_md_14"
+MOWA_r2beta_md_14<-dplyr::select(MOWA_r2beta_md_14, "response", "name", "Model", 1:ncol(MOWA_r2beta_md_14))
+
+dd<-d3%>%filter(SS_lidar_timelag==-15)
+MOWA_r2beta_md_15<-r2beta(model = MOWA_models_4$md_15, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+MOWA_r2beta_md_15<-spread(MOWA_r2beta_md_15[c(1,6)], Effect, Rsq)
+MOWA_r2beta_md_15$response<-"MOWA"
+MOWA_r2beta_md_15$name<-"MOWA_md_15"
+MOWA_r2beta_md_15<-dplyr::select(MOWA_r2beta_md_15, "response", "name", "Model", 1:ncol(MOWA_r2beta_md_15))
+
+
+colnames(MOWA_r2beta_md_15)=colnames(MOWA_r2beta_md_14)=colnames(MOWA_r2beta_md_13)=colnames(MOWA_r2beta_md_12)=colnames(MOWA_r2beta_md_11)=colnames(MOWA_r2beta_md_10)=colnames(MOWA_r2beta_md_9)=colnames(MOWA_r2beta_md_8)=colnames(MOWA_r2beta_md_7)=colnames(MOWA_r2beta_md_6)=colnames(MOWA_r2beta_md_5)=colnames(MOWA_r2beta_md_4)=colnames(MOWA_r2beta_md_3)=colnames(MOWA_r2beta_md_2)=colnames(MOWA_r2beta_md_1)=colnames(MOWA_r2beta_md_0)=colnames(MOWA_r2beta_md_1)=colnames(MOWA_r2beta_md_0)
+
+MOWA_r2beta_all<-rbind(MOWA_r2beta_md_0, MOWA_r2beta_md_1, MOWA_r2beta_md_2, MOWA_r2beta_md_3, MOWA_r2beta_md_4, MOWA_r2beta_md_5, MOWA_r2beta_md_6, MOWA_r2beta_md_7, MOWA_r2beta_md_8, MOWA_r2beta_md_9, MOWA_r2beta_md_10, MOWA_r2beta_md_11, MOWA_r2beta_md_12, MOWA_r2beta_md_13, MOWA_r2beta_md_14, MOWA_r2beta_md_15
+)
+
+lag<-c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)
+
+MOWA_r2beta_all<-cbind(lag, MOWA_r2beta_all)
+
+save(MOWA_r2beta_all, file="2_pipeline/store/models/MOWA_r2beta_all.rData")
+
+
+```
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="semi partial r2 values of fixed effects"}
+knitr::include_graphics("3_output/figures/r2/MOWA_r2beta_md_0.png", dpi = 300)
+```
+
+```{r  echo=FALSE, results="asis"}
+load("2_pipeline/store/models/MOWA_r2beta_all.rData")
+
+knitr::kable(MOWA_r2beta_all[c(1:ncol(MOWA_r2beta_all))], caption = 'r2 values of fixed effects in top model', row.names = FALSE) %>%
+  kable_classic_2(font_size = 10,  full_width= F, position="center") %>%
+  scroll_box(width = "100%", height="100%")
+```
 

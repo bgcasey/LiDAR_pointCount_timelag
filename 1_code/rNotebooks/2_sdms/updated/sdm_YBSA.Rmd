@@ -972,3 +972,178 @@ knitr::kable(YBSA_models_AUC_4) %>%
 
 
 
+### Estimate relative importance of predictors
+
+Calculate semi partial R squared values for all fixed effects using the `r2glmmm` package. 
+
+```{r eval=FALSE}
+
+library(r2glmm)
+load("2_pipeline/store/models/YBSA_models_4.rData")
+
+load("2_pipeline/tmp/sdm_d3.rData")
+d3<-sdm_d3
+
+
+
+dd<-d3%>%filter(SS_lidar_timelag==0)
+YBSA_r2beta_md_0<-r2beta(model = YBSA_models_4$md_0, method = 'sgv', data=dd, partial = T)
+
+#plot
+png("3_output/figures/r2/YBSA_r2beta_md_0.png", width = 800, height = 500, units = "px", pointsize = 12)
+plot(YBSA_r2beta_md_0, maxcov=10)
+dev.off() 
+
+#Spread to combine with other models in a single data frame
+YBSA_r2beta_md_0<-spread(YBSA_r2beta_md_0[c(1,6)], Effect, Rsq)
+YBSA_r2beta_md_0$response<-"YBSA"
+YBSA_r2beta_md_0$name<-"YBSA_md_0"
+YBSA_r2beta_md_0<-dplyr::select(YBSA_r2beta_md_0, "response", "name", "Model", 1:ncol(YBSA_r2beta_md_0))
+
+
+dd<-d3%>%filter(SS_lidar_timelag==-1)
+YBSA_r2beta_md_1<-r2beta(model = YBSA_models_4$md_1, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+YBSA_r2beta_md_1<-spread(YBSA_r2beta_md_1[c(1,6)], Effect, Rsq)
+YBSA_r2beta_md_1$response<-"YBSA"
+YBSA_r2beta_md_1$name<-"YBSA_md_1"
+YBSA_r2beta_md_1<-dplyr::select(YBSA_r2beta_md_1, "response", "name", "Model", 1:ncol(YBSA_r2beta_md_1))
+
+dd<-d3%>%filter(SS_lidar_timelag==-2)
+YBSA_r2beta_md_2<-r2beta(model = YBSA_models_4$md_2, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+YBSA_r2beta_md_2<-spread(YBSA_r2beta_md_2[c(1,6)], Effect, Rsq)
+YBSA_r2beta_md_2$response<-"YBSA"
+YBSA_r2beta_md_2$name<-"YBSA_md_2"
+YBSA_r2beta_md_2<-dplyr::select(YBSA_r2beta_md_2, "response", "name", "Model", 1:ncol(YBSA_r2beta_md_2))
+
+dd<-d3%>%filter(SS_lidar_timelag==-3)
+YBSA_r2beta_md_3<-r2beta(model = YBSA_models_4$md_3, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+YBSA_r2beta_md_3<-spread(YBSA_r2beta_md_3[c(1,6)], Effect, Rsq)
+YBSA_r2beta_md_3$response<-"YBSA"
+YBSA_r2beta_md_3$name<-"YBSA_md_3"
+YBSA_r2beta_md_3<-dplyr::select(YBSA_r2beta_md_3, "response", "name", "Model", 1:ncol(YBSA_r2beta_md_3))
+
+dd<-d3%>%filter(SS_lidar_timelag==-4)
+YBSA_r2beta_md_4<-r2beta(model = YBSA_models_4$md_4, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+YBSA_r2beta_md_4<-spread(YBSA_r2beta_md_4[c(1,6)], Effect, Rsq)
+YBSA_r2beta_md_4$response<-"YBSA"
+YBSA_r2beta_md_4$name<-"YBSA_md_4"
+YBSA_r2beta_md_4<-dplyr::select(YBSA_r2beta_md_4, "response", "name", "Model", 1:ncol(YBSA_r2beta_md_4))
+
+dd<-d3%>%filter(SS_lidar_timelag==-5)
+YBSA_r2beta_md_5<-r2beta(model = YBSA_models_4$md_5, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+YBSA_r2beta_md_5<-spread(YBSA_r2beta_md_5[c(1,6)], Effect, Rsq)
+YBSA_r2beta_md_5$response<-"YBSA"
+YBSA_r2beta_md_5$name<-"YBSA_md_5"
+YBSA_r2beta_md_5<-dplyr::select(YBSA_r2beta_md_5, "response", "name", "Model", 1:ncol(YBSA_r2beta_md_5))
+
+dd<-d3%>%filter(SS_lidar_timelag==-6)
+YBSA_r2beta_md_6<-r2beta(model = YBSA_models_4$md_6, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+YBSA_r2beta_md_6<-spread(YBSA_r2beta_md_6[c(1,6)], Effect, Rsq)
+YBSA_r2beta_md_6$response<-"YBSA"
+YBSA_r2beta_md_6$name<-"YBSA_md_6"
+YBSA_r2beta_md_6<-dplyr::select(YBSA_r2beta_md_6, "response", "name", "Model", 1:ncol(YBSA_r2beta_md_6))
+
+dd<-d3%>%filter(SS_lidar_timelag==-7)
+YBSA_r2beta_md_7<-r2beta(model = YBSA_models_4$md_7, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+YBSA_r2beta_md_7<-spread(YBSA_r2beta_md_7[c(1,6)], Effect, Rsq)
+YBSA_r2beta_md_7$response<-"YBSA"
+YBSA_r2beta_md_7$name<-"YBSA_md_7"
+YBSA_r2beta_md_7<-dplyr::select(YBSA_r2beta_md_7, "response", "name", "Model", 1:ncol(YBSA_r2beta_md_7))
+
+dd<-d3%>%filter(SS_lidar_timelag==-8)
+YBSA_r2beta_md_8<-r2beta(model = YBSA_models_4$md_8, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+YBSA_r2beta_md_8<-spread(YBSA_r2beta_md_8[c(1,6)], Effect, Rsq)
+YBSA_r2beta_md_8$response<-"YBSA"
+YBSA_r2beta_md_8$name<-"YBSA_md_8"
+YBSA_r2beta_md_8<-dplyr::select(YBSA_r2beta_md_8, "response", "name", "Model", 1:ncol(YBSA_r2beta_md_8))
+
+dd<-d3%>%filter(SS_lidar_timelag==-9)
+YBSA_r2beta_md_9<-r2beta(model = YBSA_models_4$md_9, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+YBSA_r2beta_md_9<-spread(YBSA_r2beta_md_9[c(1,6)], Effect, Rsq)
+YBSA_r2beta_md_9$response<-"YBSA"
+YBSA_r2beta_md_9$name<-"YBSA_md_9"
+YBSA_r2beta_md_9<-dplyr::select(YBSA_r2beta_md_9, "response", "name", "Model", 1:ncol(YBSA_r2beta_md_9))
+
+dd<-d3%>%filter(SS_lidar_timelag==-10)
+YBSA_r2beta_md_10<-r2beta(model = YBSA_models_4$md_10, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+YBSA_r2beta_md_10<-spread(YBSA_r2beta_md_10[c(1,6)], Effect, Rsq)
+YBSA_r2beta_md_10$response<-"YBSA"
+YBSA_r2beta_md_10$name<-"YBSA_md_10"
+YBSA_r2beta_md_10<-dplyr::select(YBSA_r2beta_md_10, "response", "name", "Model", 1:ncol(YBSA_r2beta_md_10))
+
+dd<-d3%>%filter(SS_lidar_timelag==-11)
+YBSA_r2beta_md_11<-r2beta(model = YBSA_models_4$md_11, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+YBSA_r2beta_md_11<-spread(YBSA_r2beta_md_11[c(1,6)], Effect, Rsq)
+YBSA_r2beta_md_11$response<-"YBSA"
+YBSA_r2beta_md_11$name<-"YBSA_md_11"
+YBSA_r2beta_md_11<-dplyr::select(YBSA_r2beta_md_11, "response", "name", "Model", 1:ncol(YBSA_r2beta_md_11))
+
+dd<-d3%>%filter(SS_lidar_timelag==-12)
+YBSA_r2beta_md_12<-r2beta(model = YBSA_models_4$md_12, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+YBSA_r2beta_md_12<-spread(YBSA_r2beta_md_12[c(1,6)], Effect, Rsq)
+YBSA_r2beta_md_12$response<-"YBSA"
+YBSA_r2beta_md_12$name<-"YBSA_md_12"
+YBSA_r2beta_md_12<-dplyr::select(YBSA_r2beta_md_12, "response", "name", "Model", 1:ncol(YBSA_r2beta_md_12))
+
+dd<-d3%>%filter(SS_lidar_timelag==-13)
+YBSA_r2beta_md_13<-r2beta(model = YBSA_models_4$md_13, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+YBSA_r2beta_md_13<-spread(YBSA_r2beta_md_13[c(1,6)], Effect, Rsq)
+YBSA_r2beta_md_13$response<-"YBSA"
+YBSA_r2beta_md_13$name<-"YBSA_md_13"
+YBSA_r2beta_md_13<-dplyr::select(YBSA_r2beta_md_13, "response", "name", "Model", 1:ncol(YBSA_r2beta_md_13))
+
+dd<-d3%>%filter(SS_lidar_timelag==-14)
+YBSA_r2beta_md_14<-r2beta(model = YBSA_models_4$md_14, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+YBSA_r2beta_md_14<-spread(YBSA_r2beta_md_14[c(1,6)], Effect, Rsq)
+YBSA_r2beta_md_14$response<-"YBSA"
+YBSA_r2beta_md_14$name<-"YBSA_md_14"
+YBSA_r2beta_md_14<-dplyr::select(YBSA_r2beta_md_14, "response", "name", "Model", 1:ncol(YBSA_r2beta_md_14))
+
+dd<-d3%>%filter(SS_lidar_timelag==-15)
+YBSA_r2beta_md_15<-r2beta(model = YBSA_models_4$md_15, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+YBSA_r2beta_md_15<-spread(YBSA_r2beta_md_15[c(1,6)], Effect, Rsq)
+YBSA_r2beta_md_15$response<-"YBSA"
+YBSA_r2beta_md_15$name<-"YBSA_md_15"
+YBSA_r2beta_md_15<-dplyr::select(YBSA_r2beta_md_15, "response", "name", "Model", 1:ncol(YBSA_r2beta_md_15))
+
+
+colnames(YBSA_r2beta_md_15)=colnames(YBSA_r2beta_md_14)=colnames(YBSA_r2beta_md_13)=colnames(YBSA_r2beta_md_12)=colnames(YBSA_r2beta_md_11)=colnames(YBSA_r2beta_md_10)=colnames(YBSA_r2beta_md_9)=colnames(YBSA_r2beta_md_8)=colnames(YBSA_r2beta_md_7)=colnames(YBSA_r2beta_md_6)=colnames(YBSA_r2beta_md_5)=colnames(YBSA_r2beta_md_4)=colnames(YBSA_r2beta_md_3)=colnames(YBSA_r2beta_md_2)=colnames(YBSA_r2beta_md_1)=colnames(YBSA_r2beta_md_0)=colnames(YBSA_r2beta_md_1)=colnames(YBSA_r2beta_md_0)
+
+YBSA_r2beta_all<-rbind(YBSA_r2beta_md_0, YBSA_r2beta_md_1, YBSA_r2beta_md_2, YBSA_r2beta_md_3, YBSA_r2beta_md_4, YBSA_r2beta_md_5, YBSA_r2beta_md_6, YBSA_r2beta_md_7, YBSA_r2beta_md_8, YBSA_r2beta_md_9, YBSA_r2beta_md_10, YBSA_r2beta_md_11, YBSA_r2beta_md_12, YBSA_r2beta_md_13, YBSA_r2beta_md_14, YBSA_r2beta_md_15
+)
+
+lag<-c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)
+
+YBSA_r2beta_all<-cbind(lag, YBSA_r2beta_all)
+
+save(YBSA_r2beta_all, file="2_pipeline/store/models/YBSA_r2beta_all.rData")
+
+
+```
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="semi partial r2 values of fixed effects"}
+knitr::include_graphics("3_output/figures/r2/YBSA_r2beta_md_0.png", dpi = 300)
+```
+
+```{r  echo=FALSE, results="asis"}
+load("2_pipeline/store/models/YBSA_r2beta_all.rData")
+
+knitr::kable(YBSA_r2beta_all[c(1:ncol(YBSA_r2beta_all))], caption = 'r2 values of fixed effects in top model', row.names = FALSE) %>%
+  kable_classic_2(font_size = 10,  full_width= F, position="center") %>%
+  scroll_box(width = "100%", height="100%")
+```

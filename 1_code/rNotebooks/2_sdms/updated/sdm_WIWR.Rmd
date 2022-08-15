@@ -941,5 +941,180 @@ knitr::kable(WIWR_models_AUC_4) %>%
   scroll_box(width = "100%", height = "400px")
 ```
 
+### Estimate relative importance of predictors
+
+Calculate semi partial R squared values for all fixed effects using the `r2glmmm` package. 
+
+```{r eval=FALSE}
+
+library(r2glmm)
+load("2_pipeline/store/models/WIWR_models_4.rData")
+
+load("2_pipeline/tmp/sdm_d3.rData")
+d3<-sdm_d3
+
+
+
+dd<-d3%>%filter(SS_lidar_timelag==0)
+WIWR_r2beta_md_0<-r2beta(model = WIWR_models_4$md_0, method = 'sgv', data=dd, partial = T)
+
+#plot
+png("3_output/figures/r2/WIWR_r2beta_md_0.png", width = 800, height = 500, units = "px", pointsize = 12)
+plot(WIWR_r2beta_md_0, maxcov=10)
+dev.off() 
+
+#Spread to combine with other models in a single data frame
+WIWR_r2beta_md_0<-spread(WIWR_r2beta_md_0[c(1,6)], Effect, Rsq)
+WIWR_r2beta_md_0$response<-"WIWR"
+WIWR_r2beta_md_0$name<-"WIWR_md_0"
+WIWR_r2beta_md_0<-dplyr::select(WIWR_r2beta_md_0, "response", "name", "Model", 1:ncol(WIWR_r2beta_md_0))
+
+
+dd<-d3%>%filter(SS_lidar_timelag==-1)
+WIWR_r2beta_md_1<-r2beta(model = WIWR_models_4$md_1, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+WIWR_r2beta_md_1<-spread(WIWR_r2beta_md_1[c(1,6)], Effect, Rsq)
+WIWR_r2beta_md_1$response<-"WIWR"
+WIWR_r2beta_md_1$name<-"WIWR_md_1"
+WIWR_r2beta_md_1<-dplyr::select(WIWR_r2beta_md_1, "response", "name", "Model", 1:ncol(WIWR_r2beta_md_1))
+
+dd<-d3%>%filter(SS_lidar_timelag==-2)
+WIWR_r2beta_md_2<-r2beta(model = WIWR_models_4$md_2, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+WIWR_r2beta_md_2<-spread(WIWR_r2beta_md_2[c(1,6)], Effect, Rsq)
+WIWR_r2beta_md_2$response<-"WIWR"
+WIWR_r2beta_md_2$name<-"WIWR_md_2"
+WIWR_r2beta_md_2<-dplyr::select(WIWR_r2beta_md_2, "response", "name", "Model", 1:ncol(WIWR_r2beta_md_2))
+
+dd<-d3%>%filter(SS_lidar_timelag==-3)
+WIWR_r2beta_md_3<-r2beta(model = WIWR_models_4$md_3, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+WIWR_r2beta_md_3<-spread(WIWR_r2beta_md_3[c(1,6)], Effect, Rsq)
+WIWR_r2beta_md_3$response<-"WIWR"
+WIWR_r2beta_md_3$name<-"WIWR_md_3"
+WIWR_r2beta_md_3<-dplyr::select(WIWR_r2beta_md_3, "response", "name", "Model", 1:ncol(WIWR_r2beta_md_3))
+
+dd<-d3%>%filter(SS_lidar_timelag==-4)
+WIWR_r2beta_md_4<-r2beta(model = WIWR_models_4$md_4, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+WIWR_r2beta_md_4<-spread(WIWR_r2beta_md_4[c(1,6)], Effect, Rsq)
+WIWR_r2beta_md_4$response<-"WIWR"
+WIWR_r2beta_md_4$name<-"WIWR_md_4"
+WIWR_r2beta_md_4<-dplyr::select(WIWR_r2beta_md_4, "response", "name", "Model", 1:ncol(WIWR_r2beta_md_4))
+
+dd<-d3%>%filter(SS_lidar_timelag==-5)
+WIWR_r2beta_md_5<-r2beta(model = WIWR_models_4$md_5, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+WIWR_r2beta_md_5<-spread(WIWR_r2beta_md_5[c(1,6)], Effect, Rsq)
+WIWR_r2beta_md_5$response<-"WIWR"
+WIWR_r2beta_md_5$name<-"WIWR_md_5"
+WIWR_r2beta_md_5<-dplyr::select(WIWR_r2beta_md_5, "response", "name", "Model", 1:ncol(WIWR_r2beta_md_5))
+
+dd<-d3%>%filter(SS_lidar_timelag==-6)
+WIWR_r2beta_md_6<-r2beta(model = WIWR_models_4$md_6, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+WIWR_r2beta_md_6<-spread(WIWR_r2beta_md_6[c(1,6)], Effect, Rsq)
+WIWR_r2beta_md_6$response<-"WIWR"
+WIWR_r2beta_md_6$name<-"WIWR_md_6"
+WIWR_r2beta_md_6<-dplyr::select(WIWR_r2beta_md_6, "response", "name", "Model", 1:ncol(WIWR_r2beta_md_6))
+
+dd<-d3%>%filter(SS_lidar_timelag==-7)
+WIWR_r2beta_md_7<-r2beta(model = WIWR_models_4$md_7, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+WIWR_r2beta_md_7<-spread(WIWR_r2beta_md_7[c(1,6)], Effect, Rsq)
+WIWR_r2beta_md_7$response<-"WIWR"
+WIWR_r2beta_md_7$name<-"WIWR_md_7"
+WIWR_r2beta_md_7<-dplyr::select(WIWR_r2beta_md_7, "response", "name", "Model", 1:ncol(WIWR_r2beta_md_7))
+
+dd<-d3%>%filter(SS_lidar_timelag==-8)
+WIWR_r2beta_md_8<-r2beta(model = WIWR_models_4$md_8, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+WIWR_r2beta_md_8<-spread(WIWR_r2beta_md_8[c(1,6)], Effect, Rsq)
+WIWR_r2beta_md_8$response<-"WIWR"
+WIWR_r2beta_md_8$name<-"WIWR_md_8"
+WIWR_r2beta_md_8<-dplyr::select(WIWR_r2beta_md_8, "response", "name", "Model", 1:ncol(WIWR_r2beta_md_8))
+
+dd<-d3%>%filter(SS_lidar_timelag==-9)
+WIWR_r2beta_md_9<-r2beta(model = WIWR_models_4$md_9, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+WIWR_r2beta_md_9<-spread(WIWR_r2beta_md_9[c(1,6)], Effect, Rsq)
+WIWR_r2beta_md_9$response<-"WIWR"
+WIWR_r2beta_md_9$name<-"WIWR_md_9"
+WIWR_r2beta_md_9<-dplyr::select(WIWR_r2beta_md_9, "response", "name", "Model", 1:ncol(WIWR_r2beta_md_9))
+
+dd<-d3%>%filter(SS_lidar_timelag==-10)
+WIWR_r2beta_md_10<-r2beta(model = WIWR_models_4$md_10, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+WIWR_r2beta_md_10<-spread(WIWR_r2beta_md_10[c(1,6)], Effect, Rsq)
+WIWR_r2beta_md_10$response<-"WIWR"
+WIWR_r2beta_md_10$name<-"WIWR_md_10"
+WIWR_r2beta_md_10<-dplyr::select(WIWR_r2beta_md_10, "response", "name", "Model", 1:ncol(WIWR_r2beta_md_10))
+
+dd<-d3%>%filter(SS_lidar_timelag==-11)
+WIWR_r2beta_md_11<-r2beta(model = WIWR_models_4$md_11, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+WIWR_r2beta_md_11<-spread(WIWR_r2beta_md_11[c(1,6)], Effect, Rsq)
+WIWR_r2beta_md_11$response<-"WIWR"
+WIWR_r2beta_md_11$name<-"WIWR_md_11"
+WIWR_r2beta_md_11<-dplyr::select(WIWR_r2beta_md_11, "response", "name", "Model", 1:ncol(WIWR_r2beta_md_11))
+
+dd<-d3%>%filter(SS_lidar_timelag==-12)
+WIWR_r2beta_md_12<-r2beta(model = WIWR_models_4$md_12, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+WIWR_r2beta_md_12<-spread(WIWR_r2beta_md_12[c(1,6)], Effect, Rsq)
+WIWR_r2beta_md_12$response<-"WIWR"
+WIWR_r2beta_md_12$name<-"WIWR_md_12"
+WIWR_r2beta_md_12<-dplyr::select(WIWR_r2beta_md_12, "response", "name", "Model", 1:ncol(WIWR_r2beta_md_12))
+
+dd<-d3%>%filter(SS_lidar_timelag==-13)
+WIWR_r2beta_md_13<-r2beta(model = WIWR_models_4$md_13, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+WIWR_r2beta_md_13<-spread(WIWR_r2beta_md_13[c(1,6)], Effect, Rsq)
+WIWR_r2beta_md_13$response<-"WIWR"
+WIWR_r2beta_md_13$name<-"WIWR_md_13"
+WIWR_r2beta_md_13<-dplyr::select(WIWR_r2beta_md_13, "response", "name", "Model", 1:ncol(WIWR_r2beta_md_13))
+
+dd<-d3%>%filter(SS_lidar_timelag==-14)
+WIWR_r2beta_md_14<-r2beta(model = WIWR_models_4$md_14, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+WIWR_r2beta_md_14<-spread(WIWR_r2beta_md_14[c(1,6)], Effect, Rsq)
+WIWR_r2beta_md_14$response<-"WIWR"
+WIWR_r2beta_md_14$name<-"WIWR_md_14"
+WIWR_r2beta_md_14<-dplyr::select(WIWR_r2beta_md_14, "response", "name", "Model", 1:ncol(WIWR_r2beta_md_14))
+
+dd<-d3%>%filter(SS_lidar_timelag==-15)
+WIWR_r2beta_md_15<-r2beta(model = WIWR_models_4$md_15, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+WIWR_r2beta_md_15<-spread(WIWR_r2beta_md_15[c(1,6)], Effect, Rsq)
+WIWR_r2beta_md_15$response<-"WIWR"
+WIWR_r2beta_md_15$name<-"WIWR_md_15"
+WIWR_r2beta_md_15<-dplyr::select(WIWR_r2beta_md_15, "response", "name", "Model", 1:ncol(WIWR_r2beta_md_15))
+
+
+colnames(WIWR_r2beta_md_15)=colnames(WIWR_r2beta_md_14)=colnames(WIWR_r2beta_md_13)=colnames(WIWR_r2beta_md_12)=colnames(WIWR_r2beta_md_11)=colnames(WIWR_r2beta_md_10)=colnames(WIWR_r2beta_md_9)=colnames(WIWR_r2beta_md_8)=colnames(WIWR_r2beta_md_7)=colnames(WIWR_r2beta_md_6)=colnames(WIWR_r2beta_md_5)=colnames(WIWR_r2beta_md_4)=colnames(WIWR_r2beta_md_3)=colnames(WIWR_r2beta_md_2)=colnames(WIWR_r2beta_md_1)=colnames(WIWR_r2beta_md_0)=colnames(WIWR_r2beta_md_1)=colnames(WIWR_r2beta_md_0)
+
+WIWR_r2beta_all<-rbind(WIWR_r2beta_md_0, WIWR_r2beta_md_1, WIWR_r2beta_md_2, WIWR_r2beta_md_3, WIWR_r2beta_md_4, WIWR_r2beta_md_5, WIWR_r2beta_md_6, WIWR_r2beta_md_7, WIWR_r2beta_md_8, WIWR_r2beta_md_9, WIWR_r2beta_md_10, WIWR_r2beta_md_11, WIWR_r2beta_md_12, WIWR_r2beta_md_13, WIWR_r2beta_md_14, WIWR_r2beta_md_15
+)
+
+lag<-c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)
+
+WIWR_r2beta_all<-cbind(lag, WIWR_r2beta_all)
+
+save(WIWR_r2beta_all, file="2_pipeline/store/models/WIWR_r2beta_all.rData")
+
+
+```
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="semi partial r2 values of fixed effects"}
+knitr::include_graphics("3_output/figures/r2/WIWR_r2beta_md_0.png", dpi = 300)
+```
+
+```{r  echo=FALSE, results="asis"}
+load("2_pipeline/store/models/WIWR_r2beta_all.rData")
+
+knitr::kable(WIWR_r2beta_all[c(1:ncol(WIWR_r2beta_all))], caption = 'r2 values of fixed effects in top model', row.names = FALSE) %>%
+  kable_classic_2(font_size = 10,  full_width= F, position="center") %>%
+  scroll_box(width = "100%", height="100%")
+```
 
 

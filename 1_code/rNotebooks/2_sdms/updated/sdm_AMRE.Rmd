@@ -965,5 +965,181 @@ knitr::kable(AMRE_models_AUC_4) %>%
   scroll_box(width = "100%", height = "400px")
 ```
 
+### Estimate relative importance of predictors
+
+Calculate semi partial R squared values for all fixed effects using the `r2glmmm` package. 
+
+```{r eval=FALSE}
+
+library(r2glmm)
+load("2_pipeline/store/models/AMRE_models_4.rData")
+
+load("2_pipeline/tmp/sdm_d3.rData")
+d3<-sdm_d3
+
+
+
+dd<-d3%>%filter(SS_lidar_timelag==0)
+AMRE_r2beta_md_0<-r2beta(model = AMRE_models_4$md_0, method = 'sgv', data=dd, partial = T)
+
+#plot
+png("3_output/figures/r2/AMRE_r2beta_md_0.png", width = 800, height = 500, units = "px", pointsize = 12)
+plot(AMRE_r2beta_md_0, maxcov=10)
+dev.off() 
+
+#Spread to combine with other models in a single data frame
+AMRE_r2beta_md_0<-spread(AMRE_r2beta_md_0[c(1,6)], Effect, Rsq)
+AMRE_r2beta_md_0$response<-"AMRE"
+AMRE_r2beta_md_0$name<-"AMRE_md_0"
+AMRE_r2beta_md_0<-dplyr::select(AMRE_r2beta_md_0, "response", "name", "Model", 1:ncol(AMRE_r2beta_md_0))
+
+
+dd<-d3%>%filter(SS_lidar_timelag==-1)
+AMRE_r2beta_md_1<-r2beta(model = AMRE_models_4$md_1, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+AMRE_r2beta_md_1<-spread(AMRE_r2beta_md_1[c(1,6)], Effect, Rsq)
+AMRE_r2beta_md_1$response<-"AMRE"
+AMRE_r2beta_md_1$name<-"AMRE_md_1"
+AMRE_r2beta_md_1<-dplyr::select(AMRE_r2beta_md_1, "response", "name", "Model", 1:ncol(AMRE_r2beta_md_1))
+
+dd<-d3%>%filter(SS_lidar_timelag==-2)
+AMRE_r2beta_md_2<-r2beta(model = AMRE_models_4$md_2, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+AMRE_r2beta_md_2<-spread(AMRE_r2beta_md_2[c(1,6)], Effect, Rsq)
+AMRE_r2beta_md_2$response<-"AMRE"
+AMRE_r2beta_md_2$name<-"AMRE_md_2"
+AMRE_r2beta_md_2<-dplyr::select(AMRE_r2beta_md_2, "response", "name", "Model", 1:ncol(AMRE_r2beta_md_2))
+
+dd<-d3%>%filter(SS_lidar_timelag==-3)
+AMRE_r2beta_md_3<-r2beta(model = AMRE_models_4$md_3, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+AMRE_r2beta_md_3<-spread(AMRE_r2beta_md_3[c(1,6)], Effect, Rsq)
+AMRE_r2beta_md_3$response<-"AMRE"
+AMRE_r2beta_md_3$name<-"AMRE_md_3"
+AMRE_r2beta_md_3<-dplyr::select(AMRE_r2beta_md_3, "response", "name", "Model", 1:ncol(AMRE_r2beta_md_3))
+
+dd<-d3%>%filter(SS_lidar_timelag==-4)
+AMRE_r2beta_md_4<-r2beta(model = AMRE_models_4$md_4, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+AMRE_r2beta_md_4<-spread(AMRE_r2beta_md_4[c(1,6)], Effect, Rsq)
+AMRE_r2beta_md_4$response<-"AMRE"
+AMRE_r2beta_md_4$name<-"AMRE_md_4"
+AMRE_r2beta_md_4<-dplyr::select(AMRE_r2beta_md_4, "response", "name", "Model", 1:ncol(AMRE_r2beta_md_4))
+
+dd<-d3%>%filter(SS_lidar_timelag==-5)
+AMRE_r2beta_md_5<-r2beta(model = AMRE_models_4$md_5, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+AMRE_r2beta_md_5<-spread(AMRE_r2beta_md_5[c(1,6)], Effect, Rsq)
+AMRE_r2beta_md_5$response<-"AMRE"
+AMRE_r2beta_md_5$name<-"AMRE_md_5"
+AMRE_r2beta_md_5<-dplyr::select(AMRE_r2beta_md_5, "response", "name", "Model", 1:ncol(AMRE_r2beta_md_5))
+
+dd<-d3%>%filter(SS_lidar_timelag==-6)
+AMRE_r2beta_md_6<-r2beta(model = AMRE_models_4$md_6, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+AMRE_r2beta_md_6<-spread(AMRE_r2beta_md_6[c(1,6)], Effect, Rsq)
+AMRE_r2beta_md_6$response<-"AMRE"
+AMRE_r2beta_md_6$name<-"AMRE_md_6"
+AMRE_r2beta_md_6<-dplyr::select(AMRE_r2beta_md_6, "response", "name", "Model", 1:ncol(AMRE_r2beta_md_6))
+
+dd<-d3%>%filter(SS_lidar_timelag==-7)
+AMRE_r2beta_md_7<-r2beta(model = AMRE_models_4$md_7, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+AMRE_r2beta_md_7<-spread(AMRE_r2beta_md_7[c(1,6)], Effect, Rsq)
+AMRE_r2beta_md_7$response<-"AMRE"
+AMRE_r2beta_md_7$name<-"AMRE_md_7"
+AMRE_r2beta_md_7<-dplyr::select(AMRE_r2beta_md_7, "response", "name", "Model", 1:ncol(AMRE_r2beta_md_7))
+
+dd<-d3%>%filter(SS_lidar_timelag==-8)
+AMRE_r2beta_md_8<-r2beta(model = AMRE_models_4$md_8, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+AMRE_r2beta_md_8<-spread(AMRE_r2beta_md_8[c(1,6)], Effect, Rsq)
+AMRE_r2beta_md_8$response<-"AMRE"
+AMRE_r2beta_md_8$name<-"AMRE_md_8"
+AMRE_r2beta_md_8<-dplyr::select(AMRE_r2beta_md_8, "response", "name", "Model", 1:ncol(AMRE_r2beta_md_8))
+
+dd<-d3%>%filter(SS_lidar_timelag==-9)
+AMRE_r2beta_md_9<-r2beta(model = AMRE_models_4$md_9, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+AMRE_r2beta_md_9<-spread(AMRE_r2beta_md_9[c(1,6)], Effect, Rsq)
+AMRE_r2beta_md_9$response<-"AMRE"
+AMRE_r2beta_md_9$name<-"AMRE_md_9"
+AMRE_r2beta_md_9<-dplyr::select(AMRE_r2beta_md_9, "response", "name", "Model", 1:ncol(AMRE_r2beta_md_9))
+
+dd<-d3%>%filter(SS_lidar_timelag==-10)
+AMRE_r2beta_md_10<-r2beta(model = AMRE_models_4$md_10, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+AMRE_r2beta_md_10<-spread(AMRE_r2beta_md_10[c(1,6)], Effect, Rsq)
+AMRE_r2beta_md_10$response<-"AMRE"
+AMRE_r2beta_md_10$name<-"AMRE_md_10"
+AMRE_r2beta_md_10<-dplyr::select(AMRE_r2beta_md_10, "response", "name", "Model", 1:ncol(AMRE_r2beta_md_10))
+
+dd<-d3%>%filter(SS_lidar_timelag==-11)
+AMRE_r2beta_md_11<-r2beta(model = AMRE_models_4$md_11, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+AMRE_r2beta_md_11<-spread(AMRE_r2beta_md_11[c(1,6)], Effect, Rsq)
+AMRE_r2beta_md_11$response<-"AMRE"
+AMRE_r2beta_md_11$name<-"AMRE_md_11"
+AMRE_r2beta_md_11<-dplyr::select(AMRE_r2beta_md_11, "response", "name", "Model", 1:ncol(AMRE_r2beta_md_11))
+
+dd<-d3%>%filter(SS_lidar_timelag==-12)
+AMRE_r2beta_md_12<-r2beta(model = AMRE_models_4$md_12, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+AMRE_r2beta_md_12<-spread(AMRE_r2beta_md_12[c(1,6)], Effect, Rsq)
+AMRE_r2beta_md_12$response<-"AMRE"
+AMRE_r2beta_md_12$name<-"AMRE_md_12"
+AMRE_r2beta_md_12<-dplyr::select(AMRE_r2beta_md_12, "response", "name", "Model", 1:ncol(AMRE_r2beta_md_12))
+
+dd<-d3%>%filter(SS_lidar_timelag==-13)
+AMRE_r2beta_md_13<-r2beta(model = AMRE_models_4$md_13, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+AMRE_r2beta_md_13<-spread(AMRE_r2beta_md_13[c(1,6)], Effect, Rsq)
+AMRE_r2beta_md_13$response<-"AMRE"
+AMRE_r2beta_md_13$name<-"AMRE_md_13"
+AMRE_r2beta_md_13<-dplyr::select(AMRE_r2beta_md_13, "response", "name", "Model", 1:ncol(AMRE_r2beta_md_13))
+
+dd<-d3%>%filter(SS_lidar_timelag==-14)
+AMRE_r2beta_md_14<-r2beta(model = AMRE_models_4$md_14, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+AMRE_r2beta_md_14<-spread(AMRE_r2beta_md_14[c(1,6)], Effect, Rsq)
+AMRE_r2beta_md_14$response<-"AMRE"
+AMRE_r2beta_md_14$name<-"AMRE_md_14"
+AMRE_r2beta_md_14<-dplyr::select(AMRE_r2beta_md_14, "response", "name", "Model", 1:ncol(AMRE_r2beta_md_14))
+
+dd<-d3%>%filter(SS_lidar_timelag==-15)
+AMRE_r2beta_md_15<-r2beta(model = AMRE_models_4$md_15, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+AMRE_r2beta_md_15<-spread(AMRE_r2beta_md_15[c(1,6)], Effect, Rsq)
+AMRE_r2beta_md_15$response<-"AMRE"
+AMRE_r2beta_md_15$name<-"AMRE_md_15"
+AMRE_r2beta_md_15<-dplyr::select(AMRE_r2beta_md_15, "response", "name", "Model", 1:ncol(AMRE_r2beta_md_15))
+
+
+colnames(AMRE_r2beta_md_15)=colnames(AMRE_r2beta_md_14)=colnames(AMRE_r2beta_md_13)=colnames(AMRE_r2beta_md_12)=colnames(AMRE_r2beta_md_11)=colnames(AMRE_r2beta_md_10)=colnames(AMRE_r2beta_md_9)=colnames(AMRE_r2beta_md_8)=colnames(AMRE_r2beta_md_7)=colnames(AMRE_r2beta_md_6)=colnames(AMRE_r2beta_md_5)=colnames(AMRE_r2beta_md_4)=colnames(AMRE_r2beta_md_3)=colnames(AMRE_r2beta_md_2)=colnames(AMRE_r2beta_md_1)=colnames(AMRE_r2beta_md_0)=colnames(AMRE_r2beta_md_1)=colnames(AMRE_r2beta_md_0)
+
+AMRE_r2beta_all<-rbind(AMRE_r2beta_md_0, AMRE_r2beta_md_1, AMRE_r2beta_md_2, AMRE_r2beta_md_3, AMRE_r2beta_md_4, AMRE_r2beta_md_5, AMRE_r2beta_md_6, AMRE_r2beta_md_7, AMRE_r2beta_md_8, AMRE_r2beta_md_9, AMRE_r2beta_md_10, AMRE_r2beta_md_11, AMRE_r2beta_md_12, AMRE_r2beta_md_13, AMRE_r2beta_md_14, AMRE_r2beta_md_15
+)
+
+lag<-c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)
+
+AMRE_r2beta_all<-cbind(lag, AMRE_r2beta_all)
+
+save(AMRE_r2beta_all, file="2_pipeline/store/models/AMRE_r2beta_all.rData")
+
+
+```
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="semi partial r2 values of fixed effects"}
+knitr::include_graphics("3_output/figures/r2/AMRE_r2beta_md_0.png", dpi = 300)
+```
+
+```{r  echo=FALSE, results="asis"}
+load("2_pipeline/store/models/AMRE_r2beta_all.rData")
+
+knitr::kable(AMRE_r2beta_all[c(1:ncol(AMRE_r2beta_all))], caption = 'r2 values of fixed effects in top model', row.names = FALSE) %>%
+  kable_classic_2(font_size = 10,  full_width= F, position="center") %>%
+  scroll_box(width = "100%", height="100%")
+```
+
 
 

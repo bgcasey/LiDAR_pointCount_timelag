@@ -943,4 +943,179 @@ knitr::kable(SWTH_models_AUC_4) %>%
 ```
 
 
+### Estimate relative importance of predictors
+
+Calculate semi partial R squared values for all fixed effects using the `r2glmmm` package. 
+
+```{r eval=FALSE}
+
+library(r2glmm)
+load("2_pipeline/store/models/SWTH_models_4.rData")
+
+load("2_pipeline/tmp/sdm_d3.rData")
+d3<-sdm_d3
+
+
+
+dd<-d3%>%filter(SS_lidar_timelag==0)
+SWTH_r2beta_md_0<-r2beta(model = SWTH_models_4$md_0, method = 'sgv', data=dd, partial = T)
+
+#plot
+png("3_output/figures/r2/SWTH_r2beta_md_0.png", width = 800, height = 500, units = "px", pointsize = 12)
+plot(SWTH_r2beta_md_0, maxcov=10)
+dev.off() 
+
+#Spread to combine with other models in a single data frame
+SWTH_r2beta_md_0<-spread(SWTH_r2beta_md_0[c(1,6)], Effect, Rsq)
+SWTH_r2beta_md_0$response<-"SWTH"
+SWTH_r2beta_md_0$name<-"SWTH_md_0"
+SWTH_r2beta_md_0<-dplyr::select(SWTH_r2beta_md_0, "response", "name", "Model", 1:ncol(SWTH_r2beta_md_0))
+
+
+dd<-d3%>%filter(SS_lidar_timelag==-1)
+SWTH_r2beta_md_1<-r2beta(model = SWTH_models_4$md_1, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+SWTH_r2beta_md_1<-spread(SWTH_r2beta_md_1[c(1,6)], Effect, Rsq)
+SWTH_r2beta_md_1$response<-"SWTH"
+SWTH_r2beta_md_1$name<-"SWTH_md_1"
+SWTH_r2beta_md_1<-dplyr::select(SWTH_r2beta_md_1, "response", "name", "Model", 1:ncol(SWTH_r2beta_md_1))
+
+dd<-d3%>%filter(SS_lidar_timelag==-2)
+SWTH_r2beta_md_2<-r2beta(model = SWTH_models_4$md_2, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+SWTH_r2beta_md_2<-spread(SWTH_r2beta_md_2[c(1,6)], Effect, Rsq)
+SWTH_r2beta_md_2$response<-"SWTH"
+SWTH_r2beta_md_2$name<-"SWTH_md_2"
+SWTH_r2beta_md_2<-dplyr::select(SWTH_r2beta_md_2, "response", "name", "Model", 1:ncol(SWTH_r2beta_md_2))
+
+dd<-d3%>%filter(SS_lidar_timelag==-3)
+SWTH_r2beta_md_3<-r2beta(model = SWTH_models_4$md_3, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+SWTH_r2beta_md_3<-spread(SWTH_r2beta_md_3[c(1,6)], Effect, Rsq)
+SWTH_r2beta_md_3$response<-"SWTH"
+SWTH_r2beta_md_3$name<-"SWTH_md_3"
+SWTH_r2beta_md_3<-dplyr::select(SWTH_r2beta_md_3, "response", "name", "Model", 1:ncol(SWTH_r2beta_md_3))
+
+dd<-d3%>%filter(SS_lidar_timelag==-4)
+SWTH_r2beta_md_4<-r2beta(model = SWTH_models_4$md_4, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+SWTH_r2beta_md_4<-spread(SWTH_r2beta_md_4[c(1,6)], Effect, Rsq)
+SWTH_r2beta_md_4$response<-"SWTH"
+SWTH_r2beta_md_4$name<-"SWTH_md_4"
+SWTH_r2beta_md_4<-dplyr::select(SWTH_r2beta_md_4, "response", "name", "Model", 1:ncol(SWTH_r2beta_md_4))
+
+dd<-d3%>%filter(SS_lidar_timelag==-5)
+SWTH_r2beta_md_5<-r2beta(model = SWTH_models_4$md_5, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+SWTH_r2beta_md_5<-spread(SWTH_r2beta_md_5[c(1,6)], Effect, Rsq)
+SWTH_r2beta_md_5$response<-"SWTH"
+SWTH_r2beta_md_5$name<-"SWTH_md_5"
+SWTH_r2beta_md_5<-dplyr::select(SWTH_r2beta_md_5, "response", "name", "Model", 1:ncol(SWTH_r2beta_md_5))
+
+dd<-d3%>%filter(SS_lidar_timelag==-6)
+SWTH_r2beta_md_6<-r2beta(model = SWTH_models_4$md_6, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+SWTH_r2beta_md_6<-spread(SWTH_r2beta_md_6[c(1,6)], Effect, Rsq)
+SWTH_r2beta_md_6$response<-"SWTH"
+SWTH_r2beta_md_6$name<-"SWTH_md_6"
+SWTH_r2beta_md_6<-dplyr::select(SWTH_r2beta_md_6, "response", "name", "Model", 1:ncol(SWTH_r2beta_md_6))
+
+dd<-d3%>%filter(SS_lidar_timelag==-7)
+SWTH_r2beta_md_7<-r2beta(model = SWTH_models_4$md_7, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+SWTH_r2beta_md_7<-spread(SWTH_r2beta_md_7[c(1,6)], Effect, Rsq)
+SWTH_r2beta_md_7$response<-"SWTH"
+SWTH_r2beta_md_7$name<-"SWTH_md_7"
+SWTH_r2beta_md_7<-dplyr::select(SWTH_r2beta_md_7, "response", "name", "Model", 1:ncol(SWTH_r2beta_md_7))
+
+dd<-d3%>%filter(SS_lidar_timelag==-8)
+SWTH_r2beta_md_8<-r2beta(model = SWTH_models_4$md_8, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+SWTH_r2beta_md_8<-spread(SWTH_r2beta_md_8[c(1,6)], Effect, Rsq)
+SWTH_r2beta_md_8$response<-"SWTH"
+SWTH_r2beta_md_8$name<-"SWTH_md_8"
+SWTH_r2beta_md_8<-dplyr::select(SWTH_r2beta_md_8, "response", "name", "Model", 1:ncol(SWTH_r2beta_md_8))
+
+dd<-d3%>%filter(SS_lidar_timelag==-9)
+SWTH_r2beta_md_9<-r2beta(model = SWTH_models_4$md_9, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+SWTH_r2beta_md_9<-spread(SWTH_r2beta_md_9[c(1,6)], Effect, Rsq)
+SWTH_r2beta_md_9$response<-"SWTH"
+SWTH_r2beta_md_9$name<-"SWTH_md_9"
+SWTH_r2beta_md_9<-dplyr::select(SWTH_r2beta_md_9, "response", "name", "Model", 1:ncol(SWTH_r2beta_md_9))
+
+dd<-d3%>%filter(SS_lidar_timelag==-10)
+SWTH_r2beta_md_10<-r2beta(model = SWTH_models_4$md_10, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+SWTH_r2beta_md_10<-spread(SWTH_r2beta_md_10[c(1,6)], Effect, Rsq)
+SWTH_r2beta_md_10$response<-"SWTH"
+SWTH_r2beta_md_10$name<-"SWTH_md_10"
+SWTH_r2beta_md_10<-dplyr::select(SWTH_r2beta_md_10, "response", "name", "Model", 1:ncol(SWTH_r2beta_md_10))
+
+dd<-d3%>%filter(SS_lidar_timelag==-11)
+SWTH_r2beta_md_11<-r2beta(model = SWTH_models_4$md_11, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+SWTH_r2beta_md_11<-spread(SWTH_r2beta_md_11[c(1,6)], Effect, Rsq)
+SWTH_r2beta_md_11$response<-"SWTH"
+SWTH_r2beta_md_11$name<-"SWTH_md_11"
+SWTH_r2beta_md_11<-dplyr::select(SWTH_r2beta_md_11, "response", "name", "Model", 1:ncol(SWTH_r2beta_md_11))
+
+dd<-d3%>%filter(SS_lidar_timelag==-12)
+SWTH_r2beta_md_12<-r2beta(model = SWTH_models_4$md_12, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+SWTH_r2beta_md_12<-spread(SWTH_r2beta_md_12[c(1,6)], Effect, Rsq)
+SWTH_r2beta_md_12$response<-"SWTH"
+SWTH_r2beta_md_12$name<-"SWTH_md_12"
+SWTH_r2beta_md_12<-dplyr::select(SWTH_r2beta_md_12, "response", "name", "Model", 1:ncol(SWTH_r2beta_md_12))
+
+dd<-d3%>%filter(SS_lidar_timelag==-13)
+SWTH_r2beta_md_13<-r2beta(model = SWTH_models_4$md_13, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+SWTH_r2beta_md_13<-spread(SWTH_r2beta_md_13[c(1,6)], Effect, Rsq)
+SWTH_r2beta_md_13$response<-"SWTH"
+SWTH_r2beta_md_13$name<-"SWTH_md_13"
+SWTH_r2beta_md_13<-dplyr::select(SWTH_r2beta_md_13, "response", "name", "Model", 1:ncol(SWTH_r2beta_md_13))
+
+dd<-d3%>%filter(SS_lidar_timelag==-14)
+SWTH_r2beta_md_14<-r2beta(model = SWTH_models_4$md_14, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+SWTH_r2beta_md_14<-spread(SWTH_r2beta_md_14[c(1,6)], Effect, Rsq)
+SWTH_r2beta_md_14$response<-"SWTH"
+SWTH_r2beta_md_14$name<-"SWTH_md_14"
+SWTH_r2beta_md_14<-dplyr::select(SWTH_r2beta_md_14, "response", "name", "Model", 1:ncol(SWTH_r2beta_md_14))
+
+dd<-d3%>%filter(SS_lidar_timelag==-15)
+SWTH_r2beta_md_15<-r2beta(model = SWTH_models_4$md_15, method = 'sgv', data=dd, partial = T)
+#Spread to combine with other models in a single data frame
+SWTH_r2beta_md_15<-spread(SWTH_r2beta_md_15[c(1,6)], Effect, Rsq)
+SWTH_r2beta_md_15$response<-"SWTH"
+SWTH_r2beta_md_15$name<-"SWTH_md_15"
+SWTH_r2beta_md_15<-dplyr::select(SWTH_r2beta_md_15, "response", "name", "Model", 1:ncol(SWTH_r2beta_md_15))
+
+
+colnames(SWTH_r2beta_md_15)=colnames(SWTH_r2beta_md_14)=colnames(SWTH_r2beta_md_13)=colnames(SWTH_r2beta_md_12)=colnames(SWTH_r2beta_md_11)=colnames(SWTH_r2beta_md_10)=colnames(SWTH_r2beta_md_9)=colnames(SWTH_r2beta_md_8)=colnames(SWTH_r2beta_md_7)=colnames(SWTH_r2beta_md_6)=colnames(SWTH_r2beta_md_5)=colnames(SWTH_r2beta_md_4)=colnames(SWTH_r2beta_md_3)=colnames(SWTH_r2beta_md_2)=colnames(SWTH_r2beta_md_1)=colnames(SWTH_r2beta_md_0)=colnames(SWTH_r2beta_md_1)=colnames(SWTH_r2beta_md_0)
+
+SWTH_r2beta_all<-rbind(SWTH_r2beta_md_0, SWTH_r2beta_md_1, SWTH_r2beta_md_2, SWTH_r2beta_md_3, SWTH_r2beta_md_4, SWTH_r2beta_md_5, SWTH_r2beta_md_6, SWTH_r2beta_md_7, SWTH_r2beta_md_8, SWTH_r2beta_md_9, SWTH_r2beta_md_10, SWTH_r2beta_md_11, SWTH_r2beta_md_12, SWTH_r2beta_md_13, SWTH_r2beta_md_14, SWTH_r2beta_md_15
+)
+
+lag<-c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)
+
+SWTH_r2beta_all<-cbind(lag, SWTH_r2beta_all)
+
+save(SWTH_r2beta_all, file="2_pipeline/store/models/SWTH_r2beta_all.rData")
+
+
+```
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="semi partial r2 values of fixed effects"}
+knitr::include_graphics("3_output/figures/r2/SWTH_r2beta_md_0.png", dpi = 300)
+```
+
+```{r  echo=FALSE, results="asis"}
+load("2_pipeline/store/models/SWTH_r2beta_all.rData")
+
+knitr::kable(SWTH_r2beta_all[c(1:ncol(SWTH_r2beta_all))], caption = 'r2 values of fixed effects in top model', row.names = FALSE) %>%
+  kable_classic_2(font_size = 10,  full_width= F, position="center") %>%
+  scroll_box(width = "100%", height="100%")
+```
 

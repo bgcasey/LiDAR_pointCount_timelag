@@ -1,9 +1,22 @@
 
+library(dplyr)
+library(lme4)
+library(car)
+library(MuMIn)
+library(raster)
+library(jtools)
+library(effects)
+library(DHARMa)
+library(pROC)
+
+
 load("2_pipeline/tmp/sdm_d3.rData")
 d3<-sdm_d3
 
 scaled_stack<-stackOpen("0_data/manual/spatialCov/scaled_cov/scaled_stack2.stk")
 names(scaled_stack)[78:97]<-c('ndvi_lag_19', 'ndvi_lag_18', 'ndvi_lag_17', 'ndvi_lag_16', 'ndvi_lag_15', 'ndvi_lag_14', 'ndvi_lag_13', 'ndvi_lag_12', 'ndvi_lag_11', 'ndvi_lag_10', 'ndvi_lag_9', 'ndvi_lag_8', 'ndvi_lag_7', 'ndvi_lag_6', 'ndvi_lag_5', 'ndvi_lag_4', 'ndvi_lag_3', 'ndvi_lag_2', 'ndvi_lag_1', 'ndvi_lag_0')
+
+
 
 ####################################################################################################################################
 ##AMRE##############################################################################################################################
@@ -2972,11 +2985,6 @@ md_15_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c
 WIWR_predictMap_m_15<-raster::predict(scaled_stack, md_15, re.form=NA, type='response')
 writeRaster(WIWR_predictMap_m_15,file="3_output/maps/predictedDistributions/WIWR/WIWR_predictMap_m_15", format="GTiff", overwrite=T)
 
-
-
-save(WIWR_auc_boot_all_lm, file="2_pipeline/store/models/WIWR_auc_boot_all_lm.rData")
-
-
 ####################################################################
 # save models
 WIWR_models_4<-list(md_0, md_1, md_2, md_3, md_4, md_5, md_6, md_7, md_8, md_9, md_10, md_11, md_12, md_13, md_14, md_15)
@@ -3619,7 +3627,7 @@ WTSP_models_AUC_4<-as.data.frame(rbind(md_0_meanAUC, md_1_meanAUC, md_2_meanAUC,
 #           #panel.background = element_rect(fill="white"),
 #           panel.grid.major = element_blank(),
 #           panel.grid.minor = element_blank(),
-legend.position="none")
+#legend.position="none")
 
 
 

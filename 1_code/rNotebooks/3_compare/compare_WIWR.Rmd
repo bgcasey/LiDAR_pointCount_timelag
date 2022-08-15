@@ -1,6 +1,6 @@
 ## WIWR
 
-```{r setup, include=FALSE, cache=FALSE}
+```{r include=FALSE, cache=FALSE}
 #Set root directory to R project root
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 ```
@@ -21,7 +21,7 @@ pre[class] {
 
 ### Load packages {-}
 
-```{r eval=FALSE, message = FALSE}
+```{r , message = FALSE}
 library(dplyr)
 library(ggplot2)
 library(raster)
@@ -29,9 +29,10 @@ library(spatialEco)
 library(sf)
 ```
 
+
 ### Compare lag stats {-}
 
-```{r eval=FALSE}
+```{r }
 load("2_pipeline/store/models/WIWR_models_AUC_4.rData")
 
 WIWR_models_AUC_4<-WIWR_models_AUC_4%>%
@@ -145,7 +146,7 @@ print(summary(WIWR_R2c_test))
 ### Compare predictive maps {-}
 
 #### Reclassify predictive maps {-}
-```{r eval=FALSE}
+```{r }
 # Load stack of predictive rasters
 WIWR_stack<-stackOpen("3_output/maps/predictedDistributions/WIWR/WIWR_stack.stk")
 
@@ -171,7 +172,7 @@ WIWR_stack_reclass<-brick("3_output/maps/predictedDistributions/WIWR/WIWR_stack_
 
 #### Pearson correlation of predictive maps {-}
 
-```{r eval=FALSE}
+```{r }
 WIWR_stack<-stackOpen("3_output/maps/predictedDistributions/WIWR/WIWR_stack.stk")
 
 predCor_0_01<-rasterCorrelation(WIWR_stack$WIWR_predictMap_m_00, WIWR_stack$WIWR_predictMap_m_01, s = 3, type = "pearson")
@@ -223,40 +224,46 @@ stackSave(WIWR_predCor_stack,file="3_output/maps/predictedDistributions/WIWR/pre
 
 #### Pearson correlation ~ forest age {-}
 
-```{r eval=FALSE}
+```{r }
 library(ggeffects)
 
 WIWR_predCor_stack<-stackOpen("3_output/maps/predictedDistributions/WIWR/predCor/WIWR_predCor_stack.stk")
 
 lidar_forestAge_raster<-raster("0_data/manual/spatialCov/CASFRI/lidar_forestAge_raster.tif")
+ageClass_00<-raster("0_data/manual/spatialCov/CASFRI/ageClassRasters/ageClass_00.tif")
 
 lidar_forestAge_raster_pr<-projectRaster(lidar_forestAge_raster, crs=WIWR_predCor_stack)
+ageClass_00_pr<-projectRaster(ageClass_00, method='ngb',crs=WIWR_predCor_stack)
 
 #study area
 load("0_data/manual/bird/studyarea_big.rData")
- 
-pc<- raster::crop(WIWR_predCor_stack, as_Spatial(st_geometry(c_bb))) 
-fa<- raster::crop(lidar_forestAge_raster_pr, as_Spatial(st_geometry(c_bb))) 
 
+pc<- raster::crop(WIWR_predCor_stack, as_Spatial(st_geometry(c_bb)))
+fa<- raster::crop(lidar_forestAge_raster_pr, as_Spatial(st_geometry(c_bb)))
+ac<- raster::crop(ageClass_00_pr, as_Spatial(st_geometry(c_bb)))
+ac<- raster::crop(ageClass_00_pr, as_Spatial(st_geometry(c_bb)))
 #resample so they have the same resolution
 pc_rs<-resample(pc, fa)
 
 # Stack covariates
-fa_co <- stack(pc_rs, fa)
+fa_co_ac <- stack(pc_rs, fa, ac)
 
-WIWR_fa_co_df<-as.data.frame(na.omit(values(fa_co)))%>%
-  dplyr::rename(forest_age=lidar_forestAge_raster)
-          
-save(WIWR_fa_co_df, file="2_pipeline/store/WIWR_fa_co_df.rData")
+WIWR_fa_co_ac_df<-as.data.frame(na.omit(values(fa_co_ac)))%>%
+  dplyr::rename(forest_age=lidar_forestAge_raster)%>%
+  dplyr::rename(forest_age_class=ageClass_00)
 
-load("2_pipeline/store/WIWR_fa_co_df.rData")
+WIWR_fa_co_ac_df$forest_age_class<-ordered(as.factor(WIWR_fa_co_ac_df$forest_age_class))
+
+save(WIWR_fa_co_ac_df, file="2_pipeline/store/WIWR_fa_co_ac_df.rData")
+
+load("2_pipeline/store/WIWR_fa_co_ac_df.rData")
 
 
 #######################################################################################
 ############### Plot Effect ######################################################
 #######################################################################################
-lm_fa_00to01 <- lm(predCor_0_01 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to01, terms="forest_age [all]", data=WIWR_fa_co_df)
+lm_fa_00to01 <- lm(predCor_0_01 ~ forest_age, data=WIWR_fa_co_ac_df)
+t<-ggpredict(lm_fa_00to01, terms="forest_age [all]", data=WIWR_fa_co_ac_df)
 png("3_output/figures/timelag_stats/WIWR_lm_fa_00to01.png", width = 800, height = 600, units = "px", pointsize = 12)
 plot(t) + labs(
     x = "Forest age when LiDAR was acquired.", 
@@ -264,9 +271,35 @@ plot(t) + labs(
     title=""
   )
 dev.off()
+
+# age class
+lm_fac_00to01 <- lm(predCor_0_01 ~ forest_age_class, data=WIWR_fa_co_ac_df)
+ggplot(WIWR_fa_co_ac_df) +
+  aes(x = forest_age_class, y = predCor_0_01) +
+  geom_smooth(aes(x = unclass(forest_age_class), color = "1"), 
+              formula = y ~ x, 
+              method = lm, se = FALSE, show.legend = FALSE) +
+  labs(
+    x = "Forest age class", 
+    y = "Pearson correlation (r)")+
+    theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+         legend.title = element_blank())  
+  
+  ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_lm_fac_00to01.png"), width =8, height=5)
+
 #######################################################################################
-lm_fa_00to02 <- lm(predCor_0_02 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to02, terms="forest_age [all]", data=WIWR_fa_co_df)
+
+lm_fa_00to02 <- lm(predCor_0_02 ~ forest_age, data=WIWR_fa_co_ac_df)
+t<-ggpredict(lm_fa_00to02, terms="forest_age [all]", data=WIWR_fa_co_ac_df)
 png("3_output/figures/timelag_stats/WIWR_lm_fa_00to02.png", width = 800, height = 600, units = "px", pointsize = 12)
 plot(t) + labs(
     x = "Forest age when LiDAR was acquired.", 
@@ -274,9 +307,33 @@ plot(t) + labs(
     title=""
   )
 dev.off()
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+# age class
+lm_fac_00to02 <- lm(predCor_0_02 ~ forest_age_class, data=WIWR_fa_co_ac_df)
+ggplot(WIWR_fa_co_ac_df) +
+  aes(x = forest_age_class, y = predCor_0_02) +
+  geom_smooth(aes(x = unclass(forest_age_class), color = "1"), 
+              formula = y ~ x, 
+              method = lm, se = FALSE, show.legend = FALSE) +
+  labs(
+    x = "Forest age class", 
+    y = "Pearson correlation (r)")+
+    theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+         legend.title = element_blank())  
+ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_lm_fac_00to02.png"), width =8, height=5)  
+  
 #######################################################################################
-lm_fa_00to03 <- lm(predCor_0_03 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to03, terms="forest_age [all]", data=WIWR_fa_co_df)
+lm_fa_00to03 <- lm(predCor_0_03 ~ forest_age, data=WIWR_fa_co_ac_df)
+t<-ggpredict(lm_fa_00to03, terms="forest_age [all]", data=WIWR_fa_co_ac_df)
 png("3_output/figures/timelag_stats/WIWR_lm_fa_00to03.png", width = 800, height = 600, units = "px", pointsize = 12)
 plot(t) + labs(
     x = "Forest age when LiDAR was acquired.", 
@@ -284,9 +341,35 @@ plot(t) + labs(
     title=""
   )
 dev.off()
+
+# age class
+lm_fac_00to03 <- lm(predCor_0_03 ~ forest_age_class, data=WIWR_fa_co_ac_df)
+ggplot(WIWR_fa_co_ac_df) +
+  aes(x = forest_age_class, y = predCor_0_03) +
+  geom_smooth(aes(x = unclass(forest_age_class), color = "1"), 
+              formula = y ~ x, 
+              method = lm, se = FALSE, show.legend = FALSE) +
+  labs(
+    x = "Forest age class", 
+    y = "Pearson correlation (r)")+
+    theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+         legend.title = element_blank())  
+  
+  ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_lm_fac_00to03.png"), width =8, height=5)
+
+
 #######################################################################################
-lm_fa_00to04 <- lm(predCor_0_04 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to04, terms="forest_age [all]", data=WIWR_fa_co_df)
+lm_fa_00to04 <- lm(predCor_0_04 ~ forest_age, data=WIWR_fa_co_ac_df)
+t<-ggpredict(lm_fa_00to04, terms="forest_age [all]", data=WIWR_fa_co_ac_df)
 png("3_output/figures/timelag_stats/WIWR_lm_fa_00to04.png", width = 800, height = 600, units = "px", pointsize = 12)
 plot(t) + labs(
     x = "Forest age when LiDAR was acquired.", 
@@ -294,9 +377,32 @@ plot(t) + labs(
     title=""
   )
 dev.off()
+
+# age class
+lm_fac_00to04 <- lm(predCor_0_04 ~ forest_age_class, data=WIWR_fa_co_ac_df)
+ggplot(WIWR_fa_co_ac_df) +
+  aes(x = forest_age_class, y = predCor_0_04) +
+  geom_smooth(aes(x = unclass(forest_age_class), color = "1"), 
+              formula = y ~ x, 
+              method = lm, se = FALSE, show.legend = FALSE) +
+  labs(
+    x = "Forest age class", 
+    y = "Pearson correlation (r)")+
+    theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank())  
+  ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_lm_fac_00to04.png"), width =8, height=5)    
+  
 #######################################################################################
-lm_fa_00to05 <- lm(predCor_0_05 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to05, terms="forest_age [all]", data=WIWR_fa_co_df)
+lm_fa_00to05 <- lm(predCor_0_05 ~ forest_age, data=WIWR_fa_co_ac_df)
+t<-ggpredict(lm_fa_00to05, terms="forest_age [all]", data=WIWR_fa_co_ac_df)
 png("3_output/figures/timelag_stats/WIWR_lm_fa_00to05.png", width = 800, height = 600, units = "px", pointsize = 12)
 plot(t) + labs(
     x = "Forest age when LiDAR was acquired.", 
@@ -304,9 +410,36 @@ plot(t) + labs(
     title=""
   )
 dev.off()
+
+# age class
+lm_fac_00to05 <- lm(predCor_0_05 ~ forest_age_class, data=WIWR_fa_co_ac_df)
+ggplot(WIWR_fa_co_ac_df) +
+  aes(x = forest_age_class, y = predCor_0_05) +
+  geom_smooth(aes(x = unclass(forest_age_class), color = "1"), 
+              formula = y ~ x, 
+              method = lm, se = FALSE, show.legend = FALSE) +
+  labs(
+    x = "Forest age class", 
+    y = "Pearson correlation (r)")+
+    theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+         legend.title = element_blank())  
+  
+  ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_lm_fac_00to05.png"), width =8, height=5)
+  
+  
+  
 #######################################################################################
-lm_fa_00to06 <- lm(predCor_0_06 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to06, terms="forest_age [all]", data=WIWR_fa_co_df)
+lm_fa_00to06 <- lm(predCor_0_06 ~ forest_age, data=WIWR_fa_co_ac_df)
+t<-ggpredict(lm_fa_00to06, terms="forest_age [all]", data=WIWR_fa_co_ac_df)
 png("3_output/figures/timelag_stats/WIWR_lm_fa_00to06.png", width = 800, height = 600, units = "px", pointsize = 12)
 plot(t) + labs(
     x = "Forest age when LiDAR was acquired.", 
@@ -314,9 +447,39 @@ plot(t) + labs(
     title=""
   )
 dev.off()
-#######################################################################################
-lm_fa_00to07 <- lm(predCor_0_07 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to07, terms="forest_age [all]", data=WIWR_fa_co_df)
+
+# age class
+lm_fac_00to06 <- lm(predCor_0_06 ~ forest_age_class, data=WIWR_fa_co_ac_df)
+ggplot(WIWR_fa_co_ac_df) +
+  aes(x = forest_age_class, y = predCor_0_06) +
+  geom_smooth(aes(x = unclass(forest_age_class), color = "1"), 
+              formula = y ~ x, 
+              method = lm, se = FALSE, show.legend = FALSE) +
+  labs(
+    x = "Forest age class", 
+    y = "Pearson correlation (r)")+
+    theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+         legend.title = element_blank())  
+  
+  ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_lm_fac_00to06.png"), width =8, height=5)
+  
+  
+  
+  
+  
+  
+  #######################################################################################
+lm_fa_00to07 <- lm(predCor_0_07 ~ forest_age, data=WIWR_fa_co_ac_df)
+t<-ggpredict(lm_fa_00to07, terms="forest_age [all]", data=WIWR_fa_co_ac_df)
 png("3_output/figures/timelag_stats/WIWR_lm_fa_00to07.png", width = 800, height = 600, units = "px", pointsize = 12)
 plot(t) + labs(
     x = "Forest age when LiDAR was acquired.", 
@@ -324,9 +487,38 @@ plot(t) + labs(
     title=""
   )
 dev.off()
-#######################################################################################
-lm_fa_00to08 <- lm(predCor_0_08 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to08, terms="forest_age [all]", data=WIWR_fa_co_df)
+
+# age class
+lm_fac_00to07 <- lm(predCor_0_07 ~ forest_age_class, data=WIWR_fa_co_ac_df)
+ggplot(WIWR_fa_co_ac_df) +
+  aes(x = forest_age_class, y = predCor_0_07) +
+  geom_smooth(aes(x = unclass(forest_age_class), color = "1"), 
+              formula = y ~ x, 
+              method = lm, se = FALSE, show.legend = FALSE) +
+  labs(
+    x = "Forest age class", 
+    y = "Pearson correlation (r)")+
+    theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+         legend.title = element_blank())  
+  
+  ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_lm_fac_00to07.png"), width =8, height=5)
+  
+  
+  
+  
+  
+  #######################################################################################
+lm_fa_00to08 <- lm(predCor_0_08 ~ forest_age, data=WIWR_fa_co_ac_df)
+t<-ggpredict(lm_fa_00to08, terms="forest_age [all]", data=WIWR_fa_co_ac_df)
 png("3_output/figures/timelag_stats/WIWR_lm_fa_00to08.png", width = 800, height = 600, units = "px", pointsize = 12)
 plot(t) + labs(
     x = "Forest age when LiDAR was acquired.", 
@@ -334,9 +526,37 @@ plot(t) + labs(
     title=""
   )
 dev.off()
-#######################################################################################
-lm_fa_00to09 <- lm(predCor_0_09 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to09, terms="forest_age [all]", data=WIWR_fa_co_df)
+
+# age class
+lm_fac_00to08 <- lm(predCor_0_08 ~ forest_age_class, data=WIWR_fa_co_ac_df)
+ggplot(WIWR_fa_co_ac_df) +
+  aes(x = forest_age_class, y = predCor_0_08) +
+  geom_smooth(aes(x = unclass(forest_age_class), color = "1"), 
+              formula = y ~ x, 
+              method = lm, se = FALSE, show.legend = FALSE) +
+  labs(
+    x = "Forest age class", 
+    y = "Pearson correlation (r)")+
+    theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+         legend.title = element_blank())  
+  
+  ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_lm_fac_00to08.png"), width =8, height=5)
+  
+  
+  
+  
+  #######################################################################################
+lm_fa_00to09 <- lm(predCor_0_09 ~ forest_age, data=WIWR_fa_co_ac_df)
+t<-ggpredict(lm_fa_00to09, terms="forest_age [all]", data=WIWR_fa_co_ac_df)
 png("3_output/figures/timelag_stats/WIWR_lm_fa_00to09.png", width = 800, height = 600, units = "px", pointsize = 12)
 plot(t) + labs(
     x = "Forest age when LiDAR was acquired.", 
@@ -344,9 +564,37 @@ plot(t) + labs(
     title=""
   )
 dev.off()
-#######################################################################################
-lm_fa_00to10 <- lm(predCor_0_10 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to10, terms="forest_age [all]", data=WIWR_fa_co_df)
+
+# age class
+lm_fac_00to09 <- lm(predCor_0_09 ~ forest_age_class, data=WIWR_fa_co_ac_df)
+ggplot(WIWR_fa_co_ac_df) +
+  aes(x = forest_age_class, y = predCor_0_09) +
+  geom_smooth(aes(x = unclass(forest_age_class), color = "1"), 
+              formula = y ~ x, 
+              method = lm, se = FALSE, show.legend = FALSE) +
+  labs(
+    x = "Forest age class", 
+    y = "Pearson correlation (r)")+
+    theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+         legend.title = element_blank())  
+  
+  ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_lm_fac_00to09.png"), width =8, height=5)
+  
+  
+  
+  
+  #######################################################################################
+lm_fa_00to10 <- lm(predCor_0_10 ~ forest_age, data=WIWR_fa_co_ac_df)
+t<-ggpredict(lm_fa_00to10, terms="forest_age [all]", data=WIWR_fa_co_ac_df)
 png("3_output/figures/timelag_stats/WIWR_lm_fa_00to10.png", width = 800, height = 600, units = "px", pointsize = 12)
 plot(t) + labs(
     x = "Forest age when LiDAR was acquired.", 
@@ -354,9 +602,37 @@ plot(t) + labs(
     title=""
   )
 dev.off()
-#######################################################################################
-lm_fa_00to11 <- lm(predCor_0_11 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to11, terms="forest_age [all]", data=WIWR_fa_co_df)
+
+# age class
+lm_fac_00to10 <- lm(predCor_0_10 ~ forest_age_class, data=WIWR_fa_co_ac_df)
+ggplot(WIWR_fa_co_ac_df) +
+  aes(x = forest_age_class, y = predCor_0_10) +
+  geom_smooth(aes(x = unclass(forest_age_class), color = "1"), 
+              formula = y ~ x, 
+              method = lm, se = FALSE, show.legend = FALSE) +
+  labs(
+    x = "Forest age class", 
+    y = "Pearson correlation (r)")+
+    theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+         legend.title = element_blank())  
+  
+  ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_lm_fac_00to10.png"), width =8, height=5)
+  
+  
+  
+  
+  #######################################################################################
+lm_fa_00to11 <- lm(predCor_0_11 ~ forest_age, data=WIWR_fa_co_ac_df)
+t<-ggpredict(lm_fa_00to11, terms="forest_age [all]", data=WIWR_fa_co_ac_df)
 png("3_output/figures/timelag_stats/WIWR_lm_fa_00to11.png", width = 800, height = 600, units = "px", pointsize = 12)
 plot(t) + labs(
     x = "Forest age when LiDAR was acquired.", 
@@ -364,9 +640,37 @@ plot(t) + labs(
     title=""
   )
 dev.off()
-#######################################################################################
-lm_fa_00to12 <- lm(predCor_0_12 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to12, terms="forest_age [all]", data=WIWR_fa_co_df)
+
+# age class
+lm_fac_00to11 <- lm(predCor_0_11 ~ forest_age_class, data=WIWR_fa_co_ac_df)
+ggplot(WIWR_fa_co_ac_df) +
+  aes(x = forest_age_class, y = predCor_0_11) +
+  geom_smooth(aes(x = unclass(forest_age_class), color = "1"), 
+              formula = y ~ x, 
+              method = lm, se = FALSE, show.legend = FALSE) +
+  labs(
+    x = "Forest age class", 
+    y = "Pearson correlation (r)")+
+    theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+         legend.title = element_blank())  
+  
+  ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_lm_fac_00to11.png"), width =8, height=5)
+  
+  
+  
+  
+  #######################################################################################
+lm_fa_00to12 <- lm(predCor_0_12 ~ forest_age, data=WIWR_fa_co_ac_df)
+t<-ggpredict(lm_fa_00to12, terms="forest_age [all]", data=WIWR_fa_co_ac_df)
 png("3_output/figures/timelag_stats/WIWR_lm_fa_00to12.png", width = 800, height = 600, units = "px", pointsize = 12)
 plot(t) + labs(
     x = "Forest age when LiDAR was acquired.", 
@@ -374,9 +678,37 @@ plot(t) + labs(
     title=""
   )
 dev.off()
-#######################################################################################
-lm_fa_00to13 <- lm(predCor_0_13 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to13, terms="forest_age [all]", data=WIWR_fa_co_df)
+
+# age class
+lm_fac_00to12 <- lm(predCor_0_12 ~ forest_age_class, data=WIWR_fa_co_ac_df)
+ggplot(WIWR_fa_co_ac_df) +
+  aes(x = forest_age_class, y = predCor_0_12) +
+  geom_smooth(aes(x = unclass(forest_age_class), color = "1"), 
+              formula = y ~ x, 
+              method = lm, se = FALSE, show.legend = FALSE) +
+  labs(
+    x = "Forest age class", 
+    y = "Pearson correlation (r)")+
+    theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+         legend.title = element_blank())  
+  
+  ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_lm_fac_00to12.png"), width =8, height=5)
+  
+  
+  
+  
+  #######################################################################################
+lm_fa_00to13 <- lm(predCor_0_13 ~ forest_age, data=WIWR_fa_co_ac_df)
+t<-ggpredict(lm_fa_00to13, terms="forest_age [all]", data=WIWR_fa_co_ac_df)
 png("3_output/figures/timelag_stats/WIWR_lm_fa_00to13.png", width = 800, height = 600, units = "px", pointsize = 12)
 plot(t) + labs(
     x = "Forest age when LiDAR was acquired.", 
@@ -384,9 +716,36 @@ plot(t) + labs(
     title=""
   )
 dev.off()
-#######################################################################################
-lm_fa_00to14 <- lm(predCor_0_14 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to14, terms="forest_age [all]", data=WIWR_fa_co_df)
+
+# age class
+lm_fac_00to13 <- lm(predCor_0_13 ~ forest_age_class, data=WIWR_fa_co_ac_df)
+ggplot(WIWR_fa_co_ac_df) +
+  aes(x = forest_age_class, y = predCor_0_13) +
+  geom_smooth(aes(x = unclass(forest_age_class), color = "1"), 
+              formula = y ~ x, 
+              method = lm, se = FALSE, show.legend = FALSE) +
+  labs(
+    x = "Forest age class", 
+    y = "Pearson correlation (r)")+
+    theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+         legend.title = element_blank())  
+  
+  ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_lm_fac_00to13.png"), width =8, height=5)
+
+  
+  
+  #######################################################################################
+lm_fa_00to14 <- lm(predCor_0_14 ~ forest_age, data=WIWR_fa_co_ac_df)
+t<-ggpredict(lm_fa_00to14, terms="forest_age [all]", data=WIWR_fa_co_ac_df)
 png("3_output/figures/timelag_stats/WIWR_lm_fa_00to14.png", width = 800, height = 600, units = "px", pointsize = 12)
 plot(t) + labs(
     x = "Forest age when LiDAR was acquired.", 
@@ -394,9 +753,36 @@ plot(t) + labs(
     title=""
   )
 dev.off()
-#######################################################################################
-lm_fa_00to15 <- lm(predCor_0_15 ~ forest_age, data=WIWR_fa_co_df)
-t<-ggpredict(lm_fa_00to15, terms="forest_age [all]", data=WIWR_fa_co_df)
+
+# age class
+lm_fac_00to14 <- lm(predCor_0_14 ~ forest_age_class, data=WIWR_fa_co_ac_df)
+ggplot(WIWR_fa_co_ac_df) +
+  aes(x = forest_age_class, y = predCor_0_14) +
+  geom_smooth(aes(x = unclass(forest_age_class), color = "1"), 
+              formula = y ~ x, 
+              method = lm, se = FALSE, show.legend = FALSE) +
+  labs(
+    x = "Forest age class", 
+    y = "Pearson correlation (r)")+
+    theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+         legend.title = element_blank())  
+  
+  ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_lm_fac_00to14.png"), width =8, height=5)
+  
+  
+  
+  #######################################################################################
+lm_fa_00to15 <- lm(predCor_0_15 ~ forest_age, data=WIWR_fa_co_ac_df)
+t<-ggpredict(lm_fa_00to15, terms="forest_age [all]", data=WIWR_fa_co_ac_df)
 png("3_output/figures/timelag_stats/WIWR_lm_fa_00to15.png", width = 800, height = 600, units = "px", pointsize = 12)
 plot(t) + labs(
     x = "Forest age when LiDAR was acquired.", 
@@ -404,11 +790,39 @@ plot(t) + labs(
     title=""
   )
 dev.off()
+
+# age class
+lm_fac_00to15 <- lm(predCor_0_15 ~ forest_age_class, data=WIWR_fa_co_ac_df)
+ggplot(WIWR_fa_co_ac_df) +
+  aes(x = forest_age_class, y = predCor_0_15) +
+  geom_smooth(aes(x = unclass(forest_age_class), color = "1"), 
+              formula = y ~ x, 
+              method = lm, se = FALSE, show.legend = FALSE) +
+  labs(
+    x = "Forest age class", 
+    y = "Pearson correlation (r)")+
+    theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+         legend.title = element_blank())  
+  
+  ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_lm_fac_00to15.png"), width =8, height=5)
+  
+
 #######################################################################################
 #### save models
 #######################################################################################
 
 # save models
+
+# forest age
 WIWR_predCor_to_forestAge <-list(lm_fa_00to01, lm_fa_00to02, lm_fa_00to03, lm_fa_00to04, lm_fa_00to05, lm_fa_00to06, lm_fa_00to07, lm_fa_00to08, lm_fa_00to09, lm_fa_00to10, lm_fa_00to11, lm_fa_00to12, lm_fa_00to13, lm_fa_00to14, lm_fa_00to15)
 names(WIWR_predCor_to_forestAge) <- c("lm_fa_00to01", "lm_fa_00to02", "lm_fa_00to03", "lm_fa_00to04", "lm_fa_00to05", "lm_fa_00to06", "lm_fa_00to07", "lm_fa_00to08", "lm_fa_00to09", "lm_fa_00to10", "lm_fa_00to11", "lm_fa_00to12", "lm_fa_00to13", "lm_fa_00to14", "lm_fa_00to15")
 save(WIWR_predCor_to_forestAge, file="2_pipeline/store/models/WIWR_predCor_to_forestAge.rData")
@@ -419,20 +833,31 @@ library(broom)
 WIWR_predCor_to_forestAge_df<-purrr::map_df(WIWR_predCor_to_forestAge, broom::glance, .id = 'formula')
 save(WIWR_predCor_to_forestAge_df, file="2_pipeline/store/models/WIWR_predCor_to_forestAge_df.rData")
 
+# forest age class
+WIWR_predCor_to_forestAgeClass<-list(lm_fac_00to01, lm_fac_00to02, lm_fac_00to03, lm_fac_00to04, lm_fac_00to05, lm_fac_00to06, lm_fac_00to07, lm_fac_00to08, lm_fac_00to09, lm_fac_00to10, lm_fac_00to11, lm_fac_00to12, lm_fac_00to13, lm_fac_00to14, lm_fac_00to15)
+names(WIWR_predCor_to_forestAgeClass) <- c("lm_fac_00to01", "lm_fac_00to02", "lm_fac_00to03", "lm_fac_00to04", "lm_fac_00to05", "lm_fac_00to06", "lm_fac_00to07", "lm_fac_00to08", "lm_fac_00to09", "lm_fac_00to10", "lm_fac_00to11", "lm_fac_00to12", "lm_fac_00to13", "lm_fac_00to14", "lm_fac_00to15")
+save(WIWR_predCor_to_forestAgeClass, file="2_pipeline/store/models/WIWR_predCor_to_forestAgeClass.rData")
+
+
+library(purrr)
+library(broom)
+WIWR_predCor_to_forestAgeClass_df<-purrr::map_df(WIWR_predCor_to_forestAgeClass, broom::glance, .id = 'formula')
+save(WIWR_predCor_to_forestAgeClass_df, file="2_pipeline/store/models/WIWR_predCor_to_forestAgeClass_df.rData")
+
 
 #######################################################################################
 #### Plot all on the same plot
 
 ggplot() +
-  geom_smooth(aes(x = forest_age, y = predCor_0_02, col = "0 and 02 years"), data = WIWR_fa_co_df, 
+  geom_smooth(aes(x = forest_age, y = predCor_0_02, col = "0 and 02 years"), data = WIWR_fa_co_ac_df, 
               method = "lm", se = FALSE) + 
-  geom_smooth(aes(x = forest_age, y = predCor_0_04, col = "0 and 04 years"), data = WIWR_fa_co_df, 
+  geom_smooth(aes(x = forest_age, y = predCor_0_04, col = "0 and 04 years"), data = WIWR_fa_co_ac_df, 
               method = "lm", se = FALSE) + 
-  geom_smooth(aes(x = forest_age, y = predCor_0_06, col = "0 and 06 years"), data = WIWR_fa_co_df, 
+  geom_smooth(aes(x = forest_age, y = predCor_0_06, col = "0 and 06 years"), data = WIWR_fa_co_ac_df, 
               method = "lm", se = FALSE) + 
-  geom_smooth(aes(x = forest_age, y = predCor_0_08, col = "0 and 08 years"), data = WIWR_fa_co_df, 
+  geom_smooth(aes(x = forest_age, y = predCor_0_08, col = "0 and 08 years"), data = WIWR_fa_co_ac_df, 
               method = "lm", se = FALSE) + 
-  geom_smooth(aes(x = forest_age, y = predCor_0_10, col = "0 and 10 years"), data = WIWR_fa_co_df, 
+  geom_smooth(aes(x = forest_age, y = predCor_0_10, col = "0 and 10 years"), data = WIWR_fa_co_ac_df, 
               method = "lm", se = FALSE)+
     scale_colour_manual(name="", 
                       values = c("#fa9fb5","#f768a1","#dd3497","#ae017e","#7a0177")) +
@@ -450,8 +875,61 @@ ggplot() +
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank())
   ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_lm_fa_all.png"), width =8, height=5)
-
-```
+  
+  
+  
+ggplot() +
+   geom_smooth(aes(x = unclass(forest_age_class), y = predCor_0_01, col = "0 and 01 years"), data = WIWR_fa_co_ac_df, 
+              method = "lm", se = FALSE) + 
+  geom_smooth(aes(x = unclass(forest_age_class), y = predCor_0_02, col = "0 and 02 years"), data = WIWR_fa_co_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = unclass(forest_age_class), y = predCor_0_03, col = "0 and 03 years"), data = WIWR_fa_co_ac_df, 
+              method = "lm", se = FALSE) + 
+  geom_smooth(aes(x = unclass(forest_age_class), y = predCor_0_04, col = "0 and 04 years"), data = WIWR_fa_co_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = unclass(forest_age_class), y = predCor_0_05, col = "0 and 05 years"), data = WIWR_fa_co_ac_df, 
+              method = "lm", se = FALSE) + 
+  geom_smooth(aes(x = unclass(forest_age_class), y = predCor_0_06, col = "0 and 06 years"), data = WIWR_fa_co_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = unclass(forest_age_class), y = predCor_0_07, col = "0 and 07 years"), data = WIWR_fa_co_ac_df, 
+              method = "lm", se = FALSE) + 
+  geom_smooth(aes(x = unclass(forest_age_class), y = predCor_0_08, col = "0 and 08 years"), data = WIWR_fa_co_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = unclass(forest_age_class), y = predCor_0_09, col = "0 and 09 years"), data = WIWR_fa_co_ac_df, 
+              method = "lm", se = FALSE) + 
+  geom_smooth(aes(x = unclass(forest_age_class), y = predCor_0_10, col = "0 and 10 years"), data = WIWR_fa_co_ac_df, 
+              method = "lm", se = FALSE)+
+   geom_smooth(aes(x = unclass(forest_age_class), y = predCor_0_11, col = "0 and 11 years"), data = WIWR_fa_co_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = unclass(forest_age_class), y = predCor_0_12, col = "0 and 12 years"), data = WIWR_fa_co_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = unclass(forest_age_class), y = predCor_0_13, col = "0 and 13 years"), data = WIWR_fa_co_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = unclass(forest_age_class), y = predCor_0_14, col = "0 and 14 years"), data = WIWR_fa_co_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = unclass(forest_age_class), y = predCor_0_15, col = "0 and 15 years"), data = WIWR_fa_co_ac_df, 
+              method = "lm", se = FALSE) + 
+  scale_colour_viridis_d()+  
+  # scale_colour_manual(name="", 
+    #                   values = c("#fa9fb5","#f768a1","#dd3497","#ae017e","#7a0177")) +
+  labs(
+    x = "Forest age class", 
+    y = "Pearson correlation (r)")+
+    theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+         legend.title = element_blank())  
+  ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_lm_fac_all.png"), width =8, height=5)
+  
+```  
+  
 
 ```{r  echo=FALSE, out.width = '100%'}
 knitr::include_graphics("3_output/figures/timelag_stats/WIWR_lm_fa_all.png", dpi = 300)
@@ -471,24 +949,63 @@ knitr::kable(WIWR_predCor_to_forestAge_df) %>%
 
 #### Scatter plots of occupancy probability {-}
 
-```{r eval=FALSE}
+```{r }
+
+
+WIWR_predCor_stack<-stackOpen("3_output/maps/predictedDistributions/WIWR/predCor/WIWR_predCor_stack.stk")
+
+lidar_forestAge_raster<-raster("0_data/manual/spatialCov/CASFRI/lidar_forestAge_raster.tif")
+ageClass_00<-raster("0_data/manual/spatialCov/CASFRI/ageClassRasters/ageClass_00.tif")
+
+lidar_forestAge_raster_pr<-projectRaster(lidar_forestAge_raster, crs=WIWR_predCor_stack)
+ageClass_00_pr<-projectRaster(ageClass_00, method='ngb',crs=WIWR_predCor_stack)
+
+#study area
+load("0_data/manual/bird/studyarea_big.rData")
+
+pc<- raster::crop(WIWR_predCor_stack, as_Spatial(st_geometry(c_bb)))
+fa<- raster::crop(lidar_forestAge_raster_pr, as_Spatial(st_geometry(c_bb)))
+ac<- raster::crop(ageClass_00_pr, as_Spatial(st_geometry(c_bb)))
+#resample so they have the same resolution
+
+pc_rs<-resample(pc, fa)
+
+# Stack covariates
+fa_co_ac <- stack(pc_rs, fa, ac)
+
+WIWR_fa_co_ac_df<-as.data.frame(na.omit(values(fa_co_ac)))%>%
+  dplyr::rename(forest_age=lidar_forestAge_raster)%>%
+  dplyr::rename(forest_age_class=ageClass_00)
+
+WIWR_fa_co_ac_df$forest_age_class<-ordered(as.factor(WIWR_fa_co_ac_df$forest_age_class))
+
+save(WIWR_fa_co_ac_df, file="2_pipeline/store/WIWR_fa_co_ac_df.rData")
+
+load("2_pipeline/store/WIWR_fa_co_ac_df.rData")
+
+
 
 WIWR_stack<-stackOpen("3_output/maps/predictedDistributions/WIWR/WIWR_stack.stk")
 lidar_forestAge_raster<-raster("0_data/manual/spatialCov/CASFRI/lidar_forestAge_raster.tif")
+ageClass_00<-raster("0_data/manual/spatialCov/CASFRI/ageClassRasters/ageClass_00.tif")
+
+
 
 lidar_forestAge_raster_pr<-projectRaster(lidar_forestAge_raster, crs=WIWR_stack)
+ageClass_00_pr<-projectRaster(ageClass_00, method='ngb',crs=WIWR_stack)
 
 #study area
 load("0_data/manual/bird/studyarea_big.rData")
  
 pd<- raster::crop(WIWR_stack, as_Spatial(st_geometry(c_bb))) 
 fa<- raster::crop(lidar_forestAge_raster_pr, as_Spatial(st_geometry(c_bb))) 
+ac<- raster::crop(ageClass_00_pr, as_Spatial(st_geometry(c_bb)))
 
 #resample so they have the same resolution
 pd_rs<-resample(pd, fa)
 
 # Stack covariates
-pd_fa <- stack(pd_rs, fa)
+pd_fa <- stack(pd_rs, fa, ac)
 
 WIWR_pd_fa_df<-as.data.frame(na.omit(values(pd_fa)))%>%
   dplyr::rename(forest_age=lidar_forestAge_raster)
@@ -516,9 +1033,34 @@ WIWR_pd_fa_df %>%
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank())
 ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_scatter_00to15.png"), width = 7, height=5)
+
+
+
+WIWR_pd_fa_df %>%
+  ggplot(aes(WIWR_predictMap_m_00, WIWR_predictMap_m_15, color=ageClass_00)) +
+  geom_point(alpha=0.4, size=.1) +
+  scale_color_viridis() +
+  labs(y="occupancy probability (15 year time lag)", x="occupancy probability (no time lag)", color="forest age class") +
+   theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank())
+ggsave(filename=paste0("3_output/figures/timelag_stats/WIWR_scatter_00to15_class.png"), width = 7, height=5)
 ```
 
 
 ```{r  echo=FALSE, out.width = '100%'}
 knitr::include_graphics("3_output/figures/timelag_stats/WIWR_scatter_00to15.png", dpi = 300)
 ```
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/WIWR_scatter_00to15_class.png", dpi = 300)
+```
+
+

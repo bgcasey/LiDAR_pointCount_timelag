@@ -1,0 +1,528 @@
+## SWTH
+
+```{r setup, include=FALSE, cache=FALSE}
+#Set root directory to R project root
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+```
+
+
+```{css, echo=FALSE}
+# set max height of code chunks using the following css styling
+
+pre {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+pre[class] {
+  max-height: 500px;
+}
+```
+
+### Load packages {-}
+
+```{r eval=FALSE, message = FALSE}
+library(dplyr)
+library(ggplot2)
+library(raster)
+library(spatialEco)
+library(sf)
+```
+
+
+### Compare timelag models {-}
+
+### Compare lag stats {-}
+
+```{r eval=FALSE}
+load("2_pipeline/store/models/SWTH_models_AUC_4.rData")
+
+SWTH_models_AUC_4<-SWTH_models_AUC_4%>%
+  rename(LiDAR_timelag=lag)
+
+ggplot(SWTH_models_AUC_4, aes(x=LiDAR_timelag, y=AUC_mean)) + 
+  geom_errorbar(aes(ymin=AUC_mean-1.96*AUC_stdErr, ymax=AUC_mean+ 1.96*AUC_stdErr, width=.2))+
+  geom_point(size=1) + 
+  geom_segment(x=0, xend=15, y=.7, yend=.7, col="red", linetype="longdash")+
+  geom_smooth(method = lm)+
+  theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          legend.position="none")
+ ggsave(filename=paste0("3_output/figures/timelag_stats/SWTH_AUC_lm_test.png"), width =6, height=5)
+  
+SWTH_AUC_lm_test<-lm(AUC_mean~ LiDAR_timelag, data=SWTH_models_AUC_4)
+save(SWTH_AUC_lm_test,file="2_pipeline/store/models/SWTH_AUC_lm_test.rData")
+
+AUC_cor_test <- cor.test(SWTH_models_AUC_4$AUC_mean, SWTH_models_AUC_4$LiDAR_timelag, method = "pearson")
+
+#########################
+
+ggplot(SWTH_models_AUC_4, aes(x=LiDAR_timelag, y=R2m_mean)) + 
+  geom_errorbar(aes(ymin=R2m_mean- 1.96* R2m_stdErr, ymax=R2m_mean+ 1.96* R2m_stdErr, width=.2))+
+  geom_point() + 
+  geom_segment(x=0, xend=15, y=.7, yend=.7, col="red", linetype="longdash")+
+  geom_smooth(method = lm) +
+  theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          legend.position="none")
+ ggsave(filename=paste0("3_output/figures/timelag_stats/SWTH_R2m_test.png"), width =6, height=5)
+  
+SWTH_R2m_test<-lm(R2m_mean~ LiDAR_timelag, data=SWTH_models_AUC_4)
+save(SWTH_R2m_test,file="2_pipeline/store/models/SWTH_R2m_test.rData")
+
+########################
+ggplot(SWTH_models_AUC_4, aes(x=LiDAR_timelag, y=R2c_mean)) + 
+  geom_errorbar(aes(ymin=R2c_mean- 1.96* R2c_stdErr, ymax=R2c_mean+ 1.96* R2c_stdErr, width=.2))+
+  geom_point() + 
+  geom_segment(x=0, xend=15, y=.7, yend=.7, col="red", linetype="longdash")+
+  geom_smooth(method = lm)+
+  theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          legend.position="none")
+ ggsave(filename=paste0("3_output/figures/timelag_stats/SWTH_R2c_test.png"), width =6, height=5)
+  
+SWTH_R2c_test<-lm(R2c_mean~ LiDAR_timelag, data=SWTH_models_AUC_4)
+save(SWTH_R2c_test,file="2_pipeline/store/models/SWTH_R2c_test.rData")
+
+```
+
+AUC ~ timelag
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="SWTH AUC time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/SWTH_AUC_lm_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/SWTH_AUC_lm_test.rData")
+print(summary(SWTH_AUC_lm_test))
+```
+
+R2m ~ timelag
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="SWTH R2m time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/SWTH_R2m_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/SWTH_R2m_test.rData")
+print(summary(SWTH_R2m_test))
+```
+
+R2c ~ timelag
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="SWTH R2c time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/SWTH_R2c_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/SWTH_R2c_test.rData")
+print(summary(SWTH_R2c_test))
+```
+
+
+
+#### Compare predictive maps {-}
+
+##### Reclassify predictive maps {-}
+```{r eval=FALSE}
+# Load stack of predictive rasters
+SWTH_stack<-stackOpen("3_output/maps/predictedDistributions/SWTH/SWTH_stack.stk")
+
+# reclassify to a binary above and below 50% occupancy probability
+
+reclass_df <- c(0, .5, 0,
+              .5, 1, 1)
+
+reclass_m <- matrix(reclass_df,
+                ncol = 3,
+                byrow = TRUE)
+
+SWTH_stack_reclass <- reclassify(SWTH_stack,
+                     reclass_m)
+
+# save reclass raster brick (save as .grd to preserve layer names)
+writeRaster(SWTH_stack_reclass, "3_output/maps/predictedDistributions/SWTH/SWTH_stack_reclass.grd", overwrite=TRUE, format="raster") 
+
+# load reclass rasters as a brick
+SWTH_stack_reclass<-brick("3_output/maps/predictedDistributions/SWTH/SWTH_stack_reclass.grd")
+
+```
+
+##### Pearson correlation of predictive maps {-}
+
+```{r eval=FALSE}
+SWTH_stack<-stackOpen("3_output/maps/predictedDistributions/SWTH/SWTH_stack.stk")
+
+predCor_0_01<-rasterCorrelation(SWTH_stack$SWTH_predictMap_m_00, SWTH_stack$SWTH_predictMap_m_01, s = 3, type = "pearson")
+predCor_0_02<-rasterCorrelation(SWTH_stack$SWTH_predictMap_m_00, SWTH_stack$SWTH_predictMap_m_02, s = 3, type = "pearson")
+predCor_0_03<-rasterCorrelation(SWTH_stack$SWTH_predictMap_m_00, SWTH_stack$SWTH_predictMap_m_03, s = 3, type = "pearson")
+predCor_0_04<-rasterCorrelation(SWTH_stack$SWTH_predictMap_m_00, SWTH_stack$SWTH_predictMap_m_04, s = 3, type = "pearson")
+predCor_0_05<-rasterCorrelation(SWTH_stack$SWTH_predictMap_m_00, SWTH_stack$SWTH_predictMap_m_05, s = 3, type = "pearson")
+predCor_0_06<-rasterCorrelation(SWTH_stack$SWTH_predictMap_m_00, SWTH_stack$SWTH_predictMap_m_06, s = 3, type = "pearson")
+predCor_0_07<-rasterCorrelation(SWTH_stack$SWTH_predictMap_m_00, SWTH_stack$SWTH_predictMap_m_07, s = 3, type = "pearson")
+predCor_0_08<-rasterCorrelation(SWTH_stack$SWTH_predictMap_m_00, SWTH_stack$SWTH_predictMap_m_08, s = 3, type = "pearson")
+predCor_0_09<-rasterCorrelation(SWTH_stack$SWTH_predictMap_m_00, SWTH_stack$SWTH_predictMap_m_09, s = 3, type = "pearson")
+predCor_0_10<-rasterCorrelation(SWTH_stack$SWTH_predictMap_m_00, SWTH_stack$SWTH_predictMap_m_10, s = 3, type = "pearson")
+predCor_0_11<-rasterCorrelation(SWTH_stack$SWTH_predictMap_m_00, SWTH_stack$SWTH_predictMap_m_11, s = 3, type = "pearson")
+predCor_0_12<-rasterCorrelation(SWTH_stack$SWTH_predictMap_m_00, SWTH_stack$SWTH_predictMap_m_12, s = 3, type = "pearson")
+predCor_0_13<-rasterCorrelation(SWTH_stack$SWTH_predictMap_m_00, SWTH_stack$SWTH_predictMap_m_13, s = 3, type = "pearson")
+predCor_0_14<-rasterCorrelation(SWTH_stack$SWTH_predictMap_m_00, SWTH_stack$SWTH_predictMap_m_14, s = 3, type = "pearson")
+predCor_0_15<-rasterCorrelation(SWTH_stack$SWTH_predictMap_m_00, SWTH_stack$SWTH_predictMap_m_15, s = 3, type = "pearson")
+
+
+writeRaster(predCor_0_01, file="3_output/maps/predictedDistributions/SWTH/predCor/predCor_0_01.tif", overwrite=TRUE)
+writeRaster(predCor_0_02, file="3_output/maps/predictedDistributions/SWTH/predCor/predCor_0_02.tif", overwrite=TRUE)
+writeRaster(predCor_0_03, file="3_output/maps/predictedDistributions/SWTH/predCor/predCor_0_03.tif", overwrite=TRUE)
+writeRaster(predCor_0_04, file="3_output/maps/predictedDistributions/SWTH/predCor/predCor_0_04.tif", overwrite=TRUE)
+writeRaster(predCor_0_05, file="3_output/maps/predictedDistributions/SWTH/predCor/predCor_0_05.tif", overwrite=TRUE)
+writeRaster(predCor_0_06, file="3_output/maps/predictedDistributions/SWTH/predCor/predCor_0_06.tif", overwrite=TRUE)
+writeRaster(predCor_0_07, file="3_output/maps/predictedDistributions/SWTH/predCor/predCor_0_07.tif", overwrite=TRUE)
+writeRaster(predCor_0_08, file="3_output/maps/predictedDistributions/SWTH/predCor/predCor_0_08.tif", overwrite=TRUE)
+writeRaster(predCor_0_09, file="3_output/maps/predictedDistributions/SWTH/predCor/predCor_0_09.tif", overwrite=TRUE)
+writeRaster(predCor_0_10, file="3_output/maps/predictedDistributions/SWTH/predCor/predCor_0_10.tif", overwrite=TRUE)
+writeRaster(predCor_0_11, file="3_output/maps/predictedDistributions/SWTH/predCor/predCor_0_11.tif", overwrite=TRUE)
+writeRaster(predCor_0_12, file="3_output/maps/predictedDistributions/SWTH/predCor/predCor_0_12.tif", overwrite=TRUE)
+writeRaster(predCor_0_13, file="3_output/maps/predictedDistributions/SWTH/predCor/predCor_0_13.tif", overwrite=TRUE)
+writeRaster(predCor_0_14, file="3_output/maps/predictedDistributions/SWTH/predCor/predCor_0_14.tif", overwrite=TRUE)
+writeRaster(predCor_0_15, file="3_output/maps/predictedDistributions/SWTH/predCor/predCor_0_15.tif", overwrite=TRUE)
+
+
+
+map_list<-list.files(path='3_output/maps/predictedDistributions/SWTH/predCor', pattern = "*.tif$", full.names = TRUE)
+SWTH_predCor_stack<-raster::stack(map_list)
+
+#save stack as r object
+stackSave(SWTH_predCor_stack,file="3_output/maps/predictedDistributions/SWTH/predCor/SWTH_predCor_stack.stk")
+
+```
+
+
+
+
+
+##### Pearson correlation ~ forest age {-}
+
+```{r eval=FALSE}
+library(ggeffects)
+
+SWTH_predCor_stack<-stackOpen("3_output/maps/predictedDistributions/SWTH/predCor/SWTH_predCor_stack.stk")
+
+lidar_forestAge_raster<-raster("0_data/manual/spatialCov/CASFRI/lidar_forestAge_raster.tif")
+
+lidar_forestAge_raster_pr<-projectRaster(lidar_forestAge_raster, crs=SWTH_predCor_stack)
+
+#study area
+load("0_data/manual/bird/studyarea_big.rData")
+ 
+pc<- raster::crop(SWTH_predCor_stack, as_Spatial(st_geometry(c_bb))) 
+fa<- raster::crop(lidar_forestAge_raster_pr, as_Spatial(st_geometry(c_bb))) 
+
+#resample so they have the same resolution
+pc_rs<-resample(pc, fa)
+
+# Stack covariates
+fa_co <- stack(pc_rs, fa)
+
+SWTH_fa_co_df<-as.data.frame(na.omit(values(fa_co)))%>%
+  dplyr::rename(forest_age=lidar_forestAge_raster)
+          
+save(SWTH_fa_co_df, file="2_pipeline/store/SWTH_fa_co_df.rData")
+
+load("2_pipeline/store/SWTH_fa_co_df.rData")
+
+
+#######################################################################################
+############### Plot Effect ######################################################
+#######################################################################################
+lm_fa_00to01 <- lm(predCor_0_01 ~ forest_age, data=SWTH_fa_co_df)
+t<-ggpredict(lm_fa_00to01, terms="forest_age [all]", data=SWTH_fa_co_df)
+png("3_output/figures/timelag_stats/SWTH_lm_fa_00to01.png", width = 800, height = 600, units = "px", pointsize = 12)
+plot(t) + labs(
+    x = "Forest age when LiDAR was acquired.", 
+    y = "Pearson correlation (r)",
+    title=""
+  )
+dev.off()
+#######################################################################################
+lm_fa_00to02 <- lm(predCor_0_02 ~ forest_age, data=SWTH_fa_co_df)
+t<-ggpredict(lm_fa_00to02, terms="forest_age [all]", data=SWTH_fa_co_df)
+png("3_output/figures/timelag_stats/SWTH_lm_fa_00to02.png", width = 800, height = 600, units = "px", pointsize = 12)
+plot(t) + labs(
+    x = "Forest age when LiDAR was acquired.", 
+    y = "Pearson correlation (r)",
+    title=""
+  )
+dev.off()
+#######################################################################################
+lm_fa_00to03 <- lm(predCor_0_03 ~ forest_age, data=SWTH_fa_co_df)
+t<-ggpredict(lm_fa_00to03, terms="forest_age [all]", data=SWTH_fa_co_df)
+png("3_output/figures/timelag_stats/SWTH_lm_fa_00to03.png", width = 800, height = 600, units = "px", pointsize = 12)
+plot(t) + labs(
+    x = "Forest age when LiDAR was acquired.", 
+    y = "Pearson correlation (r)",
+    title=""
+  )
+dev.off()
+#######################################################################################
+lm_fa_00to04 <- lm(predCor_0_04 ~ forest_age, data=SWTH_fa_co_df)
+t<-ggpredict(lm_fa_00to04, terms="forest_age [all]", data=SWTH_fa_co_df)
+png("3_output/figures/timelag_stats/SWTH_lm_fa_00to04.png", width = 800, height = 600, units = "px", pointsize = 12)
+plot(t) + labs(
+    x = "Forest age when LiDAR was acquired.", 
+    y = "Pearson correlation (r)",
+    title=""
+  )
+dev.off()
+#######################################################################################
+lm_fa_00to05 <- lm(predCor_0_05 ~ forest_age, data=SWTH_fa_co_df)
+t<-ggpredict(lm_fa_00to05, terms="forest_age [all]", data=SWTH_fa_co_df)
+png("3_output/figures/timelag_stats/SWTH_lm_fa_00to05.png", width = 800, height = 600, units = "px", pointsize = 12)
+plot(t) + labs(
+    x = "Forest age when LiDAR was acquired.", 
+    y = "Pearson correlation (r)",
+    title=""
+  )
+dev.off()
+#######################################################################################
+lm_fa_00to06 <- lm(predCor_0_06 ~ forest_age, data=SWTH_fa_co_df)
+t<-ggpredict(lm_fa_00to06, terms="forest_age [all]", data=SWTH_fa_co_df)
+png("3_output/figures/timelag_stats/SWTH_lm_fa_00to06.png", width = 800, height = 600, units = "px", pointsize = 12)
+plot(t) + labs(
+    x = "Forest age when LiDAR was acquired.", 
+    y = "Pearson correlation (r)",
+    title=""
+  )
+dev.off()
+#######################################################################################
+lm_fa_00to07 <- lm(predCor_0_07 ~ forest_age, data=SWTH_fa_co_df)
+t<-ggpredict(lm_fa_00to07, terms="forest_age [all]", data=SWTH_fa_co_df)
+png("3_output/figures/timelag_stats/SWTH_lm_fa_00to07.png", width = 800, height = 600, units = "px", pointsize = 12)
+plot(t) + labs(
+    x = "Forest age when LiDAR was acquired.", 
+    y = "Pearson correlation (r)",
+    title=""
+  )
+dev.off()
+#######################################################################################
+lm_fa_00to08 <- lm(predCor_0_08 ~ forest_age, data=SWTH_fa_co_df)
+t<-ggpredict(lm_fa_00to08, terms="forest_age [all]", data=SWTH_fa_co_df)
+png("3_output/figures/timelag_stats/SWTH_lm_fa_00to08.png", width = 800, height = 600, units = "px", pointsize = 12)
+plot(t) + labs(
+    x = "Forest age when LiDAR was acquired.", 
+    y = "Pearson correlation (r)",
+    title=""
+  )
+dev.off()
+#######################################################################################
+lm_fa_00to09 <- lm(predCor_0_09 ~ forest_age, data=SWTH_fa_co_df)
+t<-ggpredict(lm_fa_00to09, terms="forest_age [all]", data=SWTH_fa_co_df)
+png("3_output/figures/timelag_stats/SWTH_lm_fa_00to09.png", width = 800, height = 600, units = "px", pointsize = 12)
+plot(t) + labs(
+    x = "Forest age when LiDAR was acquired.", 
+    y = "Pearson correlation (r)",
+    title=""
+  )
+dev.off()
+#######################################################################################
+lm_fa_00to10 <- lm(predCor_0_10 ~ forest_age, data=SWTH_fa_co_df)
+t<-ggpredict(lm_fa_00to10, terms="forest_age [all]", data=SWTH_fa_co_df)
+png("3_output/figures/timelag_stats/SWTH_lm_fa_00to10.png", width = 800, height = 600, units = "px", pointsize = 12)
+plot(t) + labs(
+    x = "Forest age when LiDAR was acquired.", 
+    y = "Pearson correlation (r)",
+    title=""
+  )
+dev.off()
+#######################################################################################
+lm_fa_00to11 <- lm(predCor_0_11 ~ forest_age, data=SWTH_fa_co_df)
+t<-ggpredict(lm_fa_00to11, terms="forest_age [all]", data=SWTH_fa_co_df)
+png("3_output/figures/timelag_stats/SWTH_lm_fa_00to11.png", width = 800, height = 600, units = "px", pointsize = 12)
+plot(t) + labs(
+    x = "Forest age when LiDAR was acquired.", 
+    y = "Pearson correlation (r)",
+    title=""
+  )
+dev.off()
+#######################################################################################
+lm_fa_00to12 <- lm(predCor_0_12 ~ forest_age, data=SWTH_fa_co_df)
+t<-ggpredict(lm_fa_00to12, terms="forest_age [all]", data=SWTH_fa_co_df)
+png("3_output/figures/timelag_stats/SWTH_lm_fa_00to12.png", width = 800, height = 600, units = "px", pointsize = 12)
+plot(t) + labs(
+    x = "Forest age when LiDAR was acquired.", 
+    y = "Pearson correlation (r)",
+    title=""
+  )
+dev.off()
+#######################################################################################
+lm_fa_00to13 <- lm(predCor_0_13 ~ forest_age, data=SWTH_fa_co_df)
+t<-ggpredict(lm_fa_00to13, terms="forest_age [all]", data=SWTH_fa_co_df)
+png("3_output/figures/timelag_stats/SWTH_lm_fa_00to13.png", width = 800, height = 600, units = "px", pointsize = 12)
+plot(t) + labs(
+    x = "Forest age when LiDAR was acquired.", 
+    y = "Pearson correlation (r)",
+    title=""
+  )
+dev.off()
+#######################################################################################
+lm_fa_00to14 <- lm(predCor_0_14 ~ forest_age, data=SWTH_fa_co_df)
+t<-ggpredict(lm_fa_00to14, terms="forest_age [all]", data=SWTH_fa_co_df)
+png("3_output/figures/timelag_stats/SWTH_lm_fa_00to14.png", width = 800, height = 600, units = "px", pointsize = 12)
+plot(t) + labs(
+    x = "Forest age when LiDAR was acquired.", 
+    y = "Pearson correlation (r)",
+    title=""
+  )
+dev.off()
+#######################################################################################
+lm_fa_00to15 <- lm(predCor_0_15 ~ forest_age, data=SWTH_fa_co_df)
+t<-ggpredict(lm_fa_00to15, terms="forest_age [all]", data=SWTH_fa_co_df)
+png("3_output/figures/timelag_stats/SWTH_lm_fa_00to15.png", width = 800, height = 600, units = "px", pointsize = 12)
+plot(t) + labs(
+    x = "Forest age when LiDAR was acquired.", 
+    y = "Pearson correlation (r)",
+    title=""
+  )
+dev.off()
+#######################################################################################
+#### save models
+#######################################################################################
+
+# save models
+SWTH_predCor_to_forestAge <-list(lm_fa_00to01, lm_fa_00to02, lm_fa_00to03, lm_fa_00to04, lm_fa_00to05, lm_fa_00to06, lm_fa_00to07, lm_fa_00to08, lm_fa_00to09, lm_fa_00to10, lm_fa_00to11, lm_fa_00to12, lm_fa_00to13, lm_fa_00to14, lm_fa_00to15)
+names(SWTH_predCor_to_forestAge) <- c("lm_fa_00to01", "lm_fa_00to02", "lm_fa_00to03", "lm_fa_00to04", "lm_fa_00to05", "lm_fa_00to06", "lm_fa_00to07", "lm_fa_00to08", "lm_fa_00to09", "lm_fa_00to10", "lm_fa_00to11", "lm_fa_00to12", "lm_fa_00to13", "lm_fa_00to14", "lm_fa_00to15")
+save(SWTH_predCor_to_forestAge, file="2_pipeline/store/models/SWTH_predCor_to_forestAge.rData")
+
+
+library(purrr)
+library(broom)
+SWTH_predCor_to_forestAge_df<-purrr::map_df(SWTH_predCor_to_forestAge, broom::glance, .id = 'formula')
+save(SWTH_predCor_to_forestAge_df, file="2_pipeline/store/models/SWTH_predCor_to_forestAge_df.rData")
+
+
+#######################################################################################
+#### Plot all on the same plot
+
+ggplot() +
+  geom_smooth(aes(x = forest_age, y = predCor_0_02, col = "0 and 02 years"), data = SWTH_fa_co_df, 
+              method = "lm", se = FALSE) + 
+  geom_smooth(aes(x = forest_age, y = predCor_0_04, col = "0 and 04 years"), data = SWTH_fa_co_df, 
+              method = "lm", se = FALSE) + 
+  geom_smooth(aes(x = forest_age, y = predCor_0_06, col = "0 and 06 years"), data = SWTH_fa_co_df, 
+              method = "lm", se = FALSE) + 
+  geom_smooth(aes(x = forest_age, y = predCor_0_08, col = "0 and 08 years"), data = SWTH_fa_co_df, 
+              method = "lm", se = FALSE) + 
+  geom_smooth(aes(x = forest_age, y = predCor_0_10, col = "0 and 10 years"), data = SWTH_fa_co_df, 
+              method = "lm", se = FALSE)+
+    scale_colour_manual(name="", 
+                      values = c("#fa9fb5","#f768a1","#dd3497","#ae017e","#7a0177")) +
+  labs(
+    x = "Forest age when LiDAR was acquired", 
+    y = "Pearson correlation (r)")+
+    theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank())
+  ggsave(filename=paste0("3_output/figures/timelag_stats/SWTH_lm_fa_all.png"), width =8, height=5)
+
+```
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/SWTH_lm_fa_all.png", dpi = 300)
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("2_pipeline/store/models/SWTH_predCor_to_forestAge_df.rData")
+
+knitr::kable(SWTH_predCor_to_forestAge_df) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+
+
+
+##### Scatter plots of occupancy probability {-}
+
+```{r eval=FALSE}
+
+SWTH_stack<-stackOpen("3_output/maps/predictedDistributions/SWTH/SWTH_stack.stk")
+lidar_forestAge_raster<-raster("0_data/manual/spatialCov/CASFRI/lidar_forestAge_raster.tif")
+
+lidar_forestAge_raster_pr<-projectRaster(lidar_forestAge_raster, crs=SWTH_stack)
+
+#study area
+load("0_data/manual/bird/studyarea_big.rData")
+ 
+pd<- raster::crop(SWTH_stack, as_Spatial(st_geometry(c_bb))) 
+fa<- raster::crop(lidar_forestAge_raster_pr, as_Spatial(st_geometry(c_bb))) 
+
+#resample so they have the same resolution
+pd_rs<-resample(pd, fa)
+
+# Stack covariates
+pd_fa <- stack(pd_rs, fa)
+
+SWTH_pd_fa_df<-as.data.frame(na.omit(values(pd_fa)))%>%
+  dplyr::rename(forest_age=lidar_forestAge_raster)
+          
+save(SWTH_pd_fa_df, file="2_pipeline/store/SWTH_pd_fa_df.rData")
+
+load("2_pipeline/store/SWTH_pd_fa_df.rData")
+
+install.packages("viridis")
+library(viridis)
+
+SWTH_pd_fa_df %>%
+  ggplot(aes(SWTH_predictMap_m_00, SWTH_predictMap_m_15, color=forest_age)) +
+  geom_point(alpha=0.4, size=.1) +
+  scale_color_viridis() +
+  labs(y="occupancy probability (15 year time lag)", x="occupancy probability (no time lag)", color="forest age (years)") +
+   theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank())
+ggsave(filename=paste0("3_output/figures/timelag_stats/SWTH_scatter_00to15.png"), width = 7, height=5)
+```
+
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/SWTH_scatter_00to15.png", dpi = 300)
+```
+

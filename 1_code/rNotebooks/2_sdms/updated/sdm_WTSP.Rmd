@@ -37,17 +37,12 @@ library(pROC)
 ### Load data {-}
 
 ```{r eval=FALSE}
-#load("2_pipeline/tmp/sdm_d.rData")
 load("2_pipeline/tmp/sdm_d3.rData")
 d3<-sdm_d3
 
-# d3<-d3%>%filter(lidar_year==2009)
-# 
-# 
-# d3ab<-d3%>%filter(SS_lidar_timelag==0)%>%
-#   filter(lidar_year==2009)
-
 scaled_stack<-stackOpen("0_data/manual/spatialCov/scaled_cov/scaled_stack2.stk")
+
+names(scaled_stack)[78:97]<-c('ndvi_lag_19', 'ndvi_lag_18', 'ndvi_lag_17', 'ndvi_lag_16', 'ndvi_lag_15', 'ndvi_lag_14', 'ndvi_lag_13', 'ndvi_lag_12', 'ndvi_lag_11', 'ndvi_lag_10', 'ndvi_lag_9', 'ndvi_lag_8', 'ndvi_lag_7', 'nevi_lag_6', 'ndvi_lag_5', 'ndvi_lag_4', 'ndvi_lag_3', 'ndvi_lag_2', 'ndvi_lag_1', 'ndvi_lag_0')
 ```
 
 ### Test for outlier detection years {-}
@@ -391,7 +386,7 @@ AUCFun <- function(fit) {
 md_0<-lme4::glmer(WTSP_OCC ~ ndvi_lag_0  + elev_cv +  elev_maximum + percentage_first_returns_above_2pnt00 + (1|SS) , data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.fail, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)))
 
 
-md_0_bootAUC<-bootMer(md_0, nsim = 5, seed = 101, FUN=AUCFun,
+md_0_bootAUC<-bootMer(md_0, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
         use.u = FALSE)
@@ -417,8 +412,8 @@ AUC_sd<-sd(md_0_bootAUC$t[,3])
 md_0_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
                       
-#WTSP_predictMap_m_0<-raster::predict(scaled_stack, md_0, re.form=NA, type='response')
-#writeRaster(#WTSP_predictMap_m_0,file="3_output/maps/predictedDistributions/WTSP/#WTSP_predictMap_m_00", format="GTiff", overwrite=T)
+WTSP_predictMap_m_0<-raster::predict(scaled_stack, md_0, re.form=NA, type='response')
+writeRaster(WTSP_predictMap_m_0,file="3_output/maps/predictedDistributions/WTSP/WTSP_predictMap_m_00", format="GTiff", overwrite=T)
 ##########################
 dd<-d3%>%filter(SS_lidar_timelag==-1)
 
@@ -430,7 +425,7 @@ AUCFun <- function(fit) {
 
 md_1<-lme4::glmer(WTSP_OCC ~ ndvi_lag_1  + elev_cv +  elev_maximum + percentage_first_returns_above_2pnt00 + (1|SS) , data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_1_bootAUC<-bootMer(md_1, nsim = 5, seed = 101, FUN=AUCFun,
+md_1_bootAUC<-bootMer(md_1, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
         use.u = FALSE)
@@ -451,8 +446,8 @@ AUC_sd<-sd(md_1_bootAUC$t[,3])
 
 md_1_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-#WTSP_predictMap_m_01<-raster::predict(scaled_stack, md_1, re.form=NA, type='response')
-#writeRaster(#WTSP_predictMap_m_01,file="3_output/maps/predictedDistributions/WTSP/#WTSP_predictMap_m_01", format="GTiff", overwrite=T)
+WTSP_predictMap_m_01<-raster::predict(scaled_stack, md_1, re.form=NA, type='response')
+writeRaster(WTSP_predictMap_m_01,file="3_output/maps/predictedDistributions/WTSP/WTSP_predictMap_m_01", format="GTiff", overwrite=T)
 ##########################
 dd<-d3%>%filter(SS_lidar_timelag==-2)
 
@@ -464,7 +459,7 @@ AUCFun <- function(fit) {
 
 md_2<-lme4::glmer(WTSP_OCC ~ ndvi_lag_2  + elev_cv +  elev_maximum + percentage_first_returns_above_2pnt00 + (1|SS) , data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_2_bootAUC<-bootMer(md_2, nsim = 5, seed = 101, FUN=AUCFun,
+md_2_bootAUC<-bootMer(md_2, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
         use.u = FALSE)
@@ -482,8 +477,8 @@ AUC_sd<-sd(md_2_bootAUC$t[,3])
 
 md_2_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-#WTSP_predictMap_m_02<-raster::predict(scaled_stack, md_2, re.form=NA, type='response')
-#writeRaster(#WTSP_predictMap_m_02,file="3_output/maps/predictedDistributions/WTSP/#WTSP_predictMap_m_02", format="GTiff", overwrite=T)
+WTSP_predictMap_m_02<-raster::predict(scaled_stack, md_2, re.form=NA, type='response')
+writeRaster(WTSP_predictMap_m_02,file="3_output/maps/predictedDistributions/WTSP/WTSP_predictMap_m_02", format="GTiff", overwrite=T)
 ##########################
 dd<-d3%>%filter(SS_lidar_timelag==-3)
 
@@ -496,7 +491,7 @@ AUCFun <- function(fit) {
 
 md_3<-lme4::glmer(WTSP_OCC ~ ndvi_lag_3  + elev_cv +  elev_maximum + percentage_first_returns_above_2pnt00 + (1|SS) , data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_3_bootAUC<-bootMer(md_3, nsim = 5, seed = 101, FUN=AUCFun,
+md_3_bootAUC<-bootMer(md_3, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
         use.u = FALSE)
@@ -514,8 +509,8 @@ AUC_sd<-sd(md_3_bootAUC$t[,3])
 
 md_3_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-#WTSP_predictMap_m_03<-raster::predict(scaled_stack, md_3, re.form=NA, type='response')
-#writeRaster(#WTSP_predictMap_m_03,file="3_output/maps/predictedDistributions/WTSP/#WTSP_predictMap_m_03", format="GTiff", overwrite=T)
+WTSP_predictMap_m_03<-raster::predict(scaled_stack, md_3, re.form=NA, type='response')
+writeRaster(WTSP_predictMap_m_03,file="3_output/maps/predictedDistributions/WTSP/WTSP_predictMap_m_03", format="GTiff", overwrite=T)
 ##########################
 dd<-d3%>%filter(SS_lidar_timelag==-4)
 
@@ -527,7 +522,7 @@ AUCFun <- function(fit) {
 
 md_4<-lme4::glmer(WTSP_OCC ~ ndvi_lag_4  + elev_cv +  elev_maximum + percentage_first_returns_above_2pnt00 + (1|SS) , data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_4_bootAUC<-bootMer(md_4, nsim = 5, seed = 101, FUN=AUCFun,
+md_4_bootAUC<-bootMer(md_4, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
         use.u = FALSE)
@@ -545,8 +540,8 @@ AUC_sd<-sd(md_4_bootAUC$t[,3])
 
 md_4_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-#WTSP_predictMap_m_04<-raster::predict(scaled_stack, md_4, re.form=NA, type='response')
-#writeRaster(#WTSP_predictMap_m_04,file="3_output/maps/predictedDistributions/WTSP/#WTSP_predictMap_m_04", format="GTiff", overwrite=T)
+WTSP_predictMap_m_04<-raster::predict(scaled_stack, md_4, re.form=NA, type='response')
+writeRaster(WTSP_predictMap_m_04,file="3_output/maps/predictedDistributions/WTSP/WTSP_predictMap_m_04", format="GTiff", overwrite=T)
 ##########################
 dd<-d3%>%filter(SS_lidar_timelag==-5)
 
@@ -558,7 +553,7 @@ AUCFun <- function(fit) {
 
 md_5<-lme4::glmer(WTSP_OCC ~ ndvi_lag_5  + elev_cv +  elev_maximum + percentage_first_returns_above_2pnt00 + (1|SS) , data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_5_bootAUC<-bootMer(md_5, nsim = 5, seed = 101, FUN=AUCFun,
+md_5_bootAUC<-bootMer(md_5, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
         use.u = FALSE)
@@ -576,8 +571,8 @@ AUC_sd<-sd(md_5_bootAUC$t[,3])
 
 md_5_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-#WTSP_predictMap_m_05<-raster::predict(scaled_stack, md_5, re.form=NA, type='response')
-#writeRaster(#WTSP_predictMap_m_05,file="3_output/maps/predictedDistributions/WTSP/#WTSP_predictMap_m_05", format="GTiff", overwrite=T)
+WTSP_predictMap_m_05<-raster::predict(scaled_stack, md_5, re.form=NA, type='response')
+writeRaster(WTSP_predictMap_m_05,file="3_output/maps/predictedDistributions/WTSP/WTSP_predictMap_m_05", format="GTiff", overwrite=T)
 ##########################
 dd<-d3%>%filter(SS_lidar_timelag==-6)
 
@@ -590,7 +585,7 @@ AUCFun <- function(fit) {
 
 md_6<-lme4::glmer(WTSP_OCC ~ ndvi_lag_6  + elev_cv +  elev_maximum + percentage_first_returns_above_2pnt00 + (1|SS) , data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_6_bootAUC<-bootMer(md_6, nsim = 5, seed = 101, FUN=AUCFun,
+md_6_bootAUC<-bootMer(md_6, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
         use.u = FALSE)
@@ -609,8 +604,8 @@ AUC_sd<-sd(md_6_bootAUC$t[,3])
 md_6_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
 
-#WTSP_predictMap_m_06<-raster::predict(scaled_stack, md_6, re.form=NA, type='response')
-#writeRaster(#WTSP_predictMap_m_06,file="3_output/maps/predictedDistributions/WTSP/#WTSP_predictMap_m_06", format="GTiff", overwrite=T)
+WTSP_predictMap_m_06<-raster::predict(scaled_stack, md_6, re.form=NA, type='response')
+writeRaster(WTSP_predictMap_m_06,file="3_output/maps/predictedDistributions/WTSP/WTSP_predictMap_m_06", format="GTiff", overwrite=T)
 
 ##########################
 dd<-d3%>%filter(SS_lidar_timelag==-7)
@@ -623,7 +618,7 @@ AUCFun <- function(fit) {
 
 md_7<-lme4::glmer(WTSP_OCC ~ ndvi_lag_7  + elev_cv +  elev_maximum + percentage_first_returns_above_2pnt00 + (1|SS) , data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_7_bootAUC<-bootMer(md_7, nsim = 5, seed = 101, FUN=AUCFun,
+md_7_bootAUC<-bootMer(md_7, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
         use.u = FALSE)
@@ -641,8 +636,8 @@ AUC_sd<-sd(md_7_bootAUC$t[,3])
 
 md_7_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-#WTSP_predictMap_m_07<-raster::predict(scaled_stack, md_7, re.form=NA, type='response')
-#writeRaster(#WTSP_predictMap_m_07,file="3_output/maps/predictedDistributions/WTSP/#WTSP_predictMap_m_07", format="GTiff", overwrite=T)
+WTSP_predictMap_m_07<-raster::predict(scaled_stack, md_7, re.form=NA, type='response')
+writeRaster(WTSP_predictMap_m_07,file="3_output/maps/predictedDistributions/WTSP/WTSP_predictMap_m_07", format="GTiff", overwrite=T)
 ##########################
 dd<-d3%>%filter(SS_lidar_timelag==-8)
 
@@ -654,7 +649,7 @@ AUCFun <- function(fit) {
 
 md_8<-lme4::glmer(WTSP_OCC ~ ndvi_lag_8  + elev_cv +  elev_maximum + percentage_first_returns_above_2pnt00 + (1|SS) , data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_8_bootAUC<-bootMer(md_8, nsim = 5, seed = 101, FUN=AUCFun,
+md_8_bootAUC<-bootMer(md_8, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
         use.u = FALSE)
@@ -672,8 +667,8 @@ AUC_sd<-sd(md_8_bootAUC$t[,3])
 
 md_8_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-#WTSP_predictMap_m_08<-raster::predict(scaled_stack, md_8, re.form=NA, type='response')
-#writeRaster(#WTSP_predictMap_m_08,file="3_output/maps/predictedDistributions/WTSP/#WTSP_predictMap_m_08", format="GTiff", overwrite=T)
+WTSP_predictMap_m_08<-raster::predict(scaled_stack, md_8, re.form=NA, type='response')
+writeRaster(WTSP_predictMap_m_08,file="3_output/maps/predictedDistributions/WTSP/WTSP_predictMap_m_08", format="GTiff", overwrite=T)
 ##########################
 dd<-d3%>%filter(SS_lidar_timelag==-9)
 
@@ -685,7 +680,7 @@ AUCFun <- function(fit) {
 
 md_9<-lme4::glmer(WTSP_OCC ~ ndvi_lag_9 +  + elev_cv +  elev_maximum + percentage_first_returns_above_2pnt00 + (1|SS) , data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_9_bootAUC<-bootMer(md_9, nsim = 5, seed = 101, FUN=AUCFun,
+md_9_bootAUC<-bootMer(md_9, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
         use.u = FALSE)
@@ -704,8 +699,8 @@ AUC_sd<-sd(md_9_bootAUC$t[,3])
 md_9_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
 
-#WTSP_predictMap_m_09<-raster::predict(scaled_stack, md_9, re.form=NA, type='response')
-#writeRaster(#WTSP_predictMap_m_09,file="3_output/maps/predictedDistributions/WTSP/#WTSP_predictMap_m_09", format="GTiff", overwrite=T)
+WTSP_predictMap_m_09<-raster::predict(scaled_stack, md_9, re.form=NA, type='response')
+writeRaster(WTSP_predictMap_m_09,file="3_output/maps/predictedDistributions/WTSP/WTSP_predictMap_m_09", format="GTiff", overwrite=T)
 
 ##########################
 dd<-d3%>%filter(SS_lidar_timelag==-10)
@@ -718,7 +713,7 @@ AUCFun <- function(fit) {
 
 md_10<-lme4::glmer(WTSP_OCC ~ ndvi_lag_10  + elev_cv +  elev_maximum + percentage_first_returns_above_2pnt00 + (1|SS) , data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_10_bootAUC<-bootMer(md_10, nsim = 5, seed = 101, FUN=AUCFun,
+md_10_bootAUC<-bootMer(md_10, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
         use.u = FALSE)
@@ -736,8 +731,8 @@ AUC_sd<-sd(md_10_bootAUC$t[,3])
 
 md_10_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-#WTSP_predictMap_m_10<-raster::predict(scaled_stack, md_10, re.form=NA, type='response')
-#writeRaster(#WTSP_predictMap_m_10,file="3_output/maps/predictedDistributions/WTSP/#WTSP_predictMap_m_10", format="GTiff", overwrite=T)
+WTSP_predictMap_m_10<-raster::predict(scaled_stack, md_10, re.form=NA, type='response')
+writeRaster(WTSP_predictMap_m_10,file="3_output/maps/predictedDistributions/WTSP/WTSP_predictMap_m_10", format="GTiff", overwrite=T)
 ##########################
 dd<-d3%>%filter(SS_lidar_timelag==-11)
 
@@ -749,7 +744,7 @@ AUCFun <- function(fit) {
 
 md_11<-lme4::glmer(WTSP_OCC ~ ndvi_lag_11  + elev_cv +  elev_maximum + percentage_first_returns_above_2pnt00 + (1|SS) , data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_11_bootAUC<-bootMer(md_11, nsim = 5, seed = 101, FUN=AUCFun,
+md_11_bootAUC<-bootMer(md_11, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
         use.u = FALSE)
@@ -767,8 +762,8 @@ AUC_sd<-sd(md_11_bootAUC$t[,3])
 
 md_11_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-#WTSP_predictMap_m_11<-raster::predict(scaled_stack, md_11, re.form=NA, type='response')
-#writeRaster(#WTSP_predictMap_m_11,file="3_output/maps/predictedDistributions/WTSP/#WTSP_predictMap_m_11", format="GTiff", overwrite=T)
+WTSP_predictMap_m_11<-raster::predict(scaled_stack, md_11, re.form=NA, type='response')
+writeRaster(WTSP_predictMap_m_11,file="3_output/maps/predictedDistributions/WTSP/WTSP_predictMap_m_11", format="GTiff", overwrite=T)
 ##########################
 dd<-d3%>%filter(SS_lidar_timelag==-12)
 
@@ -780,7 +775,7 @@ AUCFun <- function(fit) {
 
 md_12<-lme4::glmer(WTSP_OCC ~ ndvi_lag_12  + elev_cv +  elev_maximum + percentage_first_returns_above_2pnt00 + (1|SS) , data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_12_bootAUC<-bootMer(md_12, nsim = 5, seed = 101, FUN=AUCFun,
+md_12_bootAUC<-bootMer(md_12, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
         use.u = FALSE)
@@ -798,8 +793,8 @@ AUC_sd<-sd(md_12_bootAUC$t[,3])
 
 md_12_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-#WTSP_predictMap_m_12<-raster::predict(scaled_stack, md_12, re.form=NA, type='response')
-#writeRaster(#WTSP_predictMap_m_12,file="3_output/maps/predictedDistributions/WTSP/#WTSP_predictMap_m_12", format="GTiff", overwrite=T)
+WTSP_predictMap_m_12<-raster::predict(scaled_stack, md_12, re.form=NA, type='response')
+writeRaster(WTSP_predictMap_m_12,file="3_output/maps/predictedDistributions/WTSP/WTSP_predictMap_m_12", format="GTiff", overwrite=T)
 
 ##########################
 dd<-d3%>%filter(SS_lidar_timelag==-13)
@@ -812,7 +807,7 @@ AUCFun <- function(fit) {
 
 md_13<-lme4::glmer(WTSP_OCC ~ ndvi_lag_13  + elev_cv +  elev_maximum + percentage_first_returns_above_2pnt00 + (1|SS) , data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_13_bootAUC<-bootMer(md_13, nsim = 5, seed = 101, FUN=AUCFun,
+md_13_bootAUC<-bootMer(md_13, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
         use.u = FALSE)
@@ -830,8 +825,8 @@ AUC_sd<-sd(md_13_bootAUC$t[,3])
 
 md_13_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-#WTSP_predictMap_m_13<-raster::predict(scaled_stack, md_13, re.form=NA, type='response')
-#writeRaster(#WTSP_predictMap_m_13,file="3_output/maps/predictedDistributions/WTSP/#WTSP_predictMap_m_13", format="GTiff", overwrite=T)
+WTSP_predictMap_m_13<-raster::predict(scaled_stack, md_13, re.form=NA, type='response')
+writeRaster(WTSP_predictMap_m_13,file="3_output/maps/predictedDistributions/WTSP/WTSP_predictMap_m_13", format="GTiff", overwrite=T)
 ##########################
 dd<-d3%>%filter(SS_lidar_timelag==-14)
 
@@ -843,7 +838,7 @@ AUCFun <- function(fit) {
 
 md_14<-lme4::glmer(WTSP_OCC ~ ndvi_lag_14  + elev_cv +  elev_maximum + percentage_first_returns_above_2pnt00 + (1|SS) , data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
  
-md_14_bootAUC<-bootMer(md_14, nsim = 5, seed = 101, FUN=AUCFun,
+md_14_bootAUC<-bootMer(md_14, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
         use.u = FALSE)
@@ -861,8 +856,8 @@ AUC_sd<-sd(md_14_bootAUC$t[,3])
 
 md_14_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-#WTSP_predictMap_m_14<-raster::predict(scaled_stack, md_14, re.form=NA, type='response')
-#writeRaster(#WTSP_predictMap_m_14,file="3_output/maps/predictedDistributions/WTSP/#WTSP_predictMap_m_14", format="GTiff", overwrite=T)
+WTSP_predictMap_m_14<-raster::predict(scaled_stack, md_14, re.form=NA, type='response')
+writeRaster(WTSP_predictMap_m_14,file="3_output/maps/predictedDistributions/WTSP/WTSP_predictMap_m_14", format="GTiff", overwrite=T)
 ##########################
 dd<-d3%>%filter(SS_lidar_timelag==-15)
 set.seed(1)
@@ -875,7 +870,7 @@ AUCFun <- function(fit) {
 
 md_15<-lme4::glmer(WTSP_OCC ~ ndvi_lag_15  + elev_cv +  elev_maximum + percentage_first_returns_above_2pnt00 + (1|SS) , data=dd, family = binomial, offset = WTSP_OFF,  na.action = na.exclude, control=glmerControl(optimizer="bobyqa", optCtrl=list(maxfun=1e9)) )
 
-md_15_bootAUC<-bootMer(md_15, nsim = 5, seed = 101, FUN=AUCFun,
+md_15_bootAUC<-bootMer(md_15, nsim = 500, seed = 101, FUN=AUCFun,
         type = "parametric",
         verbose = TRUE, .progress = "none",
         use.u = FALSE)
@@ -895,48 +890,9 @@ AUC_sd<-sd(md_15_bootAUC$t[,3])
 
 md_15_meanAUC<-data.frame(R2m_mean, R2m_stdErr, R2m_sd, R2c_mean, R2c_stdErr,R2c_sd, AUC_mean, AUC_stdErr, AUC_sd)
 
-# create an AUC dataframe
-lag<-c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15)
-model<-c("md_0", "md_1", "md_2", "md_3", "md_4", "md_5", "md_6", "md_7", "md_8", "md_9", "md_10", "md_11", "md_12", "md_13", "md_14", "md_15")
 
-WTSP_models_AUC_4<-as.data.frame(rbind(md_0_meanAUC, md_1_meanAUC, md_2_meanAUC, md_3_meanAUC, md_4_meanAUC, md_5_meanAUC, md_6_meanAUC, md_7_meanAUC, md_8_meanAUC, md_9_meanAUC, md_10_meanAUC, md_11_meanAUC, md_12_meanAUC, md_13_meanAUC, md_14_meanAUC, md_15_meanAUC))%>%
-  cbind(lag)
-
-WTSP_AUC_lm_test<-lm(AUC_mean~ lag, data=WTSP_models_AUC_4)
-summary(WTSP_AUC_lm_test)
-
-WTSP_r2c_lm_test<-lm(R2c_mean~ lag, data=WTSP_models_AUC_4)
-summary(WTSP_r2c_lm_test)
-
-WTSP_r2m_lm_test<-lm(R2m_mean~ lag, data=WTSP_models_AUC_4)
-summary(WTSP_r2m_lm_test)
-
-
-## add weather data
-# ERA5<-read.csv("0_data/external/CL_ERA5/ERA5_time_series.csv")
-# 
-# 
-# Year<-c(2009, 2008, 2007, 2006, 2005, 2004, 2003, 2002, 2001, 2000, 1999, 1998, 1997, 1996, 1995, 1994)
-# df<-tibble(year)
-# 
-# sw<-cbind(WTSP_models_AUC_4, Year)%>%
-#   left_join(ERA5)
-# 
-# auc_0<-lm(AUC_mean~ lag, data=sw)
-# auc_1<-lm(AUC_mean~ lag + total_precipitation, data=sw)
-# auc_2<-lm(AUC_mean~ lag + maximum_2m_air_temperature, data=sw)
-# 
-# 
-# summary(auc_1)
-# anova(auc_0, auc_1, auc_2)
-
-
-
-AUC_cor_test <- cor.test(WTSP_models_AUC_4$AUC_mean, WTSP_models_AUC_4$lag, method = "pearson")
-
-
-#WTSP_predictMap_m_15<-raster::predict(scaled_stack, md_15, re.form=NA, type='response')
-#writeRaster(#WTSP_predictMap_m_15,file="3_output/maps/predictedDistributions/WTSP/#WTSP_predictMap_m_15", format="GTiff", overwrite=T)
+WTSP_predictMap_m_15<-raster::predict(scaled_stack, md_15, re.form=NA, type='response')
+writeRaster(WTSP_predictMap_m_15,file="3_output/maps/predictedDistributions/WTSP/WTSP_predictMap_m_15", format="GTiff", overwrite=T)
 
 
 ####################################################################
@@ -953,30 +909,30 @@ model<-c("md_0", "md_1", "md_2", "md_3", "md_4", "md_5", "md_6", "md_7", "md_8",
 WTSP_models_AUC_4<-as.data.frame(rbind(md_0_meanAUC, md_1_meanAUC, md_2_meanAUC, md_3_meanAUC, md_4_meanAUC, md_5_meanAUC, md_6_meanAUC, md_7_meanAUC, md_8_meanAUC, md_9_meanAUC, md_10_meanAUC, md_11_meanAUC, md_12_meanAUC, md_13_meanAUC, md_14_meanAUC, md_15_meanAUC))%>%
   cbind(lag)
 
-WTSP_AUC_lm_test<-lm(AUC_mean~ lag, data=WTSP_models_AUC_4)
-summary(WTSP_AUC_lm_test)
-
-WTSP_r2c_lm_test<-lm(R2c_mean~ lag, data=WTSP_models_AUC_4)
-summary(WTSP_r2c_lm_test)
-
-WTSP_r2m_lm_test<-lm(R2m_mean~ lag, data=WTSP_models_AUC_4)
-summary(WTSP_r2m_lm_test)
-
-ggplot(WTSP_models_AUC_4, aes(x=lag, y=AUC_mean)) + 
-    geom_errorbar(aes(ymin=AUC_mean-1.96*AUC_stdErr, ymax=AUC_mean+ 1.96*AUC_stdErr, width=.2))+
-    geom_point(size=1) + 
-    geom_segment(x=0, xend=15, y=.7, yend=.7, col="red", linetype="longdash")+
-    geom_smooth(method = lm)+
-    theme(panel.background = element_blank(),
-          text = element_text(size=10),
-          axis.ticks=element_blank(),
-          #strip.background =element_rect(fill="white"),
-          panel.border = element_rect(color = "black", fill = NA, size = .2),
-          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
-          axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
-          #panel.background = element_rect(fill="white"),
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
+# WTSP_AUC_lm_test<-lm(AUC_mean~ lag, data=WTSP_models_AUC_4)
+# summary(WTSP_AUC_lm_test)
+# 
+# WTSP_r2c_lm_test<-lm(R2c_mean~ lag, data=WTSP_models_AUC_4)
+# summary(WTSP_r2c_lm_test)
+# 
+# WTSP_r2m_lm_test<-lm(R2m_mean~ lag, data=WTSP_models_AUC_4)
+# summary(WTSP_r2m_lm_test)
+# 
+# ggplot(WTSP_models_AUC_4, aes(x=lag, y=AUC_mean)) + 
+#     geom_errorbar(aes(ymin=AUC_mean-1.96*AUC_stdErr, ymax=AUC_mean+ 1.96*AUC_stdErr, width=.2))+
+#     geom_point(size=1) + 
+#     geom_segment(x=0, xend=15, y=.7, yend=.7, col="red", linetype="longdash")+
+#     geom_smooth(method = lm)+
+#     theme(panel.background = element_blank(),
+#           text = element_text(size=10),
+#           axis.ticks=element_blank(),
+#           #strip.background =element_rect(fill="white"),
+#           panel.border = element_rect(color = "black", fill = NA, size = .2),
+#           axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+#           axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+#           #panel.background = element_rect(fill="white"),
+#           panel.grid.major = element_blank(),
+#           panel.grid.minor = element_blank(),
           legend.position="none")
 
 

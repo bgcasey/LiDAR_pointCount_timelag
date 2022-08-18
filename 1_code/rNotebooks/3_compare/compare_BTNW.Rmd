@@ -36,7 +36,7 @@ library(sf)
 load("2_pipeline/store/models/BTNW_models_AUC_4.rData")
 
 BTNW_models_AUC_4<-BTNW_models_AUC_4%>%
-  rename(LiDAR_timelag=lag)
+  dplyr::rename(LiDAR_timelag=lag)
 
 ggplot(BTNW_models_AUC_4, aes(x=LiDAR_timelag, y=AUC_mean)) + 
   geom_errorbar(aes(ymin=AUC_mean-1.96*AUC_stdErr, ymax=AUC_mean+ 1.96*AUC_stdErr, width=.2))+

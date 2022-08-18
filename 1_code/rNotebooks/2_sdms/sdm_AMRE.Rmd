@@ -965,7 +965,7 @@ knitr::kable(AMRE_models_AUC_4) %>%
   scroll_box(width = "100%", height = "400px")
 ```
 
-### Estimate relative importance of predictors
+### Estimate relative importance of predictors {-}
 
 Calculate semi partial R squared values for all fixed effects using the `r2glmmm` package. 
 

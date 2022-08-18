@@ -242,7 +242,7 @@ save(data_main_2, file = "0_data/manual/data_main_2.rData")
 #### Combine raster data into a single raster stack
 
 
-```{r eval=False}
+```{r eval=FALSE}
 #import raster stacks
 #LiDAR
 lidar_stack<-stackOpen("0_data/manual/spatialCov/LiDAR/lidar_stack.stk")

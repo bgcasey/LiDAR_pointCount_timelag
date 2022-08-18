@@ -1,1 +1,564 @@
 
+```{r setup, include=FALSE, cache=FALSE}
+#Set root directory to R project root
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+```
+
+
+
+## AMRE
+
+### Model performance trends {-}
+
+
+#### AUC ~ timelag {-}
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="AMRE AUC time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/AMRE_AUC_lm_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/AMRE_AUC_lm_test.rData")
+print(summary(AMRE_AUC_lm_test))
+```
+
+#### R2m ~ timelag {-}
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="AMRE R2m time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/AMRE_R2m_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/AMRE_R2m_test.rData")
+print(summary(AMRE_R2m_test))
+```
+
+#### R2c ~ timelag {-}
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="AMRE R2c time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/AMRE_R2c_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/AMRE_R2c_test.rData")
+print(summary(AMRE_R2c_test))
+```
+
+
+### Raster correlations ~ forest age {-}
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/AMRE_lm_fa_all.png", dpi = 300)
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("2_pipeline/store/models/AMRE_predCor_to_forestAge_df.rData")
+
+knitr::kable(AMRE_predCor_to_forestAge_df) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/AMRE_lm_fac_all.png", dpi = 300)
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("2_pipeline/store/models/AMRE_predCor_to_forestAgeClass_df.rData")
+
+knitr::kable(AMRE_predCor_to_forestAgeClass_df) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+### Occupancy probability and forest age {-}
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/AMRE_scatter_00to15.png", dpi = 300)
+```
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/AMRE_scatter_00to15_class.png", dpi = 300)
+```
+
+
+
+## BTNW
+
+### Model performance trends {-}
+
+#### AUC ~ timelag {-}
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="BTNW AUC time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/BTNW_AUC_lm_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/BTNW_AUC_lm_test.rData")
+print(summary(BTNW_AUC_lm_test))
+```
+
+#### R2m ~ timelag {-}
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="BTNW R2m time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/BTNW_R2m_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/BTNW_R2m_test.rData")
+print(summary(BTNW_R2m_test))
+```
+
+#### R2c ~ timelag {-}
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="BTNW R2c time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/BTNW_R2c_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/BTNW_R2c_test.rData")
+print(summary(BTNW_R2c_test))
+```
+
+
+### Raster correlations ~ forest age {-}
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/BTNW_lm_fa_all.png", dpi = 300)
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("2_pipeline/store/models/BTNW_predCor_to_forestAge_df.rData")
+
+knitr::kable(BTNW_predCor_to_forestAge_df) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/BTNW_lm_fac_all.png", dpi = 300)
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("2_pipeline/store/models/BTNW_predCor_to_forestAgeClass_df.rData")
+
+knitr::kable(BTNW_predCor_to_forestAgeClass_df) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+### Occupancy probability and forest age {-}
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/BTNW_scatter_00to15.png", dpi = 300)
+```
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/BTNW_scatter_00to15_class.png", dpi = 300)
+```
+
+
+## MOWA 
+
+
+### Model performance trends {-}
+
+
+#### AUC ~ timelag {-}
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="MOWA AUC time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/MOWA_AUC_lm_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/MOWA_AUC_lm_test.rData")
+print(summary(MOWA_AUC_lm_test))
+```
+
+#### R2m ~ timelag {-}
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="MOWA R2m time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/MOWA_R2m_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/MOWA_R2m_test.rData")
+print(summary(MOWA_R2m_test))
+```
+
+#### R2c ~ timelag {-}
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="MOWA R2c time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/MOWA_R2c_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/MOWA_R2c_test.rData")
+print(summary(MOWA_R2c_test))
+```
+
+
+### Raster correlations ~ forest age {-}
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/MOWA_lm_fa_all.png", dpi = 300)
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("2_pipeline/store/models/MOWA_predCor_to_forestAge_df.rData")
+
+knitr::kable(MOWA_predCor_to_forestAge_df) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/MOWA_lm_fac_all.png", dpi = 300)
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("2_pipeline/store/models/MOWA_predCor_to_forestAgeClass_df.rData")
+
+knitr::kable(MOWA_predCor_to_forestAgeClass_df) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+### Occupancy probability and forest age {-}
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/MOWA_scatter_00to15.png", dpi = 300)
+```
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/MOWA_scatter_00to15_class.png", dpi = 300)
+```
+
+
+## SWTH 
+
+
+### Model performance trends {-}
+
+
+#### AUC ~ timelag {-}
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="SWTH AUC time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/SWTH_AUC_lm_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/SWTH_AUC_lm_test.rData")
+print(summary(SWTH_AUC_lm_test))
+```
+
+#### R2m ~ timelag {-}
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="SWTH R2m time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/SWTH_R2m_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/SWTH_R2m_test.rData")
+print(summary(SWTH_R2m_test))
+```
+
+#### R2c ~ timelag {-}
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="SWTH R2c time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/SWTH_R2c_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/SWTH_R2c_test.rData")
+print(summary(SWTH_R2c_test))
+```
+
+
+### Raster correlations ~ forest age {-}
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/SWTH_lm_fa_all.png", dpi = 300)
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("2_pipeline/store/models/SWTH_predCor_to_forestAge_df.rData")
+
+knitr::kable(SWTH_predCor_to_forestAge_df) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/SWTH_lm_fac_all.png", dpi = 300)
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("2_pipeline/store/models/SWTH_predCor_to_forestAgeClass_df.rData")
+
+knitr::kable(SWTH_predCor_to_forestAgeClass_df) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+### Occupancy probability and forest age {-}
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/SWTH_scatter_00to15.png", dpi = 300)
+```
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/SWTH_scatter_00to15_class.png", dpi = 300)
+```
+
+
+## WIWR 
+
+
+### Model performance trends {-}
+
+
+#### AUC ~ timelag {-}
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="WIWR AUC time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/WIWR_AUC_lm_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/WIWR_AUC_lm_test.rData")
+print(summary(WIWR_AUC_lm_test))
+```
+
+#### R2m ~ timelag {-}
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="WIWR R2m time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/WIWR_R2m_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/WIWR_R2m_test.rData")
+print(summary(WIWR_R2m_test))
+```
+
+#### R2c ~ timelag {-}
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="WIWR R2c time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/WIWR_R2c_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/WIWR_R2c_test.rData")
+print(summary(WIWR_R2c_test))
+```
+
+
+### Raster correlations ~ forest age {-}
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/WIWR_lm_fa_all.png", dpi = 300)
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("2_pipeline/store/models/WIWR_predCor_to_forestAge_df.rData")
+
+knitr::kable(WIWR_predCor_to_forestAge_df) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/WIWR_lm_fac_all.png", dpi = 300)
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("2_pipeline/store/models/WIWR_predCor_to_forestAgeClass_df.rData")
+
+knitr::kable(WIWR_predCor_to_forestAgeClass_df) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+### Occupancy probability and forest age {-}
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/WIWR_scatter_00to15.png", dpi = 300)
+```
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/WIWR_scatter_00to15_class.png", dpi = 300)
+```
+
+
+## WTSP 
+
+### Model performance trends {-}
+
+
+#### AUC ~ timelag {-}
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="WTSP AUC time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/WTSP_AUC_lm_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/WTSP_AUC_lm_test.rData")
+print(summary(WTSP_AUC_lm_test))
+```
+
+#### R2m ~ timelag {-}
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="WTSP R2m time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/WTSP_R2m_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/WTSP_R2m_test.rData")
+print(summary(WTSP_R2m_test))
+```
+
+#### R2c ~ timelag {-}
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="WTSP R2c time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/WTSP_R2c_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/WTSP_R2c_test.rData")
+print(summary(WTSP_R2c_test))
+```
+
+
+### Raster correlations ~ forest age {-}
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/WTSP_lm_fa_all.png", dpi = 300)
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("2_pipeline/store/models/WTSP_predCor_to_forestAge_df.rData")
+
+knitr::kable(WTSP_predCor_to_forestAge_df) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/WTSP_lm_fac_all.png", dpi = 300)
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("2_pipeline/store/models/WTSP_predCor_to_forestAgeClass_df.rData")
+
+knitr::kable(WTSP_predCor_to_forestAgeClass_df) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+### Occupancy probability and forest age {-}
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/WTSP_scatter_00to15.png", dpi = 300)
+```
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/WTSP_scatter_00to15_class.png", dpi = 300)
+```
+
+
+
+## YBSA 
+
+### Model performance trends {-}
+
+
+#### AUC ~ timelag {-}
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="YBSA AUC time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/YBSA_AUC_lm_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/YBSA_AUC_lm_test.rData")
+print(summary(YBSA_AUC_lm_test))
+```
+
+#### R2m ~ timelag {-}
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="YBSA R2m time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/YBSA_R2m_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/YBSA_R2m_test.rData")
+print(summary(YBSA_R2m_test))
+```
+
+#### R2c ~ timelag {-}
+
+```{r  echo=FALSE, out.width = '100%', fig.cap="YBSA R2c time lag"}
+knitr::include_graphics("3_output/figures/timelag_stats/YBSA_R2c_test.png", dpi = 300)
+```
+
+```{r echo=FALSE}
+load("2_pipeline/store/models/YBSA_R2c_test.rData")
+print(summary(YBSA_R2c_test))
+```
+
+
+### Raster correlations ~ forest age {-}
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/YBSA_lm_fa_all.png", dpi = 300)
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("2_pipeline/store/models/YBSA_predCor_to_forestAge_df.rData")
+
+knitr::kable(YBSA_predCor_to_forestAge_df) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/YBSA_lm_fac_all.png", dpi = 300)
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("2_pipeline/store/models/YBSA_predCor_to_forestAgeClass_df.rData")
+
+knitr::kable(YBSA_predCor_to_forestAgeClass_df) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+### Occupancy probability and forest age {-}
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/YBSA_scatter_00to15.png", dpi = 300)
+```
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/YBSA_scatter_00to15_class.png", dpi = 300)
+```
+

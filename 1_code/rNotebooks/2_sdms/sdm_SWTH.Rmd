@@ -943,7 +943,7 @@ knitr::kable(SWTH_models_AUC_4) %>%
 ```
 
 
-### Estimate relative importance of predictors
+### Estimate relative importance of predictors {-}
 
 Calculate semi partial R squared values for all fixed effects using the `r2glmmm` package. 
 

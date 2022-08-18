@@ -571,7 +571,7 @@ save(pkey_cas_cov, file="0_data/manual/spatialCov/CASFRI/pkey_cas_cov.rData")
 5 100+late canopy transition/gap dynamics
 
 
-```{r}
+```{r eval=FALSE}
 load("0_data/manual/spatialCov/CASFRI/pkey_cas_cov.rData")
 
 x<-pkey_cas_cov
@@ -606,7 +606,7 @@ save(pkey_cas_cov, file="0_data/manual/spatialCov/CASFRI/pkey_cas_cov.rData")
 ```
 
 ###### Create forest age class raster {-}
-```{r}
+```{r eval=FALSE}
 #create survey forest age rasters for each time step
 lidar_forestAge_raster<-raster("0_data/manual/spatialCov/CASFRI/lidar_forestAge_raster.tif")
 

@@ -21,7 +21,7 @@ pre[class] {
 
 ### Load packages {-}
 
-```{r eval=FALSE  message = FALSE}
+```{r eval=FALSE,  message = FALSE}
 library(dplyr)
 library(ggplot2)
 library(raster)

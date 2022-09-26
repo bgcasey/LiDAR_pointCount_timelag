@@ -1,0 +1,180 @@
+\documentclass[review]{elsarticle}
+
+\usepackage{lineno}
+\usepackage{longtable,booktabs, amsmath, textcomp, rotating, pdflscape, array, multirow, adjustbox, threeparttable, caption, hhline, xcolor, colortbl, tabularx, tikz, float}
+\usepackage{fontspec} % for \textsubscript
+
+\usepackage{graphicx}
+\newcommand{\plus}{\raisebox{.4\height}{\scalebox{.6}{+ }}}
+\newcommand{\minus}{\raisebox{.4\height}{\scalebox{.8}{- }}}
+
+\newcommand\textstyleStrongEmphasis[1]{\textbf{#1}}
+\makeatletter
+\newcommand\arraybslash{\let\\\@arraycr}
+
+
+\usepackage{listings}
+\lstset{
+basicstyle=\small\ttfamily,
+columns=flexible,
+breaklines=true
+}
+
+
+
+\modulolinenumbers[$modulolinenumbers$]
+
+
+\journal{Journal of ...}
+
+
+%set up colof of hyperlinks defined using hyperref package
+% \hypersetup{
+%   colorlinks   = true, %Colours links instead of ugly boxes
+%   urlcolor     = blue, %Colour for external hyperlinks
+%   linkcolor    = blue, %Colour of internal links
+%   citecolor   = red %Colour of citations
+% }
+
+
+
+% From {rticles}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+
+
+\newenvironment{CSLreferences}%
+  {}%
+  {\par}
+%%%% added this to resolve the error "! LaTeX Error: Environment CSLReferences undefined."%%%%%%
+\newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
+ {% don't indent paragraphs
+  \setlength{\parindent}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1 \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces\fi
+  % set entry spacing
+  \ifnum #2 > 0
+  \setlength{\parskip}{#2\baselineskip}
+  \fi
+ }%
+ {}
+ 
+ \usepackage{calc} % for calculating minipage widths
+\newcommand{\CSLBlock}[1]{#1\hfill\break}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%
+%% Elsevier bibliography styles
+%%%%%%%%%%%%%%%%%%%%%%%
+%% To change the style, put a % in front of the second line of the current style and
+%% remove the % from the second line of the style you would like to use.
+%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Numbered
+%\bibliographystyle{model1-num-names}
+
+%% Numbered without titles
+%\bibliographystyle{model1a-num-names}
+
+%% Harvard
+%\bibliographystyle{model2-names.bst}\biboptions{authoryear}
+
+%% Vancouver numbered
+%\usepackage{numcompress}\bibliographystyle{model3-num-names}
+
+%% Vancouver name/year
+%\usepackage{numcompress}\bibliographystyle{model4-names}\biboptions{authoryear}
+
+%% APA style
+\bibliographystyle{model5-names}\biboptions{authoryear}
+
+%% AMA style
+%\usepackage{numcompress}\bibliographystyle{model6-num-names}
+
+%% `Elsevier LaTeX' style
+%\bibliographystyle{elsarticle-num}
+%%%%%%%%%%%%%%%%%%%%%%%
+
+  
+\begin{document}
+
+$for(include-before)$
+$include-before$
+
+$endfor$
+$if(toc)$
+{
+\setcounter{tocdepth}{$toc-depth$}
+\tableofcontents
+}
+$endif$
+$if(lof)$
+\listoffigures
+$endif$
+
+$if(lot)$
+\listoftables
+$endif$
+
+
+\title{$title$}
+%% or include affiliations in footnotes:
+\author[mymainaddress]{Brendan Casey\corref{mycorrespondingauthor}}
+\cortext[mycorrespondingauthor]{Corresponding author}
+\ead{bgcasey@ualberta.ca}
+\author[mymainaddress]{Erin Bayne}
+%\author[mysecondaryaddress]{Matthias Zeeman}
+%\author[mymainaddress]{Georg Wohlfahrt}
+
+
+\address[mymainaddress]{Department of Biological Sciences, University of Alberta, Canada}
+%%\address[mysecondaryaddress]{Karlsruhe Institute of Technology (KIT) Atmospheric Environmental Research Institute of Meteorology and Climate Research (IMK-IFU)}
+
+\begin{frontmatter}
+
+\begin{abstract}
+$abstract$
+\end{abstract}
+
+
+\begin{keyword}
+$keyword$
+\end{keyword}
+
+\end{frontmatter}
+
+\linenumbers
+
+$body$
+
+$if(natbib)$
+$if(bibliography)$
+$if(biblio-title)$
+$if(book-class)$
+\renewcommand\bibname{$biblio-title$}
+$else$
+\renewcommand\refname{$biblio-title$}
+$endif$
+$endif$
+
+
+\bibliography{$for(bibliography)$$bibliography$$sep$,$endfor$}
+
+$endif$
+$endif$
+$if(biblatex)$
+\printbibliography$if(biblio-title)$[title=$biblio-title$]$endif$
+
+$endif$
+$for(include-after)$
+$include-after$
+
+$endfor$
+\end{document}

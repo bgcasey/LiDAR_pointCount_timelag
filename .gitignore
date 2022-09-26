@@ -58,3 +58,6 @@ occupancy/
 chapter_all/
 _bookdown.yml
 
+
+
+.DS_Store

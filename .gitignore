@@ -58,6 +58,6 @@ occupancy/
 chapter_all/
 _bookdown.yml
 
-
+!.gitkeep
 
 .DS_Store

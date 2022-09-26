@@ -4,7 +4,7 @@
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
 ```
 
-
+ 
 
 ```{css, echo=FALSE}
 # set max height of code chunks using the following css styling

@@ -49,7 +49,9 @@ renv/
 #external data folder
 0_data/*
 2_pipeline/*
-3_output/!*/
+3_output/*
+
+
 rsconnect/
 5_cache/
 images/
@@ -58,8 +60,7 @@ occupancy/
 chapter_all/
 _bookdown.yml
 
-!.gitkeep
-!2_pipeline/.gitkeep
+
 
 
 

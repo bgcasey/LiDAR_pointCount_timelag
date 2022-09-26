@@ -59,5 +59,8 @@ chapter_all/
 _bookdown.yml
 
 !.gitkeep
+!2_pipeline/.gitkeep
+!3_output/.gitkeep
+
 
 .DS_Store

@@ -48,8 +48,8 @@ _bookdown_files/
 renv/
 #external data folder
 0_data/*
-2_pipeline/
-3_output/
+2_pipeline/*
+3_output/*
 rsconnect/
 5_cache/
 images/

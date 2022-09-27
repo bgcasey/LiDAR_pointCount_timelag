@@ -1,12 +1,14 @@
-\documentclass[preprint, 3p,
+\documentclass[manuscript, 3p,
 authoryear]{elsarticle} %review=doublespace preprint=single 5p=2 column
 %%% Begin My package additions %%%%%%%%%%%%%%%%%%%
 
 \usepackage[hyphens]{url}
 
-  \journal{An awesome journal} % Sets Journal name
+  \journal{Remote Sensing in Ecology and
+Conservation} % Sets Journal name
 
 \usepackage{lineno} % add
+  \linenumbers % turns line numbering on
 
 \usepackage{graphicx}
 %%%%%%%%%%%%%%%% end my additions to header
@@ -79,24 +81,14 @@ authoryear]{elsarticle} %review=doublespace preprint=single 5p=2 column
 \begin{frontmatter}
 
   \title{Short Paper}
-    \author[Some Institute of Technology]{Alice Anonymous%
+    \author[University of Alberta]{Brendan Casey*%
   \corref{cor1}%
   \fnref{1}}
-   \ead{alice@example.com} 
-    \author[Another University]{Bob Security}
-   \ead{bob@example.com} 
-    \author[Another University]{Cat Memes%
-  %
-  \fnref{2}}
-   \ead{cat@example.com} 
-    \author[Some Institute of Technology]{Derek Zoolander%
-  %
-  \fnref{2}}
-   \ead{derek@example.com} 
-      \affiliation[Some Institute of Technology]{Department, Street,
-City, State, Zip}
-    \affiliation[Another University]{Department, Street, City, State,
-Zip}
+   \ead{bgcasey@ualberta.ca} 
+    \author[University of Alberta]{Erin Bayne}
+   \ead{bayne@ualberta.ca} 
+      \affiliation[University of Alberta]{Department of Biological
+Sciences, CW 405, Biological Sciences Bldg., Edmonton, AB, T6G 2E9}
     \cortext[cor1]{Corresponding author}
     \fntext[1]{This is the first author footnote.}
     \fntext[2]{Another author footnote.}
@@ -107,11 +99,14 @@ Zip}
   It consists of two paragraphs.
   \end{abstract}
     \begin{keyword}
-    keyword1 \sep 
-    keyword2
+    Avian \sep Boreal \sep Forestry \sep 
+    LiDAR
   \end{keyword}
   
  \end{frontmatter}
+
+\hypertarget{introduction}{%
+\section{Introduction}\label{introduction}}
 
 LiDAR has the potential to improve bird models by providing high
 resolution structural covariates which, when paired with bird monitoring
@@ -246,6 +241,9 @@ observe mild decreases in performance as windfall and disease opens new
 gaps in the mature forest canopy. For all species, differences in
 predictive maps will be negatively correlated with the age of the forest
 when LiDAR was acquired.
+
+\hypertarget{methods}{%
+\section{Methods}\label{methods}}
 
 Our methodological workflow is illustrated in Figure @ref(fig:workflow).
 Analyses were done using R statistical software \citep{R-base}. We
@@ -382,8 +380,17 @@ GLMs. To accommodate the influence of survey methods and nuisance
 parameters on detection probabilities, I will generate statistical
 offsets via QPAD \citep{SolymosMatsuoka2013}.
 
+\hypertarget{results}{%
+\section{Results}\label{results}}
+
+\hypertarget{discussion}{%
+\section{Discussion}\label{discussion}}
+
 While AUCs dididnt significantly decline for all species, the mapped
 spatial distribution did, suggesting that timelag plays a role.
+
+\hypertarget{conclusion}{%
+\section{Conclusion}\label{conclusion}}
 
 \bibliography{library.bib}
 

@@ -1,3 +1,5 @@
+# Introduction
+
 LiDAR has the potential to improve bird models by providing high resolution structural covariates which, when paired with bird monitoring data, can provide insight into bird-habitat relationships [REF]. However, LiDAR acquisitions do not always coincide temporally with bird surveys, and it is unclear how much these time lags influence models. Disturbance-succession cycles change vegetation structure. Eventually, LiDAR metrics will no longer reflect ground conditions, and their usefulness as explanatory variables will degrade. Here, we evaluated how the time lag between LiDAR acquisitions and bird surveys influenced model robustness for early successional, mature forest, and generalist birds.
 
 The composition and structure of forests are changing in response to climate change, shifts to natural disturbance regimes, and increasing industrial development [@Brandt2013]. Predictive models linking distribution, abundance, and community structure to select environmental variables have been used to understand how forest birds respond to these changes  [@Carrillo-Rubio2014; @Engler2017a; @guisanPredictiveHabitatDistribution2000; @He2015]. Broadly known as species distribution models(SDMs), this family of statistical methods relate field observations (e.g. occupancy or abundance) with spatial covariates [@Guisan2005]. Find correlations between detection data and eviromnetal covariates to predict... While methods vary, SDMs predict species occurrence by comparing the habitat where individuals have been observed (via traditional human point counts or autonomous bioacoustic monitoring) against habitat where species are absent [Guisan2005]. With innovations in modelling methods, computational power, and environmental monitoring, SDMs are an important tool in ecology, conservation biology, and wildlife management [@Elith2009]. SDMs and resulting predictive distribution maps are often applied to bird research @englerAvianSDMsCurrent2017, and have informed conservation management planning, environmental impact assessments[REF], and bird diversity modelling [REF][@englerAvianSDMsCurrent2017; @franklinMappingSpeciesDistributions2010]. 
@@ -84,6 +86,8 @@ We hypothesized that the performance of models will decrease with increased LiDA
 ---------------------------------------------------------------
 We predicted that (1) SDMs for early successional species will see the greatest declines in performance due to more rapid amounts of change in their preferred habitat during the time lag period and models will no longer be reliable after 5 years lag. (2) Forest generalist species will see moderate declines in performance as time lag increases (3) The effect of time lag on SDMs for mature forest species will be smaller due the the relative stability of their forest habitats, but will still observe mild decreases in performance as windfall and disease opens new gaps in the mature forest canopy. For all species, differences in predictive maps will be negatively correlated with the age of the forest when LiDAR was acquired. 
 
+# Methods
+
 Our methodological workflow is illustrated in Figure \@ref(fig:workflow). Analyses were done using R statistical software [@R-base]. We developed SDMs following the methodology outlined by Guisan and Thuiller -@Guisan2005 with bird data collected by the Calling Lake Fragmentation project. 
 
 ```{r workflow, fig.cap= "Conceptual diagram of our methodology. SDM methods were repeated at every time lag for each species and compared using AUC and correlation between predictive maps. "}
@@ -142,4 +146,10 @@ I will combine LiDAR metrics with the CAS-FRI data to model species habitat rela
 
 
 
+# Results
+
+# Discussion
+
 While AUCs dididnt significantly decline for all species, the mapped spatial distribution did, suggesting that timelag plays a role. 
+
+# Conclusion

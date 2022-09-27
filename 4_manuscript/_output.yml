@@ -1,6 +1,6 @@
 bookdown::pdf_document2:
 #bookdown::word_document2:
-  template: tex/MDPI_template/template.tex # if bringing in a new template, replace all $ characters with $$
+  template: tex_templates/MDPI_template/template.tex # if bringing in a new template, replace all $ characters with $$
   keep_tex: yes
   #latex_engine: pdflatex
   latex_engine: xelatex

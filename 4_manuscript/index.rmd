@@ -1,5 +1,5 @@
 ---
-Title: Predicting the effects of forestry on birds using forest resource inventories, LiDAR, and Landsat 
+Title:  
 Author:
   - name: Brendan Casey
     affil: 1,2,\ddagger,*
@@ -8,17 +8,17 @@ Author:
     affil: 2, \dagger, \ddagger
 site: bookdown::bookdown_site
 toc: no
-abstract: The growing availability of regional bird monitoring and remote sensing data provides new opportunities to study how birds respond to forestry by enabling the study of large numbers of harvest blocks over wide spatial extents and providing novel covariates related to the structure and recovery of harvests. We explored the viability of combining LiDAR and optical remote sensing to predict bird response to harvesting. Point count data were gathered from harvest blocks across northern Alberta. We used linear and generalized linear mixed models to evaluate the power of classified habitat data, LiDAR, and Landsat spectral change metrics to predict bird abundance and community response to harvesting. We found LiDAR height and complexity metrics and spectral measures of harvest severity were more predictive of species abundance and diversity than the discrete vegetation and harvest severity classes often used to model birds. Supplementing forest resource inventory data with LiDAR and Landsat time-series can improve the accuracy of bird models while avoiding the costs of ground-based vegetation surveys.
-keyword: avian; forestry; LiDAR; change detection; spectral indices; Landsat time series
-acknowledgments: This research is part of the Boreal Ecosystem Recovery and Assessment (BERA) project ([www.bera-project.org](http://www.bera-project.org)), and was supported by a Natural Sciences and Engineering Research Council of Canada Alliance Grant (ALLRP 548285 - 19) in conjunction with Alberta-Pacific Forest Industries, Alberta Biodiversity Monitoring Institute, Canadian Natural Resources Ltd., Cenovus Energy, ConocoPhillips Canada,  Imperial Oil Ltd., and Natural Resources Canada. This research is also part of the Boreal Avian Modelling (BAM) Project ([borealbirds.ca](https://borealbirds.ca/)). We are thankful to Jennifer Hird for sharing her workflow for deriving NBR spectral recovery metrics, Chris Bater for providing summarized LiDAR metrics, Greg McDermid and Andrew Crosby for helping conceptualize this project, and all of the Bioacoustic Unit project leads who gathered and processed bird data.
+abstract: 
+keyword: avian; forestry; LiDAR; boreal forest
+acknowledgments: This research is part of the Boreal Ecosystem Recovery and Assessment (BERA) project ([www.bera-project.org](http://www.bera-project.org)), and was supported by a Natural Sciences and Engineering Research Council of Canada Alliance Grant (ALLRP 548285 - 19) in conjunction with Alberta-Pacific Forest Industries, Alberta Biodiversity Monitoring Institute, Canadian Natural Resources Ltd., Cenovus Energy, ConocoPhillips Canada,  Imperial Oil Ltd., and Natural Resources Canada. This research is also part of the Boreal Avian Modelling (BAM) Project ([borealbirds.ca](https://borealbirds.ca/)). We are thankful to Chris Bater for providing summarized LiDAR metrics, Greg McDermid for helping conceptualize this project, and all of the Bioacoustic Unit project leads who gathered and processed bird data.
 authorcontributions: Conceptualization, B.C. and E.B.; methodology and formal analysis, B.C.; writing—original draft preparation, B.C.; writing—review and editing, B.C. and E.B; funding acquisition, B.C. and E.B. All authors have read and agreed to the published version of the manuscript.
-funding: Funding was provided by a Natural Sciences and Engineering Research Council of Canada Alliance Grant, the Alberta Conservation Association (ACA),  and the University of Alberta Northern Research Awards (UANRA).
+funding:
 conflictsofinterest: The authors declare no conflict of interest. 
 modulolinenumbers: 1 # define how many lines with a line number
 always_allow_html: true
 link-citations: yes
 bibliography: library.bib   
-citation-style: ../../MendeleyBib/CitationStyles/ecology.csl
+citation-style: 
 biblio-style: apalike
 lof: yes
 lot: yes
@@ -69,23 +69,23 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, signif = 3
                       fig.retina = 2,
                       fig.pos = 'htb')
 
-# move figure files to manuscript directory
-file.copy(from="../images/chapter3_workflow.pdf", to="figures/chapter3_workflow.pdf",
-          overwrite = TRUE, recursive = FALSE,
-          copy.mode = TRUE)
-file.copy(from="../latex_figures/summ_freq_all_c.png", to="figures/summ_freq_all_c.png",
-          overwrite = TRUE, recursive = FALSE,
-          copy.mode = TRUE)
-file.copy(from="../empirical/3_output/figures/r2_plot_c.png", to="figures/r2_plot_c.png",
-          overwrite = TRUE, recursive = FALSE,
-          copy.mode = TRUE)
-file.copy(from="../latex_figures/contrFixed_c.png", to="figures/contrFixed_c.png",
-          overwrite = TRUE, recursive = FALSE,
-          copy.mode = TRUE)
-file.copy(from="../empirical/3_output/maps/studyArea_inset.png", to="figures/studyArea_inset.png",
-          overwrite = TRUE, recursive = FALSE,
-          copy.mode = TRUE)
+# # move figure files to manuscript directory
+# file.copy(from="../images/chapter3_workflow.pdf", to="figures/chapter3_workflow.pdf",
+#           overwrite = TRUE, recursive = FALSE,
+#           copy.mode = TRUE)
+# file.copy(from="../latex_figures/summ_freq_all_c.png", to="figures/summ_freq_all_c.png",
+#           overwrite = TRUE, recursive = FALSE,
+#           copy.mode = TRUE)
+# file.copy(from="../empirical/3_output/figures/r2_plot_c.png", to="figures/r2_plot_c.png",
+#           overwrite = TRUE, recursive = FALSE,
+#           copy.mode = TRUE)
+# file.copy(from="../latex_figures/contrFixed_c.png", to="figures/contrFixed_c.png",
+#           overwrite = TRUE, recursive = FALSE,
+#           copy.mode = TRUE)
+# file.copy(from="../empirical/3_output/maps/studyArea_inset.png", to="figures/studyArea_inset.png",
+#           overwrite = TRUE, recursive = FALSE,
+#           copy.mode = TRUE)
 
-knitr::read_chunk("figures/figures_tables.R")
+#knitr::read_chunk("code/figures_tables.R")
 
 ```

@@ -1,0 +1,8 @@
+output: 
+  rticles::elsevier_article:
+    keep_tex: true
+    citation_package: natbib
+  self_contained: TRUE
+#always_allow_html: true
+
+

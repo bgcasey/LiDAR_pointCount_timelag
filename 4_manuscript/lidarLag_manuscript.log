@@ -1,16 +1,16 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.9.27)  27 SEP 2022 15:07
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.11.3)  3 NOV 2022 14:57
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **lidarLag_manuscript.tex
 (./lidarLag_manuscript.tex
-LaTeX2e <2022-06-01> patch level 5
-L3 programming layer <2022-08-30> (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/elsarticle/elsarticle.cls
+LaTeX2e <2022-11-01>
+L3 programming layer <2022-11-02> (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/elsarticle/elsarticle.cls
 Document Class: elsarticle 2020/11/20, 3.3: Elsevier Ltd
 (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/l3kernel/expl3.sty
-Package: expl3 2022-08-30 L3 programming layer (loader) 
+Package: expl3 2022-11-02 L3 programming layer (loader) 
 (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
-File: l3backend-pdftex.def 2022-08-30 L3 backend support: PDF output (pdfTeX)
+File: l3backend-pdftex.def 2022-10-26 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count185
 \l__pdf_internal_box=\box51
 )) (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/l3packages/xparse/xparse.sty
@@ -19,11 +19,11 @@ Package: xparse 2022-06-22 L3 Experimental document command parser
 Package: etoolbox 2020/10/05 v2.5k e-TeX tools for LaTeX (JAW)
 \etb@tempcnta=\count186
 )
-\@bls=\dimen138
+\@bls=\dimen140
 (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/base/article.cls
-Document Class: article 2021/10/04 v1.4n Standard LaTeX document class
+Document Class: article 2022/07/02 v1.4n Standard LaTeX document class
 (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/base/size10.clo
-File: size10.clo 2021/10/04 v1.4n Standard LaTeX file (size option)
+File: size10.clo 2022/07/02 v1.4n Standard LaTeX file (size option)
 )
 \c@part=\count187
 \c@section=\count188
@@ -35,7 +35,7 @@ File: size10.clo 2021/10/04 v1.4n Standard LaTeX file (size option)
 \c@table=\count194
 \abovecaptionskip=\skip47
 \belowcaptionskip=\skip48
-\bibindent=\dimen139
+\bibindent=\dimen141
 ) (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/graphics/graphicx.sty
 Package: graphicx 2021/09/16 v1.2d Enhanced LaTeX Graphics (DPC,SPQR)
 (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/graphics/keyval.sty
@@ -51,8 +51,6 @@ File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
 Package graphics Info: Driver file: pdftex.def on input line 107.
 (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/graphics-def/pdftex.def
 File: pdftex.def 2022/09/22 v1.2b Graphics/color driver for pdftex
-\stockwidth=\dimen140
-\stockheight=\dimen141
 ))
 \Gin@req@height=\dimen142
 \Gin@req@width=\dimen143
@@ -286,8 +284,8 @@ Package: infwarerr 2019/12/03 v1.5 Providing info/warning/error messages (HO)
 Package pdftexcmds Info: \pdf@primitive is available.
 Package pdftexcmds Info: \pdf@ifprimitive is available.
 Package pdftexcmds Info: \pdfdraftmode found.
-) (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/generic/kvsetkeys/kvsetkeys.sty
-Package: kvsetkeys 2019/12/15 v1.18 Key value parser (HO)
+) (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty
+Package: kvsetkeys 2022-10-05 v1.19 Key value parser (HO)
 ) (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty
 Package: kvdefinekeys 2019-12-19 v1.6 Define keys (HO)
 ) (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/generic/pdfescape/pdfescape.sty
@@ -379,12 +377,12 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 28
 )
 \Hy@SectionHShift=\skip57
 )
-Package hyperref Info: Option `breaklinks' set `true' on input line 52.
+Package hyperref Info: Option `breaklinks' set `true' on input line 48.
 
 Package hyperref Warning: Option `bookmarks' has already been used,
-(hyperref)                setting the option has no effect on input line 52.
+(hyperref)                setting the option has no effect on input line 48.
 
-Package hyperref Info: Option `colorlinks' set `false' on input line 52.
+Package hyperref Info: Option `colorlinks' set `true' on input line 48.
 (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/tools/longtable.sty
 Package: longtable 2021-09-01 v4.17 Multi-page Table package (DPC)
 \LTleft=\skip58
@@ -423,7 +421,7 @@ Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
 \@lastruleclass=\count311
 \@thisrulewidth=\dimen188
 ) (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/tools/array.sty
-Package: array 2022/03/10 v2.5f Tabular extension package (FMi)
+Package: array 2022/09/04 v2.5g Tabular extension package (FMi)
 \col@sep=\dimen189
 \ar@mcellbox=\box67
 \extrarowheight=\dimen190
@@ -448,7 +446,10 @@ Package: footnote 1997/01/28 1.13 Save footnotes around boxes
 \fn@notes=\box69
 \fn@width=\dimen193
 )
-LaTeX Font Info:    Trying to load font information for T1+lmr on input line 78.
+\cslhangindent=\skip67
+\csllabelwidth=\skip68
+\cslentryspacingunit=\skip69
+LaTeX Font Info:    Trying to load font information for T1+lmr on input line 103.
 (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/lm/t1lmr.fd
 File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
@@ -456,27 +457,27 @@ File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 LaTeX Warning: Unused global option(s):
     [manuscript].
 
-No file lidarLag_manuscript.aux.
+(./lidarLag_manuscript.aux)
 \openout1 = `lidarLag_manuscript.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 78.
-LaTeX Font Info:    ... okay on input line 78.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
 (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
 Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 485.
@@ -519,29 +520,36 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-LaTeX Info: Redefining \microtypecontext on input line 78.
-Package microtype Info: Applying patch `item' on input line 78.
-Package microtype Info: Applying patch `toc' on input line 78.
-Package microtype Info: Applying patch `eqnum' on input line 78.
-Package microtype Info: Applying patch `footnote' on input line 78.
+LaTeX Info: Redefining \microtypecontext on input line 103.
+Package microtype Info: Applying patch `item' on input line 103.
+Package microtype Info: Applying patch `toc' on input line 103.
+Package microtype Info: Applying patch `eqnum' on input line 103.
+Package microtype Info: Applying patch `footnote' on input line 103.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using default protrusion set `alltext'.
 Package microtype Info: Automatic font expansion enabled (level 2),
 (microtype)             stretch: 20, shrink: 20, step: 1, non-selected.
 Package microtype Info: Using default expansion set `alltext-nott'.
-LaTeX Info: Redefining \showhyphens on input line 78.
+LaTeX Info: Redefining \showhyphens on input line 103.
 Package microtype Info: No adjustment of tracking.
 Package microtype Info: No adjustment of interword spacing.
 Package microtype Info: No adjustment of character kerning.
 (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/microtype/mt-cmr.cfg
 File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman (RS)
+) (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/graphics/color.sty
+Package: color 2022/01/06 v1.3d Standard LaTeX Color (DPC)
+(/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/graphics-cfg/color.cfg
+File: color.cfg 2016/01/02 v1.6 sample color configuration
 )
-Package hyperref Info: Link coloring OFF on input line 78.
+Package color Info: Driver file: pdftex.def on input line 149.
+(/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/graphics/mathcolor.ltx))
+Package hyperref Info: Link coloring ON on input line 103.
+(./lidarLag_manuscript.out) (./lidarLag_manuscript.out)
 \@outlinefile=\write4
 \openout4 = `lidarLag_manuscript.out'.
 
-LaTeX Font Info:    Trying to load font information for T1+lmss on input line 106.
+LaTeX Font Info:    Trying to load font information for T1+lmss on input line 130.
 (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/lm/t1lmss.fd
 File: t1lmss.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
@@ -549,83 +557,52 @@ Package microtype Info: Loading generic protrusion settings for font family
 (microtype)             `lmss' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
-LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 106.
+LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 130.
 (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OML+lmm on input line 106.
+LaTeX Font Info:    Trying to load font information for OML+lmm on input line 130.
 (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 106.
+LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 130.
 (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 106.
+LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 130.
 (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 106.
+(Font)              <10> on input line 130.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 106.
+(Font)              <7> on input line 130.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 106.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 106.
+(Font)              <5> on input line 130.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 130.
 (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 ) (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 106.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 130.
 (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 106.
+(Font)              <8> on input line 130.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 106.
-
-Package natbib Warning: Citation `Brandt2013' on page 1 undefined on input line 125.
-
-
-Package natbib Warning: Citation `Carrillo-Rubio2014' on page 1 undefined on input line 129.
-
-
-Package natbib Warning: Citation `Engler2017a' on page 1 undefined on input line 129.
-
-
-Package natbib Warning: Citation `guisanPredictiveHabitatDistribution2000' on page 1 undefined on input line 129.
-
-
-Package natbib Warning: Citation `He2015' on page 1 undefined on input line 129.
-
-
-Package natbib Warning: Citation `Guisan2005' on page 1 undefined on input line 132.
-
-
-Package natbib Warning: Citation `Elith2009' on page 1 undefined on input line 140.
-
-
-Package natbib Warning: Citation `englerAvianSDMsCurrent2017' on page 1 undefined on input line 141.
-
-
-Package natbib Warning: Citation `englerAvianSDMsCurrent2017' on page 1 undefined on input line 144.
-
-
-Package natbib Warning: Citation `franklinMappingSpeciesDistributions2010' on page 1 undefined on input line 144.
-
-
-Package natbib Warning: Citation `englerAvianSDMsCurrent2017' on page 1 undefined on input line 148.
-
-
-Package natbib Warning: Citation `Elith2009' on page 1 undefined on input line 149.
-
-
-Package natbib Warning: Citation `englerAvianSDMsCurrent2017' on page 1 undefined on input line 150.
-
+(Font)              <6> on input line 130.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 130.
+(/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
+File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
+Package microtype Info: Loading generic protrusion settings for font family
+(microtype)             `lmtt' (encoding: T1).
+(microtype)             For optimal results, create family-specific settings.
+(microtype)             See the microtype manual for details.
 
 Overfull \hbox (2.22221pt too wide) has occurred while \output is active
 [] 
@@ -633,159 +610,280 @@ Overfull \hbox (2.22221pt too wide) has occurred while \output is active
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\<def>-command' on input line 167.
+(hyperref)                removing `\<def>-command' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\cnotenum' on input line 167.
+(hyperref)                removing `\cnotenum' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\<def>-command' on input line 167.
+(hyperref)                removing `\<def>-command' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\@corref' on input line 167.
+(hyperref)                removing `\@corref' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\<let>-command' on input line 167.
+(hyperref)                removing `\<let>-command' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\comma' on input line 167.
+(hyperref)                removing `\comma' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\<def>-command' on input line 167.
+(hyperref)                removing `\<def>-command' on input line 144.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\@fnmark' on input line 167.
+(hyperref)                removing `\@fnmark' on input line 144.
 
 [1
 
 {/Users/brendancasey/Library/TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+Underfull \hbox (badness 10000) in paragraph at lines 161--164
 
-Package natbib Warning: Citation `Franklin1995' on page 2 undefined on input line 171.
-
-
-Package natbib Warning: Citation `Vaughn2003' on page 2 undefined on input line 171.
+ []
 
 
-Package natbib Warning: Citation `fourcadePaintingsPredictDistribution2018' on page 2 undefined on input line 171.
+Underfull \hbox (badness 10000) in paragraph at lines 165--168
 
-
-Package natbib Warning: Citation `heWillRemoteSensing2015' on page 2 undefined on input line 178.
-
-
-Package natbib Warning: Citation `pettorelliNormalizedDifferenceVegetation2011' on page 2 undefined on input line 183.
-
-
-Package natbib Warning: Citation `hislopUsingLandsatSpectral2018' on page 2 undefined on input line 185.
-
-
-Package natbib Warning: Citation `albrightHeatWavesMeasured2011' on page 2 undefined on input line 187.
-
-
-Package natbib Warning: Citation `heWillRemoteSensing2015' on page 2 undefined on input line 202.
-
-
-Package natbib Warning: Citation `Northrup2019' on page 2 undefined on input line 208.
-
-
-Package natbib Warning: Citation `Rittenhouse2010' on page 2 undefined on input line 208.
-
-
-Package natbib Warning: Citation `R-base' on page 2 undefined on input line 249.
-
-
-Package natbib Warning: Citation `Guisan2005' on page 2 undefined on input line 251.
+ []
 
 [2]
-LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 255.
-(/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/lm/ts1lmr.fd
-File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
+Underfull \hbox (badness 10000) in paragraph at lines 169--172
 
-Package natbib Warning: Citation `Downing2006' on page 3 undefined on input line 258.
+ []
 
 
-Package natbib Warning: Citation `Schmiegelow1997' on page 3 undefined on input line 263.
+Underfull \hbox (badness 10000) in paragraph at lines 173--176
+
+ []
 
 
-Package natbib Warning: Citation `Schmiegelow1997' on page 3 undefined on input line 266.
+Underfull \hbox (badness 10000) in paragraph at lines 177--180
+
+ []
 
 
-Package natbib Warning: Citation `Schmiegelow1997' on page 3 undefined on input line 268.
+Underfull \hbox (badness 10000) in paragraph at lines 181--184
+
+ []
 
 
-Package natbib Warning: Citation `Schmiegelow1997' on page 3 undefined on input line 275.
+Underfull \hbox (badness 10000) in paragraph at lines 185--188
+
+ []
 
 
-Package natbib Warning: Citation `EltonTraits2021' on page 3 undefined on input line 291.
+Underfull \hbox (badness 10000) in paragraph at lines 189--192
+
+ []
 
 
-Package natbib Warning: Citation `AESRD2013' on page 3 undefined on input line 327.
+Underfull \hbox (badness 10000) in paragraph at lines 193--196
+
+ []
 
 
-Package natbib Warning: Citation `R-raster' on page 3 undefined on input line 332.
+Underfull \hbox (badness 10000) in paragraph at lines 197--200
+
+ []
 
 
-Package natbib Warning: Citation `Cumming2011a' on page 3 undefined on input line 337.
+Underfull \hbox (badness 10000) in paragraph at lines 201--204
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 205--208
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 209--212
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 213--216
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 217--220
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 221--224
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 225--228
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 229--232
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 233--236
+
+ []
 
 [3]
+Underfull \hbox (badness 10000) in paragraph at lines 237--240
 
-Package natbib Warning: Citation `chen2002dynamics' on page 4 undefined on input line 348.
-
-
-Package natbib Warning: Citation `Guisan2005' on page 4 undefined on input line 355.
+ []
 
 
-Package natbib Warning: Citation `batesFittingLinearMixedeffects2015' on page 4 undefined on input line 359.
+Underfull \hbox (badness 10000) in paragraph at lines 241--244
+
+ []
 
 
-Package natbib Warning: Citation `valbuenaStandardizingEcosystemMorphological2020' on page 4 undefined on input line 368.
+Underfull \hbox (badness 10000) in paragraph at lines 245--248
+
+ []
 
 
-Package natbib Warning: Citation `bartonMuMInMultimodelInference2020' on page 4 undefined on input line 372.
+Underfull \hbox (badness 10000) in paragraph at lines 249--252
+
+ []
 
 
-Package natbib Warning: Citation `MacKenzie2006' on page 4 undefined on input line 377.
+Underfull \hbox (badness 10000) in paragraph at lines 253--256
+
+ []
 
 
-Package natbib Warning: Citation `SolymosMatsuoka2013' on page 4 undefined on input line 381.
+Underfull \hbox (badness 10000) in paragraph at lines 257--260
 
-No file lidarLag_manuscript.bbl.
-
-Package natbib Warning: There were undefined citations.
-
-[4] (./lidarLag_manuscript.aux)
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+ []
 
 
-Package rerunfilecheck Warning: File `lidarLag_manuscript.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
+Underfull \hbox (badness 10000) in paragraph at lines 261--264
 
-Package rerunfilecheck Info: Checksums for `lidarLag_manuscript.out':
-(rerunfilecheck)             Before: <no file>
-(rerunfilecheck)             After:  D8CDBE15C5EDCE9238FDFB6D9F079726;445.
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 265--268
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 269--272
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 273--276
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 277--280
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 281--284
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 285--288
+
+ []
+
+[4]
+Underfull \hbox (badness 10000) in paragraph at lines 289--292
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 293--296
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 297--300
+
+ []
+
+
+Underfull \hbox (badness 3343) in paragraph at lines 303--303
+[]\T1/lmr/m/n/10 (+20) L. Le-ston, E. Bayne, F. Schmiegelow, Long-term changes in bo-real for-est oc-cu-pancy
+ []
+
+
+Underfull \hbox (badness 1867) in paragraph at lines 303--303
+\T1/lmr/m/n/10 (+20) within re-gen-er-at-ing har-vest units, For-est Ecol-ogy and Man-age-ment. 421 (2018) 40--53.
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 301--304
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 305--308
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 309--312
+
+ []
+
+
+Underfull \hbox (badness 1014) in paragraph at lines 315--315
+[]\T1/lmr/m/n/10 (+20) J. Pitoc-chelli, Mourn-ing War-bler (Geoth-lypis philadel-phia), ver-sion 1.0, in: Birds of the
+ []
+
+
+Underfull \hbox (badness 1852) in paragraph at lines 315--315
+\T1/lmr/m/n/10 (+20) World (P. G. Rode-wald, Ed-i-tor), Cor-nell Lab of Or-nithol-ogy, Ithaca, NY, USA, 2020.
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 313--316
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 317--320
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 321--324
+
+ []
+
+[5] (./lidarLag_manuscript.aux)
+Package rerunfilecheck Info: File `lidarLag_manuscript.out' has not changed.
+(rerunfilecheck)             Checksum: 687EC4E01B981F02BDBBA6B188492470;197.
  ) 
 Here is how much of TeX's memory you used:
- 13695 strings out of 477035
- 221648 string characters out of 5826972
- 598316 words of memory out of 5000000
- 34451 multiletter control sequences out of 15000+600000
- 533529 words of font info for 138 fonts, out of 8000000 for 9000
+ 13810 strings out of 476931
+ 224118 string characters out of 5824092
+ 603165 words of memory out of 5000000
+ 34637 multiletter control sequences out of 15000+600000
+ 532711 words of font info for 130 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 72i,9n,77p,1016b,469s stack positions out of 10000i,1000n,20000p,200000b,200000s
-{/Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}</Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri7.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri8.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmss8.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb>
-Output written on lidarLag_manuscript.pdf (4 pages, 234175 bytes).
+ 72i,9n,77p,1825b,491s stack positions out of 10000i,1000n,20000p,200000b,200000s
+{/Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}</Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri7.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri8.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmss8.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt8.pfb>
+Output written on lidarLag_manuscript.pdf (5 pages, 264754 bytes).
 PDF statistics:
- 110 PDF objects out of 1000 (max. 8388607)
- 78 compressed objects within 1 object stream
- 20 named destinations out of 1000 (max. 500000)
- 34817 words of extra memory for PDF output out of 35830 (max. 10000000)
+ 243 PDF objects out of 1000 (max. 8388607)
+ 207 compressed objects within 3 object streams
+ 56 named destinations out of 1000 (max. 500000)
+ 33297 words of extra memory for PDF output out of 35830 (max. 10000000)
 

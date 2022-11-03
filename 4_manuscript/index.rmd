@@ -1,5 +1,5 @@
 ---
-title: Short Paper
+title: "The influence of LiDAR acquisition time lag on bird species distribution models"
 author:
   - name: Brendan Casey*
     email: bgcasey@ualberta.ca
@@ -31,14 +31,14 @@ journal: "Remote Sensing in Ecology and Conservation"
 date: "`r Sys.Date()`"
 classoption: manuscript, 3p, authoryear
 bibliography: library.bib
+link-citations: yes
 linenumbers: true
 numbersections: true
+colorlinks: yes
+citecolor: blue
 # Use a CSL with `citation_package = "default"`
-csl: https://www.zotero.org/styles/elsevier-harvard
-output: 
-  rticles::elsevier_article:
-    keep_tex: true
-    citation_package: natbib
+csl: https://www.zotero.org/styles/elsevier-with-titles
+
 ---
 
 
@@ -76,3 +76,8 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, signif = 3
 #knitr::read_chunk("code/figures_tables.R")
 
 ```
+
+
+
+
+

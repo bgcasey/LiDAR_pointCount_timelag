@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.11.3)  3 NOV 2022 14:57
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2022.11.8)  10 NOV 2022 12:14
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -247,7 +247,11 @@ Package fixltx2e Warning: fixltx2e is not required with releases after 2015
 (fixltx2e)                See the latexrelease package for details.
 
 Already applied: [0000/00/00] Old fixltx2e package on input line 53.
-) (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/base/inputenc.sty
+) (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/upquote/upquote.sty
+Package: upquote 2012/04/19 v1.3 upright-quote and grave-accent glyphs in verbatim
+(/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/base/textcomp.sty
+Package: textcomp 2020/02/02 v2.0n Standard LaTeX package
+)) (/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/base/inputenc.sty
 Package: inputenc 2021/02/14 v1.3d Input encoding file
 \inpenc@prehook=\toks27
 \inpenc@posthook=\toks28
@@ -643,247 +647,278 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 [1
 
 {/Users/brendancasey/Library/TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-Underfull \hbox (badness 10000) in paragraph at lines 161--164
+
+pdfTeX warning: pdflatex (file ../3_output/figures/chapter1_workflow.pdf): PDF inclusion: found PDF version <1.6>, but at most version <1.5> allowed
+<../3_output/figures/chapter1_workflow.pdf, id=105, 553.58823pt x 370.08264pt>
+File: ../3_output/figures/chapter1_workflow.pdf Graphic file (type pdf)
+<use ../3_output/figures/chapter1_workflow.pdf>
+Package pdftex.def Info: ../3_output/figures/chapter1_workflow.pdf  used on input line 161.
+(pdftex.def)             Requested size: 468.0pt x 312.87762pt.
+LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 167.
+(/Users/brendancasey/Library/TinyTeX/texmf-dist/tex/latex/lm/ts1lmr.fd
+File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+) [2]
+<../3_output/maps/studyArea_inset.png, id=135, 1896.08376pt x 1579.9025pt>
+File: ../3_output/maps/studyArea_inset.png Graphic file (type png)
+<use ../3_output/maps/studyArea_inset.png>
+Package pdftex.def Info: ../3_output/maps/studyArea_inset.png  used on input line 170.
+(pdftex.def)             Requested size: 327.59857pt x 272.9674pt.
+[3 <../3_output/figures/chapter1_workflow.pdf>]
+Underfull \hbox (badness 10000) in paragraph at lines 196--199
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 165--168
+Underfull \hbox (badness 10000) in paragraph at lines 200--203
 
  []
 
-[2]
-Underfull \hbox (badness 10000) in paragraph at lines 169--172
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 173--176
+[4 <../3_output/maps/studyArea_inset.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 204--207
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 177--180
+Underfull \hbox (badness 10000) in paragraph at lines 208--211
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 181--184
+Underfull \hbox (badness 10000) in paragraph at lines 212--215
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 185--188
+Underfull \hbox (badness 10000) in paragraph at lines 216--219
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 189--192
+Underfull \hbox (badness 10000) in paragraph at lines 220--223
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 193--196
+Underfull \hbox (badness 10000) in paragraph at lines 224--227
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 197--200
+Underfull \hbox (badness 10000) in paragraph at lines 228--231
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 201--204
+Underfull \hbox (badness 10000) in paragraph at lines 232--235
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 205--208
+Underfull \hbox (badness 10000) in paragraph at lines 236--239
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 209--212
+Underfull \hbox (badness 10000) in paragraph at lines 240--243
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 213--216
+Underfull \hbox (badness 10000) in paragraph at lines 244--247
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 217--220
+Underfull \hbox (badness 10000) in paragraph at lines 248--251
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 221--224
+Underfull \hbox (badness 10000) in paragraph at lines 252--255
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 225--228
+Underfull \hbox (badness 10000) in paragraph at lines 256--259
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 229--232
+Underfull \hbox (badness 10000) in paragraph at lines 260--263
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 233--236
-
- []
-
-[3]
-Underfull \hbox (badness 10000) in paragraph at lines 237--240
+Underfull \hbox (badness 10000) in paragraph at lines 264--267
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 241--244
+Underfull \hbox (badness 10000) in paragraph at lines 268--271
+
+ []
+
+[5]
+Underfull \hbox (badness 10000) in paragraph at lines 272--275
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 245--248
+Underfull \hbox (badness 10000) in paragraph at lines 276--279
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 249--252
+Underfull \hbox (badness 10000) in paragraph at lines 280--283
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 253--256
+Underfull \hbox (badness 10000) in paragraph at lines 284--287
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 257--260
+Underfull \hbox (badness 10000) in paragraph at lines 288--291
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 261--264
+Underfull \hbox (badness 10000) in paragraph at lines 292--295
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 265--268
+Underfull \hbox (badness 10000) in paragraph at lines 296--299
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 269--272
+Underfull \hbox (badness 10000) in paragraph at lines 300--303
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 273--276
+Underfull \hbox (badness 10000) in paragraph at lines 304--307
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 277--280
+Underfull \hbox (badness 10000) in paragraph at lines 308--311
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 281--284
+Underfull \hbox (badness 10000) in paragraph at lines 312--315
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 285--288
-
- []
-
-[4]
-Underfull \hbox (badness 10000) in paragraph at lines 289--292
+Underfull \hbox (badness 10000) in paragraph at lines 316--319
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 293--296
+Underfull \hbox (badness 10000) in paragraph at lines 320--323
+
+ []
+
+[6]
+Underfull \hbox (badness 10000) in paragraph at lines 324--327
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 297--300
+Underfull \hbox (badness 10000) in paragraph at lines 328--331
 
  []
 
 
-Underfull \hbox (badness 3343) in paragraph at lines 303--303
+Underfull \hbox (badness 10000) in paragraph at lines 332--335
+
+ []
+
+
+Underfull \hbox (badness 3343) in paragraph at lines 338--338
 []\T1/lmr/m/n/10 (+20) L. Le-ston, E. Bayne, F. Schmiegelow, Long-term changes in bo-real for-est oc-cu-pancy
  []
 
 
-Underfull \hbox (badness 1867) in paragraph at lines 303--303
+Underfull \hbox (badness 1867) in paragraph at lines 338--338
 \T1/lmr/m/n/10 (+20) within re-gen-er-at-ing har-vest units, For-est Ecol-ogy and Man-age-ment. 421 (2018) 40--53.
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 301--304
+Underfull \hbox (badness 10000) in paragraph at lines 336--339
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 305--308
+Underfull \hbox (badness 10000) in paragraph at lines 340--343
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 309--312
+Underfull \hbox (badness 10000) in paragraph at lines 344--347
 
  []
 
 
-Underfull \hbox (badness 1014) in paragraph at lines 315--315
+Underfull \hbox (badness 1014) in paragraph at lines 350--350
 []\T1/lmr/m/n/10 (+20) J. Pitoc-chelli, Mourn-ing War-bler (Geoth-lypis philadel-phia), ver-sion 1.0, in: Birds of the
  []
 
 
-Underfull \hbox (badness 1852) in paragraph at lines 315--315
+Underfull \hbox (badness 1852) in paragraph at lines 350--350
 \T1/lmr/m/n/10 (+20) World (P. G. Rode-wald, Ed-i-tor), Cor-nell Lab of Or-nithol-ogy, Ithaca, NY, USA, 2020.
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 313--316
+Underfull \hbox (badness 10000) in paragraph at lines 348--351
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 317--320
+Underfull \hbox (badness 10000) in paragraph at lines 352--355
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 321--324
+Underfull \hbox (badness 10000) in paragraph at lines 356--359
 
  []
 
-[5] (./lidarLag_manuscript.aux)
+
+Underfull \hbox (badness 10000) in paragraph at lines 360--363
+
+ []
+
+[7] (./lidarLag_manuscript.aux)
 Package rerunfilecheck Info: File `lidarLag_manuscript.out' has not changed.
-(rerunfilecheck)             Checksum: 687EC4E01B981F02BDBBA6B188492470;197.
+(rerunfilecheck)             Checksum: 5B7A80F57CE92A30374CEF1E094C215C;490.
  ) 
 Here is how much of TeX's memory you used:
- 13810 strings out of 476931
- 224118 string characters out of 5824092
- 603165 words of memory out of 5000000
- 34637 multiletter control sequences out of 15000+600000
- 532711 words of font info for 130 fonts, out of 8000000 for 9000
+ 13955 strings out of 476931
+ 227845 string characters out of 5824092
+ 603901 words of memory out of 5000000
+ 34743 multiletter control sequences out of 15000+600000
+ 533503 words of font info for 136 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 72i,9n,77p,1825b,491s stack positions out of 10000i,1000n,20000p,200000b,200000s
-{/Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}</Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri7.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri8.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmss8.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt8.pfb>
-Output written on lidarLag_manuscript.pdf (5 pages, 264754 bytes).
+ 72i,9n,77p,1825b,495s stack positions out of 10000i,1000n,20000p,200000b,200000s
+
+pdfTeX warning (dest): name{ref-EltonTraits2021} has been referenced but does not exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{ref-Schmiegelow1997} has been referenced but does not exist, replaced by a fixed one
+
+
+pdfTeX warning (dest): name{ref-R-base} has been referenced but does not exist, replaced by a fixed one
+
+{/Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}</Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri7.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri8.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmss8.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy7.pfb></Users/brendancasey/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt8.pfb>
+Output written on lidarLag_manuscript.pdf (7 pages, 4472280 bytes).
 PDF statistics:
- 243 PDF objects out of 1000 (max. 8388607)
- 207 compressed objects within 3 object streams
- 56 named destinations out of 1000 (max. 500000)
- 33297 words of extra memory for PDF output out of 35830 (max. 10000000)
+ 351 PDF objects out of 1000 (max. 8388607)
+ 265 compressed objects within 3 object streams
+ 70 named destinations out of 1000 (max. 500000)
+ 35379 words of extra memory for PDF output out of 35830 (max. 10000000)
 

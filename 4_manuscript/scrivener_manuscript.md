@@ -32,6 +32,44 @@ To inform this trade-off, we addressed the question of how much temporal misalig
 The effects of temporal misalignment on SDMs will likely vary by habitat type (e.g. forest age, disturbance history, and dominant vegetation) and the life history characteristics of the study species. We predicted that the performance of SDMs will decrease with increased temporal misalignment and that the magnitude of change will vary according to the habitat associations of the focal species. We predicted that (1) SDMs for early successional specialists, Mourning Warbler (*Geothlypis philadelphia*) and White-throated Sparrow (*Zonotrichia albicollis*), would be most affected by temporal misalignment because of faster vertical growth rates of establishment trees and loss of dense shrub layers [@mccarthy2001gap; @fallsWhitethroatedSparrowZonotrichia2020; @pitocchelliMourningWarblerGeothlypis2020]. (2) SDMs for mid-seral species like American Redstart (*Setophaga ruticilla*) that are associated with dense midstory vegetation, would see moderate declines in performance as temporal misalignment increases due to self-thinning during the stem exclusion stage of succession [@sherryAmericanRedstartSetophaga2020a; @brassardStandStructureComposition2010]. And (3) mature forest associates, Black-throated Green Warbler (*Setophaga virens*), will be least effected by temporal misalignment as the processes effecting mature forest canopy structure (insect defoliation and windthrow) happen at too small a scale to effect overall model performance [@morseBlackthroatedGreenWarbler2020; @VierlingSwift2014]. For all species, we predicted that differences in distribution maps will be negatively correlated with forest age. 
 
 
+# Methods
+
+Our methodological workflow is illustrated in Figure \@ref(fig:workflow). Analyses were done using R statistical software [@R-base]. We built SDMs using bird data from the Calling Lake Fragmentation project [@Schmiegelow1997]. 
+
+```{r workflow, fig.cap= "Conceptual diagram of our methodology. SDM methods were repeated at every time lag for each species. SDMs were compared using AUC and correlation between predictive maps."}
+```
+
+## Study area
+We used bird survey data from the Calling Lake Fragmentation Experiment [@Schmiegelow1997]. Surveys were conducted across $\approx$ 14,000 ha of boreal mixedwood forests near Calling Lake, in northern Alberta, Canada (55º14'51'' N, 113º28'59'' W) (Figure \@ref(fig:studyArea)). The experiment was designed to study the long-term impacts of forest harvesting on birds [@Schmiegelow1997;@hannonCorridorsMayNot2002;@lestonLongtermChangesBoreal2018]. The study's experimental harvest treatments have led to a landscape patchwork of early- to mid- successional stands surrounded by tracts of unharvested mature forests. When the experiment began in 1994, the landscape was dominated by older mixedwood forests composed of trembling aspen (*Populus tremuloides*, balsam poplar (*Populus balsamifera*) and white spruce (*Picea glauca*) and treed bogs containing black spruce (*Picea mariana*) and larch (*Larix laricina*). Understory vegetation in the mixedwood forests was composed  mostly of alder (*Alnus spp.*) and willow species(*Salix spp.*). 
+
+```{r studyArea, fig.cap= "Locations of point count survey sites from the Calling Lake Fragmentation Study near Calling Lake, Alberta (@Schmiegelow1997). Repeat point counts were conducted during the breeding seasons from 1993 and 2015.", out.width="70%"}
+```
+
+
+## Bird data 
+As part of the Calling Lake Fragmentation Experiment, long term bird monitoring via annual repeated point counts was done for 20 consecutive breeding seasons (from 1995-2015). As the experiment's study area overlaps spatially with government wall-to-wall LiDAR coverage, there is an opportunity to study the impacts of LiDAR/wildlife survey temporal misalignment on bird SDMs.
+
+We used detection data from 187 stations where consecutive annual point counts were conducted from zero to sixteen years of the LiDAR acquisition date. Stations were spaced $\approx$ 200 m apart. At each station, three to five morning point count surveys were conducted over each breeding season(May 16 to July 7) between sunrise and 10:00 h. Observers recorded the species detected during each five minute point count interval within sampling radii of 50 and 100 meters. Please see Schmiegelow et al. -@Schmiegelow1997 for further information on the Calling Lake Fragmentation Experiment's study design and point count protocols.
+
+
+
+
+
+
+
+We performed our time lag analysis on seven bird species associated with different nesting and foraging guilds, forest strata, habitat structures, and forest age classes (TABLE). [@EltonTraits2021].  
+
+
+
+Species were selected that exhibited low variability in the total number of detections each year across the 16 years modelled (CV  < 0.5). To ensure that the selected species was abundant enough to model, we chose species that were detected in > 10% of all point count events. Variability of detections between years
+
+The seven selected species included early successional specialists:  mature forests species, habitat generalist ...   American Redstart (*Setophaga ruticilla*), Black-throated Green Warbler (*Setophaga virens*), and Swainson's Thrush (*Catharus ustulatus*), Mourning Warbler (*Geothlypis philadelphia*), White-throated Sparrow (*Zonotrichia albicollis*), , Winter Wren(*Troglodytes hiemalis*).
+
+
+Based on this, we selected Black-throated Green Warbler (BTNW),  a mature forest species; Swainson's Thrush (SWTH) a forest generalist; and Mourning Warbler (MOWA) an early-seral specialist. YBSA Yellow-bellied Sapsucker AMRE American redstart (mid seral) WTSP White throated sparrow (early)
+
+To minimize the influence of forest edges and adjacent differently aged forest, we excluded point count stations with high variation of forest age classes within a hundred meter radius (SD >5 yrs) 
+
 # References {-}
 
 <div id="refs"></div>

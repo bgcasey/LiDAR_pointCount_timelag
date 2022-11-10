@@ -24,32 +24,11 @@ kable(cov_description, col.names = c("Metric",
   # kable_styling(font_size = 6, position = "center", full_width = T)
 
 
-# summ_top_2<-summ_top_2[c(1:2,4:6,8)]
-# #summ_top_2<-summ_top_2[c(1:3)]
-# knitr::kable(summ_top_2, 
-#              col.names = c("response","fixed effects", "df", "R2m", "R2c", "source"),
-#              align=c("l","l","l","l","r","r","r","r", "r","r"), escape=F,
-#              caption = "Top models for each response variable",
-#              "latex", linesep="", longtable=T, booktabs=T)%>%
-#   kable_styling(latex_options=c("HOLD_position", "repeat_header"), full_width = F, font_size = 6, position = "center")%>%
-#   #kable_styling(font_size = 7)%>%
-#   #column_spec(column = 1, width = "10em") %>% 
-#   column_spec(column = 2, width = "20em") 
-
-
-
-
 ## ---- workflow
-# file.copy(from="../images/chapter3_workflow.pdf", to="figures/chapter3_workflow.pdf",
-#           overwrite = TRUE, recursive = FALSE,
-#           copy.mode = TRUE)
-knitr::include_graphics("figures/chapter3_workflow.pdf", dpi = 300, auto_pdf = TRUE)
+knitr::include_graphics("../3_output/figures/chapter1_workflow.pdf", dpi = 300, auto_pdf = TRUE)
 
 ## ---- studyArea
-# file.copy(from="../empirical/3_output/maps/studyArea_inset.png", to="figures/studyArea_inset.png", 
-#           overwrite = TRUE, recursive = FALSE, 
-#           copy.mode = TRUE)
-knitr::include_graphics("figures/studyArea_inset.png", dpi = 300, auto_pdf = TRUE)
+knitr::include_graphics("../3_output/maps/studyArea_inset.png", dpi = 300, auto_pdf = TRUE)
 
 
 

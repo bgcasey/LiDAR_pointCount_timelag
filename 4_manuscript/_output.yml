@@ -1,6 +1,0 @@
-bookdown::pdf_book:
-    base_format: rticles::elsevier_article
-    keep_tex: true
-    citation_package: default
-
-

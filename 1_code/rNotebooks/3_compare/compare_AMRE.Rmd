@@ -172,6 +172,67 @@ AMRE_stack_reclass<-brick("3_output/maps/predictedDistributions/AMRE/AMRE_stack_
 
 #### Pearson correlation of predictive maps {-}
 
+##### Anova of pixel values {-}
+```{r eval=FALSE}
+AMRE_stack<-stackOpen("3_output/maps/predictedDistributions/AMRE/AMRE_stack.stk")
+
+### from https://gis.stackexchange.com/questions/201557/how-can-a-statistically-significant-difference-between-rasters-be-calculated
+
+
+test<-as.data.frame(AMRE_stack)
+
+test2<-gather(test, lag, value)
+
+
+d.aov = aov(value ~ lag, test2)
+
+
+# Make single data frame
+# - if you haven't already run out of ram, this might do it!
+d = do.call("rbind.data.frame", d)
+
+# ANOVA
+d.aov = aov(val ~ r, d)
+
+# Honest significant differences
+result = TukeyHSD(d.aov)
+
+# See output table
+result
+
+# Plot differences and confidence limits
+plot(result)
+
+
+library(rstatix)
+### multiple t-tests
+stat.test <- test2 %>%
+  t_test(value ~ lag) %>%
+  adjust_pvalue(method = "BH")
+
+stat.test
+
+
+t.test(test$AMRE_predictMap_m_00, test$AMRE_predictMap_m_15, paired=TRUE)
+
+t.test(test$AMRE_predictMap_m_00, test$AMRE_predictMap_m_01, paired=TRUE)
+
+t.test(test$AMRE_predictMap_m_00, test$AMRE_predictMap_m_02, paired=TRUE)
+
+t.test(test$AMRE_predictMap_m_00, test$AMRE_predictMap_m_08, paired=TRUE)
+
+
+agg<-aggregate(r, fact=5)
+
+###agrregate maps first?
+
+```
+
+
+
+
+##### Create correlation ratsers{-}
+
 ```{r eval=FALSE }
 AMRE_stack<-stackOpen("3_output/maps/predictedDistributions/AMRE/AMRE_stack.stk")
 

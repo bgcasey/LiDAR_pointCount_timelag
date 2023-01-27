@@ -90,6 +90,9 @@
 \linenumbers
 \usepackage {hyperref}
 \hypersetup {colorlinks = true, linkcolor = blue, urlcolor = blue}
+\usepackage{multirow}
+\usepackage{amsmath, amssymb} 
+\usepackage{enumitem, array}
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
@@ -109,7 +112,7 @@
 
 \title{The influence of LiDAR acquisition time lag on bird species distribution models}
 \author{Brendan Casey}
-\date{2022-12-09}
+\date{2023-01-27}
 
 \begin{document}
 \maketitle
@@ -128,7 +131,7 @@ The composition and structure of forests are changing in response to climate cha
 
 Many factors influence the predictive capacity of SDMs, but the inclusion of ecologically relevant spatial covariates are key drivers of model accuracy (\protect\hyperlink{ref-fourcadePaintingsPredictDistribution2018}{Fourcade et al., 2018}; \protect\hyperlink{ref-Franklin1995}{Franklin, 1995}; \protect\hyperlink{ref-Vaughn2003}{Vaughn and Ormerod, 2003}). Bird SDMs often rely on categorical predictors derived from digital maps delineating land cover, vegetation composition, and human footprint. While useful, they often miss key forest features driving habitat selection, namely those related to vegetation structure.
 
-Vegetation structure influences the abundance, distribution, and behavior of birds Davies and Asner (\protect\hyperlink{ref-Davies2014a}{2014}). The height and density of vegetation influence where birds perch, feed, and reproduce (\protect\hyperlink{ref-Bradbury2005}{Bradbury et al., 2005}) by mediating microclimates, providing shelter from weather (\protect\hyperlink{ref-CarrascalDiaz2006}{Carrascal and Diaz, 2006}), concealment from predators (\protect\hyperlink{ref-GotmarkBlomqvist1995}{Gotmark et al., 1995}), and creating habitat for insect prey (\protect\hyperlink{ref-halajImportanceHabitatStructure2000}{Halaj et al., 2000}). Light Detection and Ranging (LiDAR) can characterize these three-dimensional forest structures (\protect\hyperlink{ref-limLiDARRemoteSensing2003}{Lim et al., 2003}). Common LiDAR derived metrics correspond with vegetation height, cover, structural complexity, and density of forest strata (\protect\hyperlink{ref-Bae2018}{Bae et al., 2018}; \protect\hyperlink{ref-Davies2014a}{Davies and Asner, 2014}; \protect\hyperlink{ref-Kortmann2018}{Kortmann et al., 2018}; \protect\hyperlink{ref-Lefsky2002}{Lefsky et al., 2002}; \protect\hyperlink{ref-Renner2018}{Renner et al., 2018}). Used as predictor variables, LiDAR metrics can improve the predictive power of bird SDMS Bae et al. (\protect\hyperlink{ref-Bae2014}{2014}).
+Vegetation structure influences the abundance, distribution, and behavior of birds Davies and Asner (\protect\hyperlink{ref-Davies2014a}{2014}). The height and density of vegetation influence where birds perch, feed, and reproduce (\protect\hyperlink{ref-Bradbury2005}{Bradbury et al., 2005}) by mediating microclimates, providing shelter from weather (\protect\hyperlink{ref-CarrascalDiaz2006}{Carrascal and Diaz, 2006}), concealment from predators (\protect\hyperlink{ref-GotmarkBlomqvist1995}{Gotmark et al., 1995}), and creating habitat for insect prey (\protect\hyperlink{ref-halajImportanceHabitatStructure2000}{Halaj et al., 2000}). Light Detection and Ranging (LiDAR) can characterize these three-dimensional forest structures (\protect\hyperlink{ref-limLiDARRemoteSensing2003}{Lim et al., 2003}). Common LiDAR derived metrics correspond with vegetation height, cover, structural complexity, and density of forest strata (\protect\hyperlink{ref-Bae2018}{Bae et al., 2018}; \protect\hyperlink{ref-Davies2014a}{Davies and Asner, 2014}; \protect\hyperlink{ref-Kortmann2018}{Kortmann et al., 2018}; \protect\hyperlink{ref-Lefsky2002}{Lefsky et al., 2002}; \protect\hyperlink{ref-Renner2018}{Renner et al., 2018}). Used as predictor variables, LiDAR metrics can improve the predictive power of bird SDMs Bae et al. (\protect\hyperlink{ref-Bae2014}{2014}).
 
 Publicly funded regional LIDAR data and space-based sensors like NASA's Ice, Cloud and Land Elevation Satellite-2 (ICESat-2) and Global Ecosystem Dynamics Investigation (GEDI), have made large amounts of wall-to-wall structural data available to researchers (\protect\hyperlink{ref-abdalatiICESat2LaserAltimetry2010}{Abdalati et al., 2010}; \protect\hyperlink{ref-coopsForestStructureHabitat2016}{Coops et al., 2016}; \protect\hyperlink{ref-dubayahGlobalEcosystemDynamics2020a}{Dubayah et al., 2020}). However, LiDAR continues to be under-used in bird ecology. The limited temporal resolution of most LiDAR products may be a factor. LiDAR is often limited to a single season, with long multiyear gaps between repeat surveys. Temporal misalignment between wildlife surveys and LiDAR is common.
 
@@ -140,7 +143,7 @@ Thus, succession occurring between LiDAR and wildlife surveys may influence SDM 
 
 To inform this trade-off, we addressed the question of how much temporal misalignment is acceptable in LiDAR based SDMs. Our objectives were to (1) evaluate how the time lag between LiDAR acquisitions and bird surveys influence the performance of SDMs across a gradient of 0 to 15 years, (2) compare the influence of temporal misalignment on models for early successional, mid-successional, mature forest, and forest generalist birds, and (3) assess how differences in resultant predictive distribution maps correlate with forest age.
 
-The effects of temporal misalignment on SDMs will likely vary by habitat type (e.g.~forest age, disturbance history, and dominant vegetation) and the life history characteristics of the study species. We predicted that the performance of SDMs will decrease with increased temporal misalignment and that the magnitude of change will vary according to the habitat associations of the focal species. We predicted that (1) SDMs for early successional specialists, Mourning Warbler (\emph{Geothlypis philadelphia}) and White-throated Sparrow (\emph{Zonotrichia albicollis}), would be most affected by temporal misalignment because of faster vertical growth rates of establishment trees and loss of dense shrub layers (\protect\hyperlink{ref-fallsWhitethroatedSparrowZonotrichia2020}{Falls and Kopachena, 2020}; \protect\hyperlink{ref-mccarthy2001gap}{McCarthy, 2001}; \protect\hyperlink{ref-pitocchelliMourningWarblerGeothlypis2020}{Pitocchelli, 2020}). (2) SDMs for mid-seral species like American Redstart (\emph{Setophaga ruticilla}) that are associated with dense midstory vegetation, would see moderate declines in performance as temporal misalignment increases due to self-thinning during the stem exclusion stage of succession (\protect\hyperlink{ref-brassardStandStructureComposition2010}{Brassard and Chen, 2010}; \protect\hyperlink{ref-sherryAmericanRedstartSetophaga2020a}{Sherry et al., 2020}). And (3) mature forest associates, Black-throated Green Warbler (\emph{Setophaga virens}), will be least effected by temporal misalignment as the processes effecting mature forest canopy structure (insect defoliation and windthrow) happen at too small a scale to effect overall model performance (\protect\hyperlink{ref-morseBlackthroatedGreenWarbler2020}{Morse and Poole, 2020}; \protect\hyperlink{ref-VierlingSwift2014}{Vierling et al., 2014}). For all species, we predicted that differences in distribution maps will be negatively correlated with forest age.
+The effects of temporal misalignment on SDMs will likely vary by habitat type (e.g.~forest age, disturbance history, and dominant vegetation) and the life history characteristics of the study species. We predicted that the performance of SDMs will decrease with increased temporal misalignment and that the magnitude of change will vary according to the habitat associations of the focal species. We predicted that (1) SDMs for early-successional associates, Mourning Warbler (\emph{Geothlypis philadelphia}) and White-throated Sparrow (\emph{Zonotrichia albicollis}), would be most affected by temporal misalignment because of faster vertical growth rates of establishment trees and loss of dense shrub layers (\protect\hyperlink{ref-fallsWhitethroatedSparrowZonotrichia2020}{Falls and Kopachena, 2020}; \protect\hyperlink{ref-mccarthy2001gap}{McCarthy, 2001}; \protect\hyperlink{ref-pitocchelliMourningWarblerGeothlypis2020}{Pitocchelli, 2020}). (2) SDMs for mid-seral species like American Redstart (\emph{Setophaga ruticilla}) that are associated with dense midstory vegetation, would see moderate declines in performance as temporal misalignment increases due to self-thinning during the stem exclusion stage of succession (\protect\hyperlink{ref-brassardStandStructureComposition2010}{Brassard and Chen, 2010}; \protect\hyperlink{ref-sherryAmericanRedstartSetophaga2020a}{Sherry et al., 2020}). And (3) mature forest associates, Black-throated Green Warbler (\emph{Setophaga virens}), will be least effected by temporal misalignment as the processes effecting mature forest canopy structure (insect defoliation and windthrow) happen at too small a scale to effect overall model performance (\protect\hyperlink{ref-morseBlackthroatedGreenWarbler2020}{Morse and Poole, 2020}; \protect\hyperlink{ref-VierlingSwift2014}{Vierling et al., 2014}). For all species, we predicted that differences in distribution maps will be negatively correlated with forest age.
 
 \hypertarget{methods}{%
 \section{Methods}\label{methods}}
@@ -174,13 +177,55 @@ We tested the effects of LiDAR temporal misalignment on seven bird species commo
 
 Habitat covariates included LiDAR vegetation metrics provided the provincial government of Alberta (GOA), forest stand attributes from the Common Attribute Schema for Forest Resource Inventories (CAS-FRI) (\protect\hyperlink{ref-Cumming2011a}{Cosco, 2011}), and mean summer NDVI calculated from a time series of Landsat images (\protect\hyperlink{ref-geologicalsurveyLandsat47Surface2018}{Survey, 2018}) (Table \ref{tab:covDes}).
 
+\begin{table}[h!]
+
+\caption{\label{tab:covDes}Spatial covariates included in the analysis.}
+\centering
+\resizebox{\linewidth}{!}{
+\fontsize{9}{11}\selectfont
+\begin{tabular}[t]{llr}
+\toprule
+Metric & Source & Description\\
+\midrule
+elev\textunderscore mean & LiDAR & Mean height\\
+elev\textunderscore maximum & LiDAR & Maximum height\\
+elev\textunderscore cv & LiDAR & Height coefficient of variation\\
+canopy\textunderscore relief\textunderscore ratio & LiDAR & Canopy relief ratio (mean - min)/(max-min)\\
+elev\textunderscore p50 & LiDAR & 50th percentile of canopy height\\
+\addlinespace
+elev\textunderscore kurtosis & LiDAR & Height kurtosis\\
+elev\textunderscore p99 & LiDAR & 99th percentile of canopy height\\
+elev\textunderscore stddev & LiDAR & Height standard deviation\\
+percentage\textunderscore first\textunderscore returns\textunderscore above\textunderscore 2pnt00 & LiDAR & Percentage of first returns above 2 m\\
+percentage\textunderscore first\textunderscore returns\textunderscore above\textunderscore mean & LiDAR & Percentage of first returns above the mean return height\\
+\addlinespace
+total\textunderscore all\textunderscore returns & LiDAR & Total all returns\\
+elev\textunderscore p95 & LiDAR & 95th percentile of canopy height\\
+strata\textunderscore 0pnt15\textunderscore to\textunderscore 2pnt00 & LiDAR & Proportion of points between 0.15 and 2 m\\
+strata\textunderscore 2pnt00\textunderscore to\textunderscore 4pnt00 & LiDAR & Proportion of points between 2 and 4 m\\
+strata\textunderscore 4pnt00\textunderscore to\textunderscore 6pnt00 & LiDAR & Proportion of points between 4 and 6 m\\
+\addlinespace
+strata\textunderscore 6pnt00\textunderscore to\textunderscore 8pnt00 & LiDAR & Proportion of points between 6 and 8 m\\
+strata\textunderscore 8pnt00\textunderscore to\textunderscore 10pnt00 & LiDAR & Proportion of points between 8 and 10 m\\
+strata\textunderscore 10pnt00\textunderscore to\textunderscore 15pnt00 & LiDAR & Proportion of points between 10 and 15 m\\
+strata\textunderscore 15pnt00\textunderscore to\textunderscore 20pnt00 & LiDAR & Proportion of points between 15 and 20 m\\
+strata\textunderscore 20pnt00\textunderscore to\textunderscore 25pnt00 & LiDAR & Proportion of points between 20 and 25 m\\
+\addlinespace
+strata\textunderscore 25pnt00\textunderscore to\textunderscore 30pnt00 & LiDAR & Proportion of points between 25 and 30 m\\
+strata\textunderscore 30pnt00\textunderscore to\textunderscore 50pnt00 & LiDAR & Proportion of points between 30 and 50 m\\
+forest\textunderscore age & CAS-FRI & Mean age of the forest stand\\
+NDVI & Landsat 5, 7, and 8 & Mean NDVI\\
+\bottomrule
+\end{tabular}}
+\end{table}
+
 LiDAR data covering the study area collected between 2008-2009 was supplied by Alberta Agriculture and Forestry, Government of Alberta.
 Airborne LiDAR was gathered between 2008-2009 by Alberta Agriculture and Forestry, Government of Alberta. The data was part of a larger provincial wall-to-wall LiDAR mapping effort. For an overview of the LiDAR specifications and collection protocols see Alberta Environment and Sustainable Resource Development -Alberta Environment and Sustainable Resource Development (\protect\hyperlink{ref-AESRD2013}{2013}).
 The Government of Alberta provided us with 30m LiDAR raster layers representing vegetation height, cover, and density metrics. The rasters were calculated from point cloud data using FUSION software (\protect\hyperlink{ref-mcgaugheyFUSIONLDVSoftware2018}{McGaughey, 2018}). For each raster, we calculated the mean pixel value within a 100 meter radius of point count stations using the \emph{raster} package in R (\protect\hyperlink{ref-R-raster}{Hijmans, 2020}). A total of \_ LiDAR predictor variables were evaluated in our analyses {[}TABLE{]}.
 
 Forest stand attributes were extracted from the Common Attribute Schema for Forest Resource Inventories (CAS-FRI). CAS-FRI is a standardized collection of 2 ha forest inventory geospatial data (\protect\hyperlink{ref-Cumming2011a}{Cosco, 2011}). CAS-FRI stand attributes were interpreted using 1:10,000 to 1:40,000 aerial photography flown between 1987 and 2010. For each point-count station location we determined the disturbance history and mean forest age. As there wasn't much variation in the dominant vegetation species at survey locations, we excluded vegetation composition as a covariate in our models.
 
-We used the Normalize Difference Vegetation Index (NDVI) as an indicator of vegetation cover (\protect\hyperlink{ref-pettorelliNormalizedDifferenceVegetation2011}{Pettorelli et al., 2011}). We generated 30 m composite NDVI rasters from 1995 to 2015 using surface reflectance imagery from the Landsat 5 Thematic Mapper (bands 3 and 4), the Landsat 7 Enhanced Thematic Mapper (bands 3 and 4), and the Landsat 8 Operational Land Imager (bands 4 and 5)(\protect\hyperlink{ref-geologicalsurveyLandsat47Surface2018}{Survey, 2018}). Satellite images were accessed and processed using the Google Earth Engine (GEE) Code Editor (\protect\hyperlink{ref-gorelickGoogleEarthEngine2017}{Gorelick et al., 2017}). As all of the point counts occurred during the summer breeding season, we limited Landsat images to those taken between June and September. Images were masked to exclude snow, cloud, and cloud shadow pixels using the CFMask algorithm (\protect\hyperlink{ref-fogaCloudDetectionAlgorithm2017}{Foga et al., 2017}). We generated annual median composites of masked Landsat images and calculated NDVI rasters from the composites (\(NDVI=\frac{NIR-R}{NIR+R}\) (\protect\hyperlink{ref-USGS_NDVI}{USGS, n.d.}). For each survey year we calculated the mean values of NDVI pixels within a 100 m buffer of point count locations.
+We used the Normalize Difference Vegetation Index (NDVI) as an indicator of vegetation cover (\protect\hyperlink{ref-pettorelliNormalizedDifferenceVegetation2011}{Pettorelli et al., 2011}). We generated 30 m composite NDVI rasters from 1995 to 2015 using surface reflectance imagery from the Landsat 5 Thematic Mapper (bands 3 and 4), the Landsat 7 Enhanced Thematic Mapper (bands 3 and 4), and the Landsat 8 Operational Land Imager (bands 4 and 5)(\protect\hyperlink{ref-geologicalsurveyLandsat47Surface2018}{Survey, 2018}). Satellite images were accessed and processed using the Google Earth Engine (GEE) Code Editor (\protect\hyperlink{ref-gorelickGoogleEarthEngine2017}{Gorelick et al., 2017}). As all of the point counts occurred during the summer breeding season, we limited Landsat images to those taken between June and September. Images were masked to exclude snow, cloud, and cloud shadow pixels using the CFMask algorithm (\protect\hyperlink{ref-fogaCloudDetectionAlgorithm2017}{Foga et al., 2017}). We generated annual median composites of masked Landsat images and calculated NDVI rasters from the composites (\(NDVI=\frac{NIR-R}{NIR+R}\)) (\protect\hyperlink{ref-USGS_NDVI}{USGS, n.d.}). For each survey year we calculated the mean values of NDVI pixels within a 100 m buffer of point count locations.
 
 \hypertarget{analyses}{%
 \subsection{Analyses}\label{analyses}}
@@ -193,9 +238,151 @@ In Step 2, we built and evaluated models for the zero time-lag group of point co
 
 In Step 3, we applied the Step 2 model to the remaining groups of time-lag point counts. For each group, we used the fitted model and a raster stack of covariates to map species occurrence probability using the `predict' function in the R package \emph{raster} (\protect\hyperlink{ref-hijmansRasterGeographicData2021}{Hijmans, 2021}).
 
-In Step 4, we compared the performance of different time-lag models. We compared their predictive accuracy using the area under the receiver operating curve (ROC) (AUC) calculated using the `auc' function in the pROC package in R (\protect\hyperlink{ref-robinPROCOpensourcePackage2011}{Robin et al., 2011}). We compared the predictive maps for different time-lag groups by calculating the per pixel differences between them. I.e., we subtracted the zero time lag map from the map of each subsequent time lag group, resulting in 15 ``difference'' rasters. We used Pearson's correlations to examine the relationship between differences in species occurrence probability and forest age.
+In Step 4, we compared the performance of different time-lag models. We compared their predictive accuracy using the area under the receiver operating curve (ROC) (AUC) calculated using the `auc' function in the pROC package in R (\protect\hyperlink{ref-robinPROCOpensourcePackage2011}{Robin et al., 2011}). Models with an AUC \textgreater0.7 were considered moderately predictive of species occurrence (\protect\hyperlink{ref-vanagasReceiverOperatingCharacteristic2004}{Vanagas, 2004}) We tracked the amount of LiDAR time-lag necessary for models to have an AUC \textless0.70. The contribution of individual fixed effects were estimated by calculating semi-partial \(R^2\) values using the \emph{r2beta} function from the \emph{r2glmm} package using standardized general variances(\protect\hyperlink{ref-jaegerR2glmmComputesSquared2017}{Jaeger, 2017}). We compared the predictive maps for different time-lag groups by calculating the per pixel differences between them. I.e., we subtracted the zero time lag map from the map of each subsequent time lag group, resulting in 15 ``difference'' rasters. We used Pearson's correlations to examine the relationship between differences in species occurrence probability and forest age.
 
-(Table \ref{tab:topModels})
+\hypertarget{results}{%
+\section{Results}\label{results}}
+
+The LiDAR variables used in top performing models varied by species (Table \ref{tab:topModels}). The most common predictor variables across species were maximum vegetation height (used in all top models), and mean summer NDVI (used in top models for five out of six species). The rates and magnitude by which AUC was effected by LiDAR-bird survey temporal misalignment varied by species @ref(fig:AUC\_lag).
+
+\begin{table}[h!]
+
+\caption{\label{tab:topModels}Top models for each species.}
+\centering
+\resizebox{\linewidth}{!}{
+\fontsize{8}{10}\selectfont
+\begin{tabular}[t]{>{}l>{\raggedright\arraybackslash}p{25em}rrr}
+\toprule
+Species & Fixed effects & $r^{2}m$ & $r^{2}c$ & AUC\\
+\midrule
+American Redstart &  &  &  & \\
+
+(\emph{Setophaga ruticilla}) & \multirow[t]{-2}{25em}{\raggedright\arraybackslash ndvi +  elev\textunderscore 2pnt00\textunderscore to\textunderscore 4pnt00\textunderscore return\textunderscore proportion +  elev\textunderscore cv+ elev\textunderscore maximum +  elev\textunderscore p50} & \multirow[t]{-2}{*}{\raggedleft\arraybackslash 0.46} & \multirow[t]{-2}{*}{\raggedleft\arraybackslash 0.62} & \multirow[t]{-2}{*}{\raggedleft\arraybackslash 0.78}\\
+\addlinespace
+Black-throated Green Warbler &  &  &  & \\
+
+(\emph{Setophaga virens}) & \multirow[t]{-2}{25em}{\raggedright\arraybackslash elev\textunderscore p50 + elev\textunderscore maximum + total\textunderscore all\textunderscore returns} & \multirow[t]{-2}{*}{\raggedleft\arraybackslash 0.48} & \multirow[t]{-2}{*}{\raggedleft\arraybackslash 0.63} & \multirow[t]{-2}{*}{\raggedleft\arraybackslash 0.80}\\
+\addlinespace
+Mourning Warbler &  &  &  & \\
+
+(\emph{Geothlypis philadelphia}) & \multirow[t]{-2}{25em}{\raggedright\arraybackslash ndvi\textsuperscript{2} +  elev\textunderscore 0pnt15\textunderscore to\textunderscore 2pnt00\textunderscore return\textunderscore proportion+ elev\textunderscore 2pnt00\textunderscore to\textunderscore 4pnt00\textunderscore return\textunderscore proportion + elev\textunderscore maximum *elev\textunderscore stddev+   percentage\textunderscore first\textunderscore returns\textunderscore above} & \multirow[t]{-2}{*}{\raggedleft\arraybackslash 0.49} & \multirow[t]{-2}{*}{\raggedleft\arraybackslash 0.50} & \multirow[t]{-2}{*}{\raggedleft\arraybackslash 0.78}\\
+\addlinespace
+Swainson's Thrush &  &  &  & \\
+
+(\emph{Catharus ustulatus}) & \multirow[t]{-2}{25em}{\raggedright\arraybackslash ndvi\textsuperscript{2} +  elev\textunderscore maximum + elev\textunderscore p50} & \multirow[t]{-2}{*}{\raggedleft\arraybackslash 0.13} & \multirow[t]{-2}{*}{\raggedleft\arraybackslash 0.16} & \multirow[t]{-2}{*}{\raggedleft\arraybackslash 0.67}\\
+\addlinespace
+White-throated Sparrow &  &  &  & \\
+
+(\emph{Zonotrichia albicollis}) & \multirow[t]{-2}{25em}{\raggedright\arraybackslash ndvi  + elev\textunderscore cv +  elev\textunderscore maximum + percentage\textunderscore first\textunderscore returns\textunderscore above\textunderscore 2pnt00} & \multirow[t]{-2}{*}{\raggedleft\arraybackslash 0.20} & \multirow[t]{-2}{*}{\raggedleft\arraybackslash 0.33} & \multirow[t]{-2}{*}{\raggedleft\arraybackslash 0.70}\\
+\addlinespace
+Winter Wren &  &  &  & \\
+
+(\emph{Troglodytes hiemalis}) & \multirow[t]{-2}{25em}{\raggedright\arraybackslash ndvi +  canopy\textunderscore relief\textunderscore ratio+ elev\textunderscore 4pnt00\textunderscore to\textunderscore 6pnt00\textunderscore return\textunderscore proportion+ elev\textunderscore maximum +   percentage\textunderscore first\textunderscore returns\textunderscore above} & \multirow[t]{-2}{*}{\raggedleft\arraybackslash 0.42} & \multirow[t]{-2}{*}{\raggedleft\arraybackslash 0.45} & \multirow[t]{-2}{*}{\raggedleft\arraybackslash 0.70}\\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{figure}[htb]
+\includegraphics[width=1\linewidth,]{../3_output/figures/timelag_stats/sppAll_AUC_lm} \end{figure}
+
+\hypertarget{american-redstart}{%
+\subsection{American Redstart}\label{american-redstart}}
+
+Occupancy probability for American Redstart increased with NDVI, the coefficient of variation of vegetation height, and the 50th percentile vegetation height, and decreased with maximum vegetation height, and the proportion of lidar returns between 2 and 4 meters high. The model built using temporally aligned covariates explained 46\% of the variance in American redstart occupancy and had an AUC of 0.784. The coefficient of variation of vegetation height contributed most to predicting occupancy (\emph{b} = 3.149, SE = 0.691, \emph{p} \textless{} 0.001, semi-partial \(R^2\) = 0.065), followed by NDVI (\emph{b} = 0.92, SE = 0.267, \emph{p} \textless{} 0.001, semi-partial \(R^2\) = 0.051), and maximum elevation (\emph{b} = -3.633, SE = 0.861, \emph{p} \textless{} 0.001, semi-partial \(R^2\) = 0.046). The percentage of explained variance did not decline with temporally misaligned LIDAR. For American Redstart, temporal misalignment did not lead to a decrease in model performance as measured by AUC.
+
+\hypertarget{black-throated-green-warbler}{%
+\subsection{Black-Throated Green Warbler}\label{black-throated-green-warbler}}
+
+Occupancy probability for Black-Throated Green Warbler increased with maximum vegetation height and decreased with the 50th percentile of canopy height and the total of all LiDAR height returns. The model built using temporally aligned covariates explained 48\% of the variance in Black-Throated Green Warbler occupancy and had an AUC of 0.799. Maximum vegetation height contributed the most to model performance (\emph{b} = 2.743, SE = 0.559, \emph{p} \textless{} 0.001, semi-partial \(R^2\) = 0.138) followed by the 50th percentile of canopy height (\emph{b} = -1.439, SE = 0.351, \emph{p} \textless{} 0.001, semi-partial \(R^2\) = 0.035). There was no discernible trend in the explained variance with increasing LiDAR temporal misalignment. However, we observed a significant decrease in model performance (r\$2=.28, \emph{p}\textless0.05). The AUC statistic for the zero-time lag model was less than 0.7 with 14 years of LiDAR-bird survey time lag.
+
+\hypertarget{mourning-warbler}{%
+\subsection{Mourning Warbler}\label{mourning-warbler}}
+
+Mourning Warbler occupancy responded positively to the percentage of first returns above the mean vegetation height, NDVI, the density of vegetation below two meters, and maximum vegetation height at low standard deviation of vegetation height. Mourning Warbler occupancy decreased with increased vegetation density between two and four meters. The model built using temporally aligned covariates explained 49\% of the variance in Mourning Warbler occupancy and had an AUC of 0.782. NDVI contributed the most to model predictions (\emph{b} = 25.81, SE = 0.354, \emph{p} \textless{} 0.001, semi-partial \(R^2\) = 0.074)followed by the proportion of vegetation returns below two meters (\emph{b} = 0.797, SE = 0.215, \emph{p} \textless{} 0.001, semi-partial \(R^2\) = 0.028). For Mourning Warbler, we found that increased LiDAR-point count temporal misalignment led to reductions in the amount of explained variance (\(r^2\)=.29, \emph{p}\textless.05) and model performance (\(r^2\)=.29, \emph{p}\textless.05). AUC statistics were less than 0.7 with \textgreater{} 13 years of LiDAR temporal misalignment.
+
+\hypertarget{swainsons-thrush}{%
+\subsection{Swainson's Thrush}\label{swainsons-thrush}}
+
+Swainson's Thrush occupancy probability responded non-linearly to NDVI (the probability of occupancy increased with increasing low NDVI values and decreased with higher values). Occupancy probability responded negatively to the 50th percentile of vegetation returns and positively to the maximum vegetation height. The model built using temporally aligned covariates explained 13\% of the variance in Swainson's Thrush occupancy and had an AUC of 0.668. The maximum vegetation height contributed the most to model performance (\emph{b} = 0.955, SE = 0.163, \emph{p} \textless{} 0.001, semi-partial \(R^2\) = 0.067) followed by the 50th percentile of vegetation height (\emph{b} = -0.944, SE = 0.166, \emph{p} \textless{} 0.001, semi-partial \(R^2\) = 0.063). The percentage of explained variance did not decline with temporally misaligned LIDAR, nor was there a decrease in model performance as measured by AUC. AUC values were \textless{} 0.70 for all Swainson's Thrush models.
+
+\hypertarget{winter-wren}{%
+\subsection{Winter Wren}\label{winter-wren}}
+
+Winter Wren occupancy was positively influenced by NDVI, the maximum vegetation height, and the percentage of first vegetation returns above the mean vegetation height. Winter Wren occupancy responded negatively to the canopy relief ratio and the density of vegetation returns between four and six meters in height. The model built using temporally aligned covariates explained 42\% of the variance in Winter Wren occupancy and had an AUC of 0.696. Maximum vegetation height contributed the most to model performance (\emph{b} = 1.024, SE = 0.27, \emph{p} \textless{} 0.001, semi-partial \(R^2\) = 0.047) followed by the canopy relief ratio (\emph{b} = -1.666, SE = 0.518, \emph{p} \textless{} 0.01, semi-partial \(R^2\) = 0.024). The percentage of explained variance did not decline with temporally misaligned LIDAR, nor was there a significant decrease in model performance as measured by AUC.
+
+\hypertarget{white-throated-sparrow}{%
+\subsection{White-Throated Sparrow}\label{white-throated-sparrow}}
+
+The top White-Throated Sparrow model predicted that occupancy probability responds positively to NDVI, the coefficient of variation of vegetation height, and the maximum vegetation height, and negatively to the percentage of LiDAR vegetation returns above two meters. The model built using temporally aligned covariates explained 20\% of the variance in White-Throated Sparrow occupancy, and had an AUC of 0.705. Maximum vegetation height contributed the most to model performance (\emph{b} = 0.813, SE = 0.155, \emph{p} \textless{} 0.001, semi-partial \(R^2\) = 0.064) followed by NDVI (\emph{b} = 0.477, SE = 0.151, \emph{p} \textless{} 0.01, semi-partial \(R^2\) = 0.022). There was no discernible trend in the explained variance with increasing LiDAR temporal misalignment. However, we observed a significant decrease in model performance (r\$2=0.28, \emph{p}\textless0.05). AUC statistics were \textless{} 0.7 with over five years of temporal misalignment.
+
+\hypertarget{forest-age}{%
+\subsection{Forest age}\label{forest-age}}
+
+For American Redstart and Black-throated Green Warbler, we found a significant relationship between forest age and the pixel-wise differences between predictive maps (\emph{p}\textless001). Comparing the zero and fifteen year time lag models, we found that models using 15-year-old LiDAR data overestimated the occupancy probability of American Redstart in stands \textless25 years old. The 15-year-old LiDAR data overestimated the probability of Black-throated Green Warbler occupancy in forests of all ages @ref(fig:spp\_scatter). Forest age explained 23\% and 30\% of the variance between predictive maps for American Redstart and Black-throated Green Warbler, respectively.
+
+\begin{figure}[!ht]
+\includegraphics[width=1\linewidth,]{../3_output/figures/timelag_stats/spp_scatter_00to15} \end{figure}
+
+For Mourning Warbler, Swainson's Thrush, Winter Wren, and White-Throated Sparrow, we found significant but weak relationships between forest age and the differences between predictive maps built with increasing amounts of LiDAR-point count temporal misalignment (\emph{p}\textless001) @ref(fig:sppAll\_FADIF). For these species, forest age explained \textless{} 5\% of the variance between predictive maps.
+
+\begin{figure}[!ht]
+\includegraphics[width=1\linewidth,]{../3_output/figures/timelag_stats/sppAll_FADIF_lm} \end{figure}
+
+\hypertarget{discussion}{%
+\section{Discussion}\label{discussion}}
+
+We found that LiDAR based models were moderately predictive of occupancy probability (0.7\textless AUC\textless-0.9) for four of the six species examined: American Redstart, Black-Throated Green Warbler, and Mourning Warbler, and White Throated Sparrow. Our results show the differential effects of LiDAR time-lag with field data on the performance of models across species. In general, lidar metrics were predictive of occupancy probability and the contribytuib of individual metrics didn't change with incleasing time-lag. The influence of increasing temporal misalignment on model performance varied across these species.
+
+changes in AUC values roughly corresponded with our hypothesis.
+
+We found that the impacts of increasing LiDAR temporal misalignment varied across species. led to significant declines in model performance for four of the six species we include in our analysis.
+
+While AUCs dididnt significantly decline for all species, the mapped spatial distribution did, suggesting that timelag plays a role.
+
+We examined the reliability of LiDAR over time by effects of lidar acquisition survey time lag on models predicting the distributions of mature forest, early successional, and forest generalist species.
+
+Declines could be explained by the top LiDAR variables for each species.
+
+Variable importance dod'n change across time lag models.
+
+For many species, the amount of temporal misalignment accounted for less than \textgreater{} percent of the variation between lagged bird models. This suggests that are not always necessary for maximum model performance (\protect\hyperlink{ref-hillAirborneLidarWoodland2015}{Hill and Hinsley, 2015}).
+
+As expected, American Redstart a habitat generalist didn't see significant declines in model performance with increasing temporal misalignment.
+
+Black-Throated Green Warbler, associated with mature forests, did see significant declines. As expected, because these birds are known to occupy mature forests.
+
+Likely White-throated sparrow had the most rapid declines.
+Mourning Warbler, we saw significant declines in model performance. The fastes rate of of decline in performance. As expected nbeing an early serial specialist. However the rates of decline ws still slower than anticipated with the AUC predicted to dip below the 0.70 threshold with 13 years of temporal misalignment.
+
+Mourning Warbler nest and feed near the ground, surrounded by dense shrub vegetation characteristic of early successional forests (\protect\hyperlink{ref-pitocchelliMourningWarblerGeothlypis2020}{Pitocchelli, 2020}). They are known to colonize clearings opened by forestry and oil and gas exploration (\protect\hyperlink{ref-atwellSongbirdResponseExperimental2008}{Atwell et al., 2008}). As clearings regenerate, and early successional vegetation gives way to canopy closing trees, their numbers decline (as early as 10 years post-disturbance (\protect\hyperlink{ref-brawnRoleDisturbanceEcology2001}{Brawn et al., 2001}). The lidar variable that contributed the most to the explained variation Mourning Warbler occupancy (the proportion of LiDAR vegetation returns below two meters) corresponds with Mourning Warbler habitat preferences and is an indicator of dense shrub understory vegetation. This helps explain the declines in model performance. As shrub density decreases over the course of succession, LiDAR metrics corresponding to shrub become less useful. For Mourning Warbler we found that mod
+els became less predictive (AUC \textless{} -.70) after 13 years.
+
+Lidar time-lag with point count data had the biggest effects on White Throated Sparrow. White-throated Sparrow is one of the most abundant species in Alberta's boreal mixed-wood forests (\protect\hyperlink{ref-Schmiegelow1997}{Schmiegelow et al., 1997}). While considered a habitat generalist, White-throated sparrow tends to occur along the foretsted edges where it nests and feeds near the ground with low vegetation cover; in early successional stands or mature forests canopy gaps (\protect\hyperlink{ref-fallsWhitethroatedSparrowZonotrichia2020}{Falls and Kopachena, 2020}). Similar to Mourning Warbler, it's feeding and nesting preferences likely impact the amount of acceptable LiDAR time-lag in predictive models. White-throated sparrow SDMs became less predictive (AUC \textless{} 0.70) after five years.
+
+While we predicted moderate declines in performance with increased temporal misalignment with the mid-successional associate, American redstart, our findings did not bear this out. American redstart SDM's for American Redstart remained moderately predictive of occupancy even with with 15 years of LiDAR temporal misalignment, with no discernible trend in reduction of model performance. American Redstart occurs in a range of successional stands and mixed-age plots (\protect\hyperlink{ref-sherryAmericanRedstartSetophaga2020a}{Sherry et al., 2020}).
+In our study area, they are associated with structurally complex deciduous forests (\protect\hyperlink{ref-lestonLongtermChangesBoreal2018}{Leston et al., 2018}; \protect\hyperlink{ref-Mahon2016}{Mahon et al., 2016}) we found them largely absent from early successional stands. Flexiblity allows them to persist through gap forming events occurring between point count and LiDAR acquisition. Two things may account for the American Restart SDM's resilience to LIDAR timelag. (1) The mid-successional stands American Redstart are associated with in Calling Lake experience slower rates of change than early successional stands. And (2) while American Redstart were shown to decrease in abundance after harvesting (\protect\hyperlink{ref-nortonSongbirdResponsePartialcut1997}{Norton and Hannon, 1997}). Given that we controlled for natural and human disturbances occurring between LiDAR acquisition and bird surveys, American Redstart declines to harvesting dirt influence our models.
+
+Contrary to our predictions, we observed a significant negative influence of LiDAR temporal misalignment with the performance of Black-throated Green Warbler. However, even with declines in model performance, LiDAR based SDMs were still moderately predictive of occupancy with fifteen years of LIDAR temporal misalignment. Black-Throated a forest interior species associated with with older deciduous and mixed-wood forests (\protect\hyperlink{ref-morseBlackthroatedGreenWarbler2020}{Morse and Poole, 2020}; Mahon2016, \protect\hyperlink{ref-Schieck2006}{Schieck and Song, 2006}). Low rates of canopy change over time and the communities remain stable in forests \textgreater31 years in age. Declines in model performance were like the result of reduce maximum canopy height values caused by natural gap opening events. Gap formation from individual tree fall or insect defoliation that may have occurred during our 15 year study period wern't large enough to iumact overall model performance. Also, these gap dynamics tend tp lead to diverse, multi-age structures to other studies have shown However the scale and rates of these events were such that that LiDAR was still moderately prodictive with high amounts of LIDAR temporal misalignment. Or are too small to impact BTNW occupancy.
+
+Generally, the most predictive LiDAR variables corresponded with the species habitat requirements that are documented in other literature.
+
+Species that respond to canopy heterogeneity and understory density may be more impacted by time lag. See Davies and saner for types of metrics
+
+Our results are similar to those of two other studies looking at the influence of liDAR temporal misalignment on predictive model performance.
+
+Vieriling et al (\protect\hyperlink{ref-VierlingSwift2014}{2014}) looked at the effects a six year time lag onon brown creeper (Certhia americana) occupancy and community models. They found that the six year timelag had only a small influence on model performance (a 5\% decrease in occupancy probability and a difference in species richness of less than one).
+
+Similarly, and as part of a larger study looking at the impact at several lidar characteristics, Hill and Hinsley (\protect\hyperlink{ref-hillAirborneLidarWoodland2015}{2015}) examined how LiDAR data with a time-lag of up to 15 years with field data influenced breeding habitat models for the Great Tit (Parus major). They also found time lag had only a small impact (less than 1\%) on model predictions when comparing LiDAR data with one, four, and 11 years.
+
+Both Vieriling et al (\protect\hyperlink{ref-VierlingSwift2014}{2014}) and Hill and Hinsley (\protect\hyperlink{ref-hillAirborneLidarWoodland2015}{2015}) cautiously suggest that for mature and stable forests, temporal misalignment does not play a major role in the performance of predictive models.
+
+Use of LiDAR data doesn't coincide temporally with will surveys is common. Due to costs of LiDARacquisitions and the limited availability of public data, many LiDAR studies have relied on lagged LiDAR data. Moudrý et al. (\protect\hyperlink{ref-moudryRoleVegetationStructure2021}{2021}).
+
+the impact of time-lag on model performance is important to consider, especially in rapidly changing landscapes like Canada's boreal forests. Assess time LiDAR is important is areas dominated by disturbance-driven succession characteristic of the boreal.
+
+While temporal misalignment may have a greater impact in harvested and burned areas, other variables may be more suited to charactiizng these habitats. I think though in discussion you would add ``of course if an area is harvested the response would change BUT lidar is not really needed to document that change (i.e.~can use spectral)
+
+\pagebreak
 
 \hypertarget{references}{%
 \section*{References}\label{references}}
@@ -208,6 +395,9 @@ Abdalati, W., Zwally, H.J., Bindschadler, R., Csatho, B., Farrell, S.L., Fricker
 
 \leavevmode\vadjust pre{\hypertarget{ref-AESRD2013}{}}%
 Alberta Environment and Sustainable Resource Development, 2013. General specifications for acquisition of {LiDAR} data. Government of Alberta, Edmonton, Alberta, Canada.
+
+\leavevmode\vadjust pre{\hypertarget{ref-atwellSongbirdResponseExperimental2008}{}}%
+Atwell, R.C., Schulte, L.A., Palik, B.J., 2008. Songbird response to experimental retention harvesting in red pine ({Pinus} resinosa) forests. Forest Ecology and Management 255, 3621--3631.
 
 \leavevmode\vadjust pre{\hypertarget{ref-babcockModelingForestBiomass2016}{}}%
 Babcock, C., Finley, A.O., Cook, B.D., Weiskittel, A., Woodall, C.W., 2016. Modeling forest biomass and growth: {Coupling} long-term inventory and {LiDAR} data. Remote Sensing of Environment 182, 1--12. \url{https://doi.org/10.1016/j.rse.2016.04.014}
@@ -238,6 +428,9 @@ Brandt, J.P., Flannigan, M.D., Maynard, D.G., Thompson, I.D., Volney, W.J.A., 20
 
 \leavevmode\vadjust pre{\hypertarget{ref-brassardStandStructureComposition2010}{}}%
 Brassard, B.W., Chen, H.Y.H., 2010. Stand {Structure} and {Composition} {Dynamics} of {Boreal} {Mixedwood} {Forest}: {Implications} for {Forest} {Management}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-brawnRoleDisturbanceEcology2001}{}}%
+Brawn, J.D., Robinson, S.K., Thompson III, F.R., 2001. The role of disturbance in the ecology and conservation of birds. Annual review of Ecology and Systematics 32, 251--276.
 
 \leavevmode\vadjust pre{\hypertarget{ref-burnhamModelSelectionMultimodel2002}{}}%
 Burnham, K.P., Anderson, D.R., 2002. Model selection and multimodel inference: {A} practical information-theoretic approach. Springer New York.
@@ -317,6 +510,12 @@ Hijmans, R.J., 2021. \href{https://CRAN.R-project.org/package=raster}{Raster: {G
 \leavevmode\vadjust pre{\hypertarget{ref-R-raster}{}}%
 Hijmans, R.J., 2020. \href{https://CRAN.R-project.org/package=raster}{Raster: {Geographic} data analysis and modeling} (manual).
 
+\leavevmode\vadjust pre{\hypertarget{ref-hillAirborneLidarWoodland2015}{}}%
+Hill, R.A., Hinsley, S.A., 2015. Airborne lidar for woodland habitat quality monitoring: {Exploring} the significance of lidar data characteristics when modelling organism-habitat relationships. Remote Sensing 7, 3446--3466. \url{https://doi.org/10.3390/rs70403446}
+
+\leavevmode\vadjust pre{\hypertarget{ref-jaegerR2glmmComputesSquared2017}{}}%
+Jaeger, B., 2017. \href{https://CRAN.R-project.org/package=r2glmm}{r2glmm: {Computes} r squared for mixed (multilevel) models} (manual).
+
 \leavevmode\vadjust pre{\hypertarget{ref-Kortmann2018}{}}%
 Kortmann, M., Heurich, M., Latifi, H., Roesner, S., Seidl, R., Mueller, J., Thorn, S., Rösner, S., Seidl, R., Müller, J., Thorn, S., 2018. Forest structure following natural disturbances and early succession provides habitat for two avian flagship species, capercaillie ({Tetrao} urogallus) and hazel grouse ({Tetrastes} bonasia). Biological Conservation 226, 81--91. \url{https://doi.org/10.1016/j.biocon.2018.07.014}
 
@@ -332,6 +531,9 @@ Lim, K., Treitz, P., Wulder, M., St-Onge, B., Flood, M., 2003. {LiDAR} remote se
 \leavevmode\vadjust pre{\hypertarget{ref-MacArthurMacArthur1961}{}}%
 MacArthur, R.H., MacArthur, J.W., 1961. On bird species diversity. Ecology 42, 594--598. \url{https://doi.org/10.2307/1932254}
 
+\leavevmode\vadjust pre{\hypertarget{ref-Mahon2016}{}}%
+Mahon, C.L., Holloway, G., Sólymos, P., Cumming, S.G., Bayne, E.M., Schmiegelow, F.K.A., Song, S.J., 2016. Community structure and niche characteristics of upland and lowland western boreal birds at multiple spatial scales. Forest Ecology and Management 361, 99--116. \url{https://doi.org/10.1016/j.foreco.2015.11.007}
+
 \leavevmode\vadjust pre{\hypertarget{ref-mccarthy2001gap}{}}%
 McCarthy, J., 2001. Gap dynamics of forest trees: A review with particular attention to boreal forests. Environmental reviews 9, 1--59.
 
@@ -341,8 +543,14 @@ McGaughey, R.J., 2018. {FUSION}/{LDV}: {Software} for {LIDAR} data analysis and 
 \leavevmode\vadjust pre{\hypertarget{ref-morseBlackthroatedGreenWarbler2020}{}}%
 Morse, D., Poole, A., 2020. Black-throated {Green} {Warbler} ({Setophaga} virens), version 1.0, in: Birds of the {World} ({P}. {G}. {Rodewald}, {Editor}). Cornell Lab of Ornithology, Ithaca, NY, USA.
 
+\leavevmode\vadjust pre{\hypertarget{ref-moudryRoleVegetationStructure2021}{}}%
+Moudrý, V., Moudrá, L., Barták, V., Bejček, V., Gdulová, K., Hendrychová, M., Moravec, D., Musil, P., Rocchini, D., Šťastný, K., Volf, O., Šálek, M., 2021. The role of the vegetation structure, primary productivity and senescence derived from airborne {LiDAR} and hyperspectral data for birds diversity and rarity on a restored site. Landscape and Urban Planning 210, 104064. \url{https://doi.org/10.1016/j.landurbplan.2021.104064}
+
 \leavevmode\vadjust pre{\hypertarget{ref-nakagawaGeneralSimpleMethod2013}{}}%
 Nakagawa, S., Schielzeth, H., 2013. A general and simple method for obtaining {R2} from generalized linear mixed-effects models. Methods in Ecology and Evolution 4, 133--142. \url{https://doi.org/10.1111/j.2041-210x.2012.00261.x}
+
+\leavevmode\vadjust pre{\hypertarget{ref-nortonSongbirdResponsePartialcut1997}{}}%
+Norton, M.R., Hannon, S.J., 1997. Songbird response to partial-cut logging in the boreal mixedwood forest of {Alberta}. Canadian Journal of Forest Research 27, 44--53. \url{https://doi.org/10.1139/x96-149}
 
 \leavevmode\vadjust pre{\hypertarget{ref-pettorelliNormalizedDifferenceVegetation2011}{}}%
 Pettorelli, N., Ryan, S., Mueller, T., Bunnefeld, N., Jedrzejewska, B., Lima, M., Kausrud, K., 2011. The normalized difference vegetation index ({NDVI}): Unforeseen successes in animal ecology. Climate Research 46, 15--27. \url{https://doi.org/10.3354/cr00936}
@@ -383,6 +591,9 @@ USGS, n.d. \href{https://www.usgs.gov/land-resources/nli/landsat/landsat-normali
 \leavevmode\vadjust pre{\hypertarget{ref-valbuenaStandardizingEcosystemMorphological2020}{}}%
 Valbuena, R., O'Connor, B., Zellweger, F., Simonson, W., Vihervaara, P., Maltamo, M., Silva, C.A., Almeida, D.R., Danks, F., Morsdorf, F., 2020. Standardizing ecosystem morphological traits from {3D} information sources. Trends in Ecology \& Evolution 35, 656--667. \url{https://doi.org/10.1016/j.tree.2020.03.006}
 
+\leavevmode\vadjust pre{\hypertarget{ref-vanagasReceiverOperatingCharacteristic2004}{}}%
+Vanagas, G., 2004. Receiver operating characteristic curves and comparison of cardiac surgery risk stratification systems. Interactive CardioVascular and Thoracic Surgery 3, 319--322. \url{https://doi.org/10.1016/j.icvts.2004.01.008}
+
 \leavevmode\vadjust pre{\hypertarget{ref-Vaughn2003}{}}%
 Vaughn, I.P., Ormerod, S.J., 2003. Improving the quality of distribution models for conservation by addressing shortcomings in the field collection of training data. Conservation Biology 17, 1601--1611. \url{https://doi.org/10.1111/j.1523-1739.2003.00359.x}
 
@@ -393,66 +604,6 @@ Vierling, K.T., Swift, C.E., Hudak, A.T., Vogeler, J.C., Vierling, L.A., 2014. H
 
 \pagebreak
 
-\hypertarget{tables}{%
-\section*{Tables}\label{tables}}
-\addcontentsline{toc}{section}{Tables}
-
-\begin{table}[h!]
-
-\caption{\label{tab:covDes}Spatial covariates included in the analysis.}
-\centering
-\resizebox{\linewidth}{!}{
-\fontsize{9}{11}\selectfont
-\begin{tabular}[t]{ll>{\raggedleft\arraybackslash}p{30em}}
-\toprule
-Metric & Source & Description\\
-\midrule
-elev\textunderscore mean & LiDAR & Mean height\\
-elev\textunderscore maximum & LiDAR & Maximum height\\
-elev\textunderscore cv & LiDAR & Height coefficient of variation\\
-canopy\textunderscore relief\textunderscore ratio & LiDAR & Canopy relief ratio (mean - min)/(max-min)\\
-elev\textunderscore p50 & LiDAR & 50th percentile of canopy height\\
-elev\textunderscore kurtosis & LiDAR & Height kurtosis\\
-elev\textunderscore p99 & LiDAR & 99th percentile of canopy height\\
-elev\textunderscore stddev & LiDAR & Height standard deviation\\
-percentage\textunderscore first\textunderscore returns\textunderscore above\textunderscore 2pnt00 & LiDAR & Percentage of first returns above 2 m\\
-percentage\textunderscore first\textunderscore returns\textunderscore above\textunderscore mean & LiDAR & Percentage of first returns above the mean return height\\
-total\textunderscore all\textunderscore returns & LiDAR & Total all returns\\
-elev\textunderscore p95 & LiDAR & 95th percentile of canopy height\\
-strata\textunderscore 0pnt15\textunderscore to\textunderscore 2pnt00 & LiDAR & Proportion of points between 0.15 and 2 m\\
-strata\textunderscore 2pnt00\textunderscore to\textunderscore 4pnt00 & LiDAR & Proportion of points between 2 and 4 m\\
-strata\textunderscore 4pnt00\textunderscore to\textunderscore 6pnt00 & LiDAR & Proportion of points between 4 and 6 m\\
-strata\textunderscore 6pnt00\textunderscore to\textunderscore 8pnt00 & LiDAR & Proportion of points between 6 and 8 m\\
-strata\textunderscore 8pnt00\textunderscore to\textunderscore 10pnt00 & LiDAR & Proportion of points between 8 and 10 m\\
-strata\textunderscore 10pnt00\textunderscore to\textunderscore 15pnt00 & LiDAR & Proportion of points between 10 and 15 m\\
-strata\textunderscore 15pnt00\textunderscore to\textunderscore 20pnt00 & LiDAR & Proportion of points between 15 and 20 m\\
-strata\textunderscore 20pnt00\textunderscore to\textunderscore 25pnt00 & LiDAR & Proportion of points between 20 and 25 m\\
-strata\textunderscore 25pnt00\textunderscore to\textunderscore 30pnt00 & LiDAR & Proportion of points between 25 and 30 m\\
-strata\textunderscore 30pnt00\textunderscore to\textunderscore 50pnt00 & LiDAR & Proportion of points between 30 and 50 m\\
-forest\textunderscore age & CAS-FRI & Mean age of the forest stand\\
-NDVI & Landsat 5, 7, and 8 & Mean NDVI\\
-\bottomrule
-\end{tabular}}
-\end{table}
-
-\begin{table}[h!]
-
-\caption{\label{tab:topModels}Top models for each species.}
-\centering
-\resizebox{\linewidth}{!}{
-\fontsize{9}{11}\selectfont
-\begin{tabular}[t]{l>{\raggedright\arraybackslash}p{30em}rrr}
-\toprule
-Species & Fixed effects & $r^{2}m$ & $r^{2}c$ & AUC\\
-\midrule
-American Redstart(\emph{Setophaga ruticilla}) & ndvi +  elev\textunderscore 2pnt00\textunderscore to\textunderscore 4pnt00\textunderscore return\textunderscore proportion +  elev\textunderscore cv+ elev\textunderscore maximum +  elev\textunderscore p50 & 0.46 & 0.62 & 0.78\\
-Black-throated Green Warbler(\emph{Setophaga virens}) & elev\textunderscore p50 + elev\textunderscore maximum + total\textunderscore all\textunderscore returns & 0.48 & 0.63 & 0.80\\
-Mourning Warbler(\emph{Geothlypis philadelphia}) & ndvi\textsuperscript{2} +  elev\textunderscore 0pnt15\textunderscore to\textunderscore 2pnt00\textunderscore return\textunderscore proportion+ elev\textunderscore 2pnt00\textunderscore to\textunderscore 4pnt00\textunderscore return\textunderscore proportion + elev\textunderscore maximum *elev\textunderscore stddev+   percentage\textunderscore first\textunderscore returns\textunderscore above & 0.49 & 0.50 & 0.78\\
-Swainson's Thrush(\emph{Catharus ustulatus}) & ndvi\textsuperscript{2} +  elev\textunderscore maximum + elev\textunderscore p50 & 0.13 & 0.16 & 0.67\\
-Winter Wren(\emph{Troglodytes hiemalis}) & ndvi +  canopy\textunderscore relief\textunderscore ratio+ elev\textunderscore 4pnt00\textunderscore to\textunderscore 6pnt00\textunderscore return\textunderscore proportion+ elev\textunderscore maximum +   percentage\textunderscore first\textunderscore returns\textunderscore above & 0.42 & 0.45 & 0.70\\
-White-throated Sparrow(\emph{Zonotrichia albicollis}) & ndvi  + elev\textunderscore cv +  elev\textunderscore maximum + percentage\textunderscore first\textunderscore returns\textunderscore above\textunderscore 2pnt00 & 0.20 & 0.33 & 0.70\\
-\bottomrule
-\end{tabular}}
-\end{table}
+We didn't see any patterns between the ranked contributions of predictors between species.
 
 \end{document}

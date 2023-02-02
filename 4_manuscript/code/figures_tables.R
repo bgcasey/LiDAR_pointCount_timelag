@@ -32,11 +32,11 @@ knitr::include_graphics("../3_output/figures/chapter1_workflow.pdf", dpi = 300, 
 knitr::include_graphics("../3_output/maps/studyArea_inset.png", dpi = 300, auto_pdf = TRUE)
 
 ## ---- topModels
-topModels<-xlsx::read.xlsx("figures_tables/top_models.xlsx", "Sheet3")
+topModels<-xlsx::read.xlsx("../3_output/tables/top_models.xlsx", "Sheet3")
 kable(topModels, position = "h!",col.names = c("Species",
                                                "Fixed effects",
                                                "$r^{2}m$","$r^{2}c$", "AUC"),
-      align = c("l","l","r", "r", "r"), escape=F, caption = 'Top models for each species.',"latex", booktabs=TRUE,  digits=2, linesep=c("\\addlinespace", "\\addlinespace"))%>%
+      align = c("l","l","r", "r", "r"), escape=F, caption = 'The fixed effects and summary statistics for top models for each species.',"latex", booktabs=TRUE,  digits=2, linesep=c("\\addlinespace", "\\addlinespace"))%>%
   column_spec(2, width = "25em")%>%
   column_spec(1,  latex_valign = "top")%>%
   kable_styling(latex_options="scale_down", font_size = 8)%>%

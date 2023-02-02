@@ -53,6 +53,7 @@ renv/
 3_output/*
 !.git* 
 
+4_
 
 
 rsconnect/
@@ -64,7 +65,7 @@ chapter_all/
 _bookdown.yml
 
 
-
+4_manuscript/manuscript/lidarLag_manuscript.pdf
 
 
 .DS_Store

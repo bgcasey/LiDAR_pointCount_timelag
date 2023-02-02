@@ -1,0 +1,528 @@
+
+```{r setup, include=FALSE, cache=FALSE}
+#Set root directory to R project root
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+```
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(stringr)
+```
+
+## Model performance
+
+
+
+## AUC facets {-}
+
+```{r}
+load("2_pipeline/store/models/AMRE_models_AUC_4.rData")
+load("2_pipeline/store/models/BTNW_models_AUC_4.rData")
+load("2_pipeline/store/models/MOWA_models_AUC_4.rData")
+load("2_pipeline/store/models/SWTH_models_AUC_4.rData")
+load("2_pipeline/store/models/WIWR_models_AUC_4.rData")
+load("2_pipeline/store/models/WTSP_models_AUC_4.rData")
+load("2_pipeline/store/models/YBSA_models_AUC_4.rData")
+
+
+
+AMRE_AUC<-AMRE_models_AUC_4%>%mutate(species="American Redstart (Setophaga ruticilla)")%>%mutate(sci_name="Setophaga ruticilla")
+BTNW_AUC<-BTNW_models_AUC_4%>%mutate(species="Black-throated Green Warbler (Setophaga virens)")%>%mutate(sci_name="Setophaga virens")
+MOWA_AUC<-MOWA_models_AUC_4%>%mutate(species="Mourning Warbler (Geothlypis philadelphia)")%>%mutate(sci_name="Geothlypis philadelphia")
+SWTH_AUC<-SWTH_models_AUC_4%>%mutate(species="Swainson's Thrush (Catharus ustulatus)")%>%mutate(sci_name="Catharus ustulatus")
+WIWR_AUC<-WIWR_models_AUC_4%>%mutate(species="Winter Wren (Troglodytes hiemalis)")%>%mutate(sci_name="Troglodytes hiemalis")
+WTSP_AUC<-WTSP_models_AUC_4%>%mutate(species="White-throated Sparrow (Zonotrichia albicollis)")%>%mutate(sci_name="Zonotrichia albicollis")
+
+spp_AUC<-rbind(AMRE_AUC, 
+BTNW_AUC, 
+MOWA_AUC, 
+SWTH_AUC, 
+WIWR_AUC, 
+WTSP_AUC)%>%
+  rename(timelag=lag)%>%
+dplyr::select(c(timelag, species, sci_name, R2m_mean:AUC_sd))%>%
+mutate_if(is.numeric, round, 3)
+
+write.csv(spp_AUC, file="3_output/tables/model_stats.csv")
+
+
+
+
+# spp_AUC$species <- factor(spp_AUC$species, label= 
+#   c("atop(textstyle('THAT'),textstyle('Extraposed', family='LMRoman10-Italic'))", 
+#     "atop(textstyle('THAT'),textstyle('Post-predicate'))",
+#     "atop(atop(textstyle('TO'),textstyle('Extraposed')),italic('for')*textstyle('-subject'))",
+#     "atop(atop(textstyle('TO'),textstyle('Post-predicate')),italic('for')*textstyle('-subject'))",
+#     "atop(atop(textstyle('THAT'),textstyle('Extraposed')),italic('that')*textstyle('-omission'))",
+#     "atop(atop(textstyle('THAT'),textstyle('Post-predicate')),italic('that')*textstyle('-omission'))"))
+# 
+# spp_AUC$species <- factor(spp_AUC$species,labels=c('American Redstart (Setophaga ruticilla)'==parse(text=TeX('American Redstart ($\\emph{Setophaga ruticilla}$)')),
+#                                                'B'=parse(text=TeX('CD4+CD8+T cells$\\frac{a^2}{b}$')),
+#                                                'C'=parse(text=TeX('LDGs $\\alpha^2$')),
+#                                                'D'=parse(text=TeX('Non classical monocytes $\\mu^2$')),
+#                                                'E'=parse(text=TeX('Neutrophils $\\gamma^2$')),
+#                                                'F'="italic('p=')*0.001"))
+
+
+  # AUC plot
+ggplot(spp_AUC, aes(x=timelag, y=AUC_mean)) + 
+  #geom_errorbar(aes(ymin=AUC_mean-1.96*AUC_stdErr, ymax=AUC_mean+ 1.96*AUC_stdErr, width=.2))+
+  geom_point(size=.5) + 
+  geom_segment(x=0, xend=15, y=.7, yend=.7, linetype="longdash", lwd=.02)+
+  geom_smooth(method = lm, colour="black", size=0.5)+
+  facet_wrap(~sci_name)+
+  xlab("LiDAR/point-count temporal missalignment (yr)")+
+  ylab("AUC")+
+  theme(panel.background = element_blank(),
+          text = element_text(size=10, family="LMRoman10-Regular"),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          legend.position="none",
+          strip.background =element_rect(fill="white"),
+          strip.text = element_text(family="LMRoman10-Italic"))#LMRoman10-Italic"
+
+
+ ggsave(filename=paste0("3_output/figures/timelag_stats/sppAll_AUC_lm.png"), width =6, height=4)
+ 
+```
+
+
+## Correlation and forest age facets {-}
+
+```{r eval=FALSE}
+
+load("2_pipeline/store/AMRE_fa_co_ac_df.rData")
+load("2_pipeline/store/BTNW_fa_co_ac_df.rData")
+load("2_pipeline/store/MOWA_fa_co_ac_df.rData")
+load("2_pipeline/store/SWTH_fa_co_ac_df.rData")
+load("2_pipeline/store/WIWR_fa_co_ac_df.rData")
+load("2_pipeline/store/WTSP_fa_co_ac_df.rData")
+load("2_pipeline/store/YBSA_fa_co_ac_df.rData")
+
+AMRE_FACO<-AMRE_fa_co_ac_df%>%mutate(species="American Redstart (Setophaga ruticilla)")%>%mutate(sci_name="Setophaga ruticilla")
+BTNW_FACO<-BTNW_fa_co_ac_df%>%mutate(species="Black-throated Green Warbler (Setophaga virens)")%>%mutate(sci_name="Setophaga virens")
+MOWA_FACO<-MOWA_fa_co_ac_df%>%mutate(species="Mourning Warbler (Geothlypis philadelphia)")%>%mutate(sci_name="Geothlypis philadelphia")
+SWTH_FACO<-SWTH_fa_co_ac_df%>%mutate(species="Swainson's Thrush (Catharus ustulatus)")%>%mutate(sci_name="Catharus ustulatus")
+WIWR_FACO<-WIWR_fa_co_ac_df%>%mutate(species="Winter Wren (Troglodytes hiemalis)")%>%mutate(sci_name="Troglodytes hiemalis")
+WTSP_FACO<-WTSP_fa_co_ac_df%>%mutate(species="White-throated Sparrow (Zonotrichia albicollis)")%>%mutate(sci_name="Zonotrichia albicollis")
+
+spp_FACO<-rbind(AMRE_FACO, 
+BTNW_FACO, 
+MOWA_FACO, 
+SWTH_FACO, 
+WIWR_FACO, 
+WTSP_FACO)%>%
+  rowwise()%>%
+  mutate(cor_mean=mean(c(predCor_0_01:predCor_0_15)))%>%
+  mutate(cor_med=median(c(predCor_0_01:predCor_0_15))) 
+
+
+ggplot(spp_FACO, aes(x=forest_age, y=cor_med)) +
+# geom_point(size=.01, alpha=.02, colour="grey")+  
+  ylim(0,1)+
+geom_smooth(method = "lm", se = TRUE, colour="black", size=0.5) +
+   facet_wrap(~sci_name)+
+  labs(
+    x = "Forest age (yr)", 
+    y = "Pearson correlation (r)")+
+    theme(panel.background = element_blank(),
+          text = element_text(size=10, family="LMRoman10-Regular"),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+          panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+           axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          strip.background =element_rect(fill="white"),
+          strip.text = element_text(family="LMRoman10-Italic"))
+ggsave(filename=paste0("3_output/figures/timelag_stats/sppAll_FACO_lm.png"), width =6, height=4)
+```
+
+
+## Difference in occupancy probility and forest age facets {-}
+
+```{r eval=FALSE}
+## Model stats
+
+load("2_pipeline/store/models/AMRE_predDif_to_forestAge_df.rData")
+load("2_pipeline/store/models/BTNW_predDif_to_forestAge_df.rData")
+load("2_pipeline/store/models/MOWA_predDif_to_forestAge_df.rData")
+load("2_pipeline/store/models/SWTH_predDif_to_forestAge_df.rData")
+load("2_pipeline/store/models/WIWR_predDif_to_forestAge_df.rData")
+load("2_pipeline/store/models/WTSP_predDif_to_forestAge_df.rData")
+load("2_pipeline/store/models/YBSA_predDif_to_forestAge_df.rData")
+
+AMRE_predDif_to_forestAge_df<-AMRE_predDif_to_forestAge_df%>%mutate(species="American Redstart (Setophaga ruticilla)")%>%mutate(sci_name="Setophaga ruticilla")%>%mutate(timelag=01:15)
+BTNW_predDif_to_forestAge_df<-BTNW_predDif_to_forestAge_df%>%mutate(species="Black-throated Green Warbler (Setophaga virens)")%>%mutate(sci_name="Setophaga virens")%>%mutate(timelag=01:15)
+MOWA_predDif_to_forestAge_df<-MOWA_predDif_to_forestAge_df%>%mutate(species="Mourning Warbler (Geothlypis philadelphia)")%>%mutate(sci_name="Geothlypis philadelphia")%>%mutate(timelag=01:15)
+SWTH_predDif_to_forestAge_df<-SWTH_predDif_to_forestAge_df%>%mutate(species="Swainson's Thrush (Catharus ustulatus)")%>%mutate(sci_name="Catharus ustulatus")%>%mutate(timelag=01:15)
+WIWR_predDif_to_forestAge_df<-WIWR_predDif_to_forestAge_df%>%mutate(species="Winter Wren (Troglodytes hiemalis)")%>%mutate(sci_name="Troglodytes hiemalis")%>%mutate(timelag=01:15)
+WTSP_predDif_to_forestAge_df<-WTSP_predDif_to_forestAge_df%>%mutate(species="White-throated Sparrow (Zonotrichia albicollis)")%>%mutate(sci_name="Zonotrichia albicollis")%>%mutate(timelag=01:15)                                                                                                                                                                        
+                                                                                                                                                                      
+
+spp_predDif_to_forestAge_df<-rbind(AMRE_predDif_to_forestAge_df, 
+BTNW_predDif_to_forestAge_df,
+MOWA_predDif_to_forestAge_df,
+SWTH_predDif_to_forestAge_df, 
+WIWR_predDif_to_forestAge_df, 
+WTSP_predDif_to_forestAge_df)%>%
+select(-formula)%>%
+select(c(timelag, species, sci_name, r.squared:p.value))%>%
+mutate_if(is.numeric, round, 2)
+
+save(spp_predDif_to_forestAge_df, file="3_output/tables/spp_predDif_to_forestAge_df.rData")
+write.csv(spp_predDif_to_forestAge_df, file="3_output/tables/spp_predDif_to_forestAge_df.csv")
+
+# plot
+load("2_pipeline/store/AMRE_fa_dif_ac_df.rData")
+load("2_pipeline/store/BTNW_fa_dif_ac_df.rData")
+load("2_pipeline/store/MOWA_fa_dif_ac_df.rData")
+load("2_pipeline/store/SWTH_fa_dif_ac_df.rData")
+load("2_pipeline/store/WIWR_fa_dif_ac_df.rData")
+load("2_pipeline/store/WTSP_fa_dif_ac_df.rData")
+load("2_pipeline/store/YBSA_fa_dif_ac_df.rData")
+
+AMRE_FADIF<-AMRE_fa_dif_ac_df%>%mutate(species="American Redstart (Setophaga ruticilla)")%>%mutate(sci_name="Setophaga ruticilla")
+BTNW_FADIF<-BTNW_fa_dif_ac_df%>%mutate(species="Black-throated Green Warbler (Setophaga virens)")%>%mutate(sci_name="Setophaga virens")
+MOWA_FADIF<-MOWA_fa_dif_ac_df%>%mutate(species="Mourning Warbler (Geothlypis philadelphia)")%>%mutate(sci_name="Geothlypis philadelphia")
+SWTH_FADIF<-SWTH_fa_dif_ac_df%>%mutate(species="Swainson's Thrush (Catharus ustulatus)")%>%mutate(sci_name="Catharus ustulatus")
+WIWR_FADIF<-WIWR_fa_dif_ac_df%>%mutate(species="Winter Wren (Troglodytes hiemalis)")%>%mutate(sci_name="Troglodytes hiemalis")
+WTSP_FADIF<-WTSP_fa_dif_ac_df%>%mutate(species="White-throated Sparrow (Zonotrichia albicollis)")%>%mutate(sci_name="Zonotrichia albicollis")
+
+
+spp_FADIF<-rbind(AMRE_FADIF, 
+BTNW_FADIF,
+MOWA_FADIF,
+SWTH_FADIF, 
+WIWR_FADIF, 
+WTSP_FADIF)%>%
+  rowwise()%>%
+  mutate(dif_mean=mean(c(predDif_0_01:predDif_0_15)))%>%
+  mutate(dif_med=median(c(predDif_0_01:predDif_0_15))) 
+
+# save(spp_FADIF, file="3_output/tables/spp_FADIF.rData")
+# write.csv(spp_FADIF, file="spp_FADIF.csv")
+
+
+ggplot(spp_FADIF) +
+   geom_smooth(aes(x = unclass(forest_age), y = predDif_0_01, col = "0 and 01 years"),  
+              method = "lm", se = FALSE, size=0.5) + 
+  geom_smooth(aes(x = unclass(forest_age), y = predDif_0_02, col = "0 and 02 years"),  
+              method = "lm", se = FALSE, size=0.5) + 
+   geom_smooth(aes(x = unclass(forest_age), y = predDif_0_03, col = "0 and 03 years"),  
+              method = "lm", se = FALSE, size=0.5) + 
+  geom_smooth(aes(x = unclass(forest_age), y = predDif_0_04, col = "0 and 04 years"),  
+              method = "lm", se = FALSE, size=0.5) + 
+   geom_smooth(aes(x = unclass(forest_age), y = predDif_0_05, col = "0 and 05 years"),  
+              method = "lm", se = FALSE, size=0.5) + 
+  geom_smooth(aes(x = unclass(forest_age), y = predDif_0_06, col = "0 and 06 years"),  
+              method = "lm", se = FALSE, size=0.5) + 
+   geom_smooth(aes(x = unclass(forest_age), y = predDif_0_07, col = "0 and 07 years"),  
+              method = "lm", se = FALSE, size=0.5) + 
+  geom_smooth(aes(x = unclass(forest_age), y = predDif_0_08, col = "0 and 08 years"),  
+              method = "lm", se = FALSE, size=0.5) + 
+   geom_smooth(aes(x = unclass(forest_age), y = predDif_0_09, col = "0 and 09 years"),  
+              method = "lm", se = FALSE, size=0.5) + 
+  geom_smooth(aes(x = unclass(forest_age), y = predDif_0_10, col = "0 and 10 years"),  
+              method = "lm", se = FALSE, size=0.5)+
+   geom_smooth(aes(x = unclass(forest_age), y = predDif_0_11, col = "0 and 11 years"),  
+              method = "lm", se = FALSE, size=0.5) + 
+   geom_smooth(aes(x = unclass(forest_age), y = predDif_0_12, col = "0 and 12 years"),  
+              method = "lm", se = FALSE, size=0.5) + 
+   geom_smooth(aes(x = unclass(forest_age), y = predDif_0_13, col = "0 and 13 years"),  
+              method = "lm", se = FALSE, size=0.5) + 
+   geom_smooth(aes(x = unclass(forest_age), y = predDif_0_14, col = "0 and 14 years"),  
+              method = "lm", se = FALSE, size=0.5) + 
+   geom_smooth(aes(x = unclass(forest_age), y = predDif_0_15, col = "0 and 15 years"),  
+              method = "lm", se = FALSE, size=0.5) + 
+  scale_colour_viridis_d(name=NULL)+    
+# geom_point(size=.01, alpha=.02, colour="grey")+  
+   facet_wrap(~sci_name)+
+  labs(
+    x = "Forest age (yr)", 
+    y = "Difference between occupancy probability")+
+    theme(panel.background = element_blank(),
+          text = element_text(size=10, family="LMRoman10-Regular"),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+          panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+           axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          strip.background =element_rect(fill="white"),
+          legend.key = element_rect(fill = "white"),
+          strip.text = element_text(family="LMRoman10-Italic"))
+
+
+
+
+
+ggsave(filename=paste0("3_output/figures/timelag_stats/sppAll_FADIF_lm.png"), width =6, height=4)
+```
+
+
+```{r eval=FALSE}
+load("2_pipeline/store/models/AMRE_predDif_to_forestAge_df.rData")
+load("2_pipeline/store/models/BTNW_predDif_to_forestAge_df.rData")
+load("2_pipeline/store/models/MOWA_predDif_to_forestAge_df.rData")
+load("2_pipeline/store/models/SWTH_predDif_to_forestAge_df.rData")
+load("2_pipeline/store/models/WIWR_predDif_to_forestAge_df.rData")
+load("2_pipeline/store/models/WTSP_predDif_to_forestAge_df.rData")
+
+AMRE_predDif_to_forestAge_df<-AMRE_predDif_to_forestAge_df%>%
+  mutate(spp="AMRE")
+BTNW_predDif_to_forestAge_df<-BTNW_predDif_to_forestAge_df%>%
+  mutate(spp="BTNW")
+MOWA_predDif_to_forestAge_df<-MOWA_predDif_to_forestAge_df%>%
+  mutate(spp="MOWA")
+SWTH_predDif_to_forestAge_df<-SWTH_predDif_to_forestAge_df%>%
+  mutate(spp="SWTH")
+WIWR_predDif_to_forestAge_df<-WIWR_predDif_to_forestAge_df%>%
+  mutate(spp="WIWR")
+WTSP_predDif_to_forestAge_df<-WTSP_predDif_to_forestAge_df%>%
+  mutate(spp="WTSP")
+
+spp_predDif_to_forestAge_df<-rbind(
+AMRE_predDif_to_forestAge_df,
+BTNW_predDif_to_forestAge_df,
+MOWA_predDif_to_forestAge_df,
+SWTH_predDif_to_forestAge_df,
+WIWR_predDif_to_forestAge_df,
+WTSP_predDif_to_forestAge_df)%>%
+  mutate(across(where(is.numeric), round, 3))
+spp_predDif_to_forestAge_df<-  round(spp_predDif_to_forestAge_df,digits = 2)
+```
+
+
+
+## Occupancy probability and forest age facets {-}
+
+```{r eval=FALSE}
+load("2_pipeline/store/AMRE_pd_fa_df.rData")
+load("2_pipeline/store/BTNW_pd_fa_df.rData")
+load("2_pipeline/store/MOWA_pd_fa_df.rData")
+load("2_pipeline/store/SWTH_pd_fa_df.rData")
+load("2_pipeline/store/WIWR_pd_fa_df.rData")
+load("2_pipeline/store/WTSP_pd_fa_df.rData")
+load("2_pipeline/store/YBSA_pd_fa_df.rData")
+
+
+for ( col in 1:ncol(AMRE_pd_fa_df)){
+    colnames(AMRE_pd_fa_df)[col] <-  sub("AMRE_", "", colnames(AMRE_pd_fa_df)[col])
+}
+
+for ( col in 1:ncol(AMRE_pd_fa_df)){
+    colnames(BTNW_pd_fa_df)[col] <-  sub("BTNW_", "", colnames(AMRE_pd_fa_df)[col])
+}
+
+for ( col in 1:ncol(AMRE_pd_fa_df)){
+    colnames(MOWA_pd_fa_df)[col] <-  sub("MOWA_", "", colnames(AMRE_pd_fa_df)[col])
+}
+
+for ( col in 1:ncol(AMRE_pd_fa_df)){
+    colnames(SWTH_pd_fa_df)[col] <-  sub("SWTH_", "", colnames(AMRE_pd_fa_df)[col])
+}
+
+for ( col in 1:ncol(AMRE_pd_fa_df)){
+    colnames(WIWR_pd_fa_df)[col] <-  sub("WIWR_", "", colnames(AMRE_pd_fa_df)[col])
+}
+
+for ( col in 1:ncol(AMRE_pd_fa_df)){
+    colnames(WTSP_pd_fa_df)[col] <-  sub("WTSP_", "", colnames(AMRE_pd_fa_df)[col])
+}
+
+
+AMRE_PDFA<-AMRE_pd_fa_df%>%mutate(species="American Redstart (Setophaga ruticilla)")%>%mutate(sci_name="Setophaga ruticilla")
+BTNW_PDFA<-BTNW_pd_fa_df%>%mutate(species="Black-throated Green Warbler (Setophaga virens)")%>%mutate(sci_name="Setophaga virens")
+MOWA_PDFA<-MOWA_pd_fa_df%>%mutate(species="Mourning Warbler (Geothlypis philadelphia)")%>%mutate(sci_name="Geothlypis philadelphia")
+SWTH_PDFA<-SWTH_pd_fa_df%>%mutate(species="Swainson's Thrush (Catharus ustulatus)")%>%mutate(sci_name="Catharus ustulatus")
+WIWR_PDFA<-WIWR_pd_fa_df%>%mutate(species="Winter Wren (Troglodytes hiemalis)")%>%mutate(sci_name="Troglodytes hiemalis")
+WTSP_PDFA<-WTSP_pd_fa_df%>%mutate(species="White-throated Sparrow (Zonotrichia albicollis)")%>%mutate(sci_name="Zonotrichia albicollis")
+
+spp_PDFA<-rbind(AMRE_PDFA, 
+BTNW_PDFA, 
+MOWA_PDFA, 
+SWTH_PDFA, 
+WIWR_PDFA, 
+WTSP_PDFA)
+
+
+
+
+spp_PDFA %>%
+  ggplot(aes(predictMap_m_00, predictMap_m_15, color=forest_age)) +
+  geom_point(alpha=0.4, size=.1) +
+  scale_color_viridis() +
+  facet_wrap(~sci_name, ncol = 2)+
+  labs(y="occupancy probability (15 year time lag)", x="occupancy probability (no time lag)", color="forest age (yr)") +
+   theme(panel.background = element_blank(),
+          text = element_text(size=10, family="LMRoman10-Regular"),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+         legend.title=element_text(size=7),
+         legend.text=element_text(size=7),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          strip.background =element_rect(fill="white"),
+          strip.text = element_text(family="LMRoman10-Italic"))
+ggsave(filename=paste0("3_output/figures/timelag_stats/spp_scatter_00to15.png"), width = 5, height=5)
+
+
+
+## density plot
+
+
+AMRE_pd_fa_df[1:5009,] %>%
+  ggplot(aes(x=predictMap_m_00, y=predictMap_m_15, fill=forest_age)) +
+    geom_tile() +
+    theme_ipsum()
+  # stat_density_2d(aes(fill = ageClass_00), geom = "polygon")+
+  # scale_color_viridis() +
+  # labs(y="occupancy probability (15 year time lag)", x="occupancy probability (no time lag)", color="forest age class") +
+  #  theme(panel.background = element_blank(),
+  #         text = element_text(size=10),
+  #         axis.ticks=element_blank(),
+  #         #strip.background =element_rect(fill="white"),
+  #        panel.border = element_rect(color = "black", fill = NA, size = .2),
+  #         axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+  #        axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+  #         #panel.background = element_rect(fill="white"),
+  #         panel.grid.major = element_blank(),
+  #         panel.grid.minor = element_blank())
+
+
+d <- ggplot(AMRE_pd_fa_df[1:500,], aes(x=predictMap_m_00, y=predictMap_m_15))
+# If you map an aesthetic to a categorical variable, you will get a
+# set of contours for each value of that variable
+d + geom_density_2d(aes(colour = forest_age))
+
+```
+
+
+## Contribution of fixed effects {-}
+
+
+```{r}
+load("2_pipeline/store/models/AMRE_r2beta_all.rData")
+load("2_pipeline/store/models/BTNW_r2beta_all.rData")
+load("2_pipeline/store/models/MOWA_r2beta_all.rData")
+load("2_pipeline/store/models/SWTH_r2beta_all.rData")
+load("2_pipeline/store/models/WIWR_r2beta_all.rData")
+load("2_pipeline/store/models/WTSP_r2beta_all.rData")
+load("2_pipeline/store/models/YBSA_r2beta_all.rData")
+
+AMRE_r2beta<-AMRE_r2beta_all%>%mutate(species="American Redstart (\\emph{Setophaga ruticilla})")%>%mutate(sci_name="Setophaga ruticilla")
+BTNW_r2beta<-BTNW_r2beta_all%>%mutate(species="Black-throated Green Warbler(\\emph{Setophaga virens})")%>%mutate(sci_name="Setophaga virens")
+MOWA_r2beta<-MOWA_r2beta_all%>%mutate(species="Mourning Warbler(\\emph{Geothlypis philadelphia})")%>%mutate(sci_name="Geothlypis philadelphia")
+SWTH_r2beta<-SWTH_r2beta_all%>%mutate(species="Swainson's Thrush(\\emph{Catharus ustulatus})")%>%mutate(sci_name="Catharus ustulatus")
+WIWR_r2beta<-WIWR_r2beta_all%>%mutate(species="Winter Wren(\\emph{Troglodytes hiemalis})")%>%mutate(sci_name="Troglodytes hiemalis")
+WTSP_r2beta<-WTSP_r2beta_all%>%mutate(species="White-throated Sparrow(\\emph{Zonotrichia albicollis})")%>%mutate(sci_name="Zonotrichia albicollis")
+
+
+
+
+spp_r2beta<-bind_rows(AMRE_r2beta, 
+BTNW_r2beta, 
+MOWA_r2beta, 
+SWTH_r2beta, 
+WIWR_r2beta, 
+WTSP_r2beta)%>%
+  dplyr::select(-c(name, response, sci_name))%>%
+   mutate(across(where(is.numeric), round, 3))%>%
+  filter(lag==0)%>%
+  rename(strata_4pnt00_to_6pnt00="elev_4pnt00_to_6pnt00_return_proportion")%>%
+  rename(strata_0pnt15_to_2pnt00="elev_0pnt15_to_2pnt00_return_proportion")%>%
+  rename(strata_2pnt00_to_4pnt00="elev_2pnt00_to_4pnt00_return_proportion")
+
+
+spp_r2beta_long<-spp_r2beta %>%
+     dplyr::select(-c(Model, lag)) %>%
+   pivot_longer(-species) %>% 
+   pivot_wider(names_from=species, values_from=value) %>%
+   rename(Predictor=name)
+df<-spp_r2beta_long
+
+
+spp_r2beta_long_rank<-df %>%
+  dplyr::select(-Predictor)%>%
+     mutate_each(funs(dense_rank(-.)))%>%
+  cbind(spp_r2beta_long$Predictor)%>%
+  rename(Predictor="spp_r2beta_long$Predictor")%>%
+  mutate_at(c(1:6), ~replace_na(.,""))%>%
+  select(c(7, 1:6))
+
+spp_r2beta_long_rank$Predictor<-str_replace_all(spp_r2beta_long_rank$Predictor, "_", "\\\\textunderscore ")
+
+
+save(spp_r2beta_long_rank, file="3_output/tables/spp_r2beta_long_rank.rData")
+
+spp_r2beta_perc<-spp_r2beta%>%
+  mutate(across(c(4:ncol(spp_r2beta)),
+           .fns = ~./Model*100))%>%
+  mutate(across(where(is.numeric), round, 3))
+
+
+
+
+  
+ggplot(spp_r2beta, aes(x = )) +
+  geom_bar(fill = "steelblue") +
+  scale_x_discrete(limits = c("pickup", "suv", "minivan", 
+                             "midsize", "compact", "subcompact", 
+                             "2seater"),
+                   labels = c("Pickup\nTruck", "Sport Utility\nVehicle", 
+                              "Minivan", "Mid-size", "Compact", 
+                              "Subcompact", "2-Seater"))
+  
+    
+
+
+```
+
+
+## Zero Model results {-}
+```{r}
+
+load("2_pipeline/store/models/AMRE_models_4.rData")
+load("2_pipeline/store/models/BTNW_models_4.rData")
+load("2_pipeline/store/models/MOWA_models_4.rData")
+load("2_pipeline/store/models/SWTH_models_4.rData")
+load("2_pipeline/store/models/WIWR_models_4.rData")
+load("2_pipeline/store/models/WTSP_models_4.rData")
+
+
+jtools::export_summs(AMRE_models_4$md_0, BTNW_models_4$md_0, MOWA_models_4$md_0, SWTH_models_4$md_0, WIWR_models_4$md_0, WTSP_models_4$md_0, exp=FALSE, set_caption="test", to.file = "xlsx", digits=3, error_pos = "below", model.names=c("Setophaga ruticilla",
+"Setophaga virens",
+"Geothlypis philadelphia",
+"Catharus ustulatus",
+"Troglodytes hiemalis",
+"Zonotrichia albicollis"), note = "{stars};   SE statistics in parenthesis.",file.name = "3_output/tables/spp_models_stats_00_b.xlsx")   
+
+#  
+# "American Redstart",
+# "Black-throated Green Warbler",
+# "Mourning Warbler",
+# "Swainson's Thrush",
+# "Winter Wren",
+# "White-throated Sparrow"                                                                                                                                             
+                                                  
+library(webshot)
+webshot("3_output/tables/spp_models_stats_00.html", "3_output/tables/spp_models_stats_00.png")
+```
+

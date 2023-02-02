@@ -298,7 +298,8 @@ knitr::include_graphics("3_output/figures/diagnostic/glmm/SWTH_dharma_resid_m1.p
 
 ```{r eval=FALSE}
 png("3_output/figures/diagnostic/glmm/SWTH_effects_m1.png", width = 1200, height = 800, units = "px", pointsize = 12)
-plot(allEffects(m1))
+# plot(allEffects(m1))
+plot(allEffects(SWTH_models_4$md_0))
 dev.off() 
 
 # summ(lm21)

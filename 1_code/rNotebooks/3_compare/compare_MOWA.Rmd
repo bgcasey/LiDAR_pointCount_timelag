@@ -944,6 +944,295 @@ knitr::kable(MOWA_predCor_to_forestAge_df) %>%
   scroll_box(width = "100%", height = "400px")
 ```
 
+#### Difference between predictive rasters{-}
+
+##### Create difference ratsers{-}
+
+```{r eval=FALSE }
+MOWA_stack<-stackOpen("3_output/maps/predictedDistributions/MOWA/MOWA_stack.stk")
+
+predDif_0_01<-MOWA_stack$MOWA_predictMap_m_00 - MOWA_stack$MOWA_predictMap_m_01
+predDif_0_02<-MOWA_stack$MOWA_predictMap_m_00 - MOWA_stack$MOWA_predictMap_m_02
+predDif_0_03<-MOWA_stack$MOWA_predictMap_m_00 - MOWA_stack$MOWA_predictMap_m_03
+predDif_0_04<-MOWA_stack$MOWA_predictMap_m_00 - MOWA_stack$MOWA_predictMap_m_04
+predDif_0_05<-MOWA_stack$MOWA_predictMap_m_00 - MOWA_stack$MOWA_predictMap_m_05
+predDif_0_06<-MOWA_stack$MOWA_predictMap_m_00 - MOWA_stack$MOWA_predictMap_m_06
+predDif_0_07<-MOWA_stack$MOWA_predictMap_m_00 - MOWA_stack$MOWA_predictMap_m_07
+predDif_0_08<-MOWA_stack$MOWA_predictMap_m_00 - MOWA_stack$MOWA_predictMap_m_08
+predDif_0_09<-MOWA_stack$MOWA_predictMap_m_00 - MOWA_stack$MOWA_predictMap_m_09
+predDif_0_10<-MOWA_stack$MOWA_predictMap_m_00 - MOWA_stack$MOWA_predictMap_m_10
+predDif_0_11<-MOWA_stack$MOWA_predictMap_m_00 - MOWA_stack$MOWA_predictMap_m_11
+predDif_0_12<-MOWA_stack$MOWA_predictMap_m_00 - MOWA_stack$MOWA_predictMap_m_12
+predDif_0_13<-MOWA_stack$MOWA_predictMap_m_00 - MOWA_stack$MOWA_predictMap_m_13
+predDif_0_14<-MOWA_stack$MOWA_predictMap_m_00 - MOWA_stack$MOWA_predictMap_m_14
+predDif_0_15<-MOWA_stack$MOWA_predictMap_m_00 - MOWA_stack$MOWA_predictMap_m_15
+
+
+writeRaster(predDif_0_01, file="3_output/maps/predictedDistributions/MOWA/predDif/predDif_0_01.tif", overwrite=TRUE)
+writeRaster(predDif_0_02, file="3_output/maps/predictedDistributions/MOWA/predDif/predDif_0_02.tif", overwrite=TRUE)
+writeRaster(predDif_0_03, file="3_output/maps/predictedDistributions/MOWA/predDif/predDif_0_03.tif", overwrite=TRUE)
+writeRaster(predDif_0_04, file="3_output/maps/predictedDistributions/MOWA/predDif/predDif_0_04.tif", overwrite=TRUE)
+writeRaster(predDif_0_05, file="3_output/maps/predictedDistributions/MOWA/predDif/predDif_0_05.tif", overwrite=TRUE)
+writeRaster(predDif_0_06, file="3_output/maps/predictedDistributions/MOWA/predDif/predDif_0_06.tif", overwrite=TRUE)
+writeRaster(predDif_0_07, file="3_output/maps/predictedDistributions/MOWA/predDif/predDif_0_07.tif", overwrite=TRUE)
+writeRaster(predDif_0_08, file="3_output/maps/predictedDistributions/MOWA/predDif/predDif_0_08.tif", overwrite=TRUE)
+writeRaster(predDif_0_09, file="3_output/maps/predictedDistributions/MOWA/predDif/predDif_0_09.tif", overwrite=TRUE)
+writeRaster(predDif_0_10, file="3_output/maps/predictedDistributions/MOWA/predDif/predDif_0_10.tif", overwrite=TRUE)
+writeRaster(predDif_0_11, file="3_output/maps/predictedDistributions/MOWA/predDif/predDif_0_11.tif", overwrite=TRUE)
+writeRaster(predDif_0_12, file="3_output/maps/predictedDistributions/MOWA/predDif/predDif_0_12.tif", overwrite=TRUE)
+writeRaster(predDif_0_13, file="3_output/maps/predictedDistributions/MOWA/predDif/predDif_0_13.tif", overwrite=TRUE)
+writeRaster(predDif_0_14, file="3_output/maps/predictedDistributions/MOWA/predDif/predDif_0_14.tif", overwrite=TRUE)
+writeRaster(predDif_0_15, file="3_output/maps/predictedDistributions/MOWA/predDif/predDif_0_15.tif", overwrite=TRUE)
+
+
+
+map_list<-list.files(path='3_output/maps/predictedDistributions/MOWA/predDif', pattern = "*.tif$", full.names = TRUE)
+MOWA_predDif_stack<-raster::stack(map_list)
+
+#save stack as r object
+stackSave(MOWA_predDif_stack,file="3_output/maps/predictedDistributions/MOWA/predDif/MOWA_predDif_stack.stk")
+
+```
+
+
+
+
+
+##### Difference ~ forest age {-}
+
+```{r eval=FALSE }
+library(ggeffects)
+
+MOWA_predDif_stack<-stackOpen("3_output/maps/predictedDistributions/MOWA/predDif/MOWA_predDif_stack.stk")
+
+lidar_forestAge_raster<-raster("0_data/manual/spatialCov/CASFRI/lidar_forestAge_raster.tif")
+ageClass_00<-raster("0_data/manual/spatialCov/CASFRI/ageClassRasters/ageClass_00.tif")
+
+lidar_forestAge_raster_pr<-projectRaster(lidar_forestAge_raster, crs=MOWA_predDif_stack)
+ageClass_00_pr<-projectRaster(ageClass_00, method='ngb',crs=MOWA_predDif_stack)
+
+#study area
+load("0_data/manual/bird/studyarea_big.rData")
+
+pd<- raster::crop(MOWA_predDif_stack, as_Spatial(st_geometry(c_bb)))
+fa<- raster::crop(lidar_forestAge_raster_pr, as_Spatial(st_geometry(c_bb)))
+ac<- raster::crop(ageClass_00_pr, as_Spatial(st_geometry(c_bb)))
+ac<- raster::crop(ageClass_00_pr, as_Spatial(st_geometry(c_bb)))
+#resample so they have the same resolution
+pd_rs<-resample(pd, fa)
+
+# Stack covariates
+fa_dif_ac <- stack(pd_rs, fa, ac)
+
+MOWA_fa_dif_ac_df<-as.data.frame(na.omit(values(fa_dif_ac)))%>%
+  dplyr::rename(forest_age=lidar_forestAge_raster)%>%
+  dplyr::rename(forest_age_class=ageClass_00)
+
+MOWA_fa_dif_ac_df$forest_age_class<-ordered(as.factor(MOWA_fa_dif_ac_df$forest_age_class))
+
+save(MOWA_fa_dif_ac_df, file="2_pipeline/store/MOWA_fa_dif_ac_df.rData")
+
+load("2_pipeline/store/MOWA_fa_dif_ac_df.rData")
+
+
+#######################################################################################
+############### Models ######################################################
+#######################################################################################
+lm_fa_00to01 <- lm(predDif_0_01 ~ forest_age, data=MOWA_fa_dif_ac_df)
+lm_fac_00to01 <- lm(predDif_0_01 ~ forest_age_class, data=MOWA_fa_dif_ac_df)
+
+lm_fa_00to02 <- lm(predDif_0_02 ~ forest_age, data=MOWA_fa_dif_ac_df)
+lm_fac_00to02 <- lm(predDif_0_02 ~ forest_age_class, data=MOWA_fa_dif_ac_df)
+
+lm_fa_00to03 <- lm(predDif_0_03 ~ forest_age, data=MOWA_fa_dif_ac_df)
+lm_fac_00to03 <- lm(predDif_0_03 ~ forest_age_class, data=MOWA_fa_dif_ac_df)
+
+lm_fa_00to04 <- lm(predDif_0_04 ~ forest_age, data=MOWA_fa_dif_ac_df)
+lm_fac_00to04 <- lm(predDif_0_04 ~ forest_age_class, data=MOWA_fa_dif_ac_df)
+
+lm_fa_00to05 <- lm(predDif_0_05 ~ forest_age, data=MOWA_fa_dif_ac_df)
+lm_fac_00to05 <- lm(predDif_0_05 ~ forest_age_class, data=MOWA_fa_dif_ac_df)
+
+lm_fa_00to06 <- lm(predDif_0_06 ~ forest_age, data=MOWA_fa_dif_ac_df)
+lm_fac_00to06 <- lm(predDif_0_06 ~ forest_age_class, data=MOWA_fa_dif_ac_df)
+
+lm_fa_00to07 <- lm(predDif_0_07 ~ forest_age, data=MOWA_fa_dif_ac_df)
+lm_fac_00to07 <- lm(predDif_0_07 ~ forest_age_class, data=MOWA_fa_dif_ac_df)
+
+lm_fa_00to08 <- lm(predDif_0_08 ~ forest_age, data=MOWA_fa_dif_ac_df)
+lm_fac_00to08 <- lm(predDif_0_08 ~ forest_age_class, data=MOWA_fa_dif_ac_df)
+
+lm_fa_00to09 <- lm(predDif_0_09 ~ forest_age, data=MOWA_fa_dif_ac_df)
+lm_fac_00to09 <- lm(predDif_0_09 ~ forest_age_class, data=MOWA_fa_dif_ac_df)
+
+lm_fa_00to10 <- lm(predDif_0_10 ~ forest_age, data=MOWA_fa_dif_ac_df)
+lm_fac_00to10 <- lm(predDif_0_10 ~ forest_age_class, data=MOWA_fa_dif_ac_df)
+
+lm_fa_00to11 <- lm(predDif_0_11 ~ forest_age, data=MOWA_fa_dif_ac_df)
+lm_fac_00to11 <- lm(predDif_0_11 ~ forest_age_class, data=MOWA_fa_dif_ac_df)
+ 
+lm_fa_00to12 <- lm(predDif_0_12 ~ forest_age, data=MOWA_fa_dif_ac_df)
+lm_fac_00to12 <- lm(predDif_0_12 ~ forest_age_class, data=MOWA_fa_dif_ac_df)
+ 
+lm_fa_00to13 <- lm(predDif_0_13 ~ forest_age, data=MOWA_fa_dif_ac_df)
+lm_fac_00to13 <- lm(predDif_0_13 ~ forest_age_class, data=MOWA_fa_dif_ac_df)
+
+lm_fa_00to14 <- lm(predDif_0_14 ~ forest_age, data=MOWA_fa_dif_ac_df)
+lm_fac_00to14 <- lm(predDif_0_14 ~ forest_age_class, data=MOWA_fa_dif_ac_df)
+
+lm_fa_00to15 <- lm(predDif_0_15 ~ forest_age, data=MOWA_fa_dif_ac_df)
+lm_fac_00to15 <- lm(predDif_0_15 ~ forest_age_class, data=MOWA_fa_dif_ac_df)
+
+
+#######################################################################################
+#### save models
+#######################################################################################
+
+# save models
+
+# forest age
+MOWA_predDif_to_forestAge <-list(lm_fa_00to01, lm_fa_00to02, lm_fa_00to03, lm_fa_00to04, lm_fa_00to05, lm_fa_00to06, lm_fa_00to07, lm_fa_00to08, lm_fa_00to09, lm_fa_00to10, lm_fa_00to11, lm_fa_00to12, lm_fa_00to13, lm_fa_00to14, lm_fa_00to15)
+names(MOWA_predDif_to_forestAge) <- c("lm_fa_00to01", "lm_fa_00to02", "lm_fa_00to03", "lm_fa_00to04", "lm_fa_00to05", "lm_fa_00to06", "lm_fa_00to07", "lm_fa_00to08", "lm_fa_00to09", "lm_fa_00to10", "lm_fa_00to11", "lm_fa_00to12", "lm_fa_00to13", "lm_fa_00to14", "lm_fa_00to15")
+save(MOWA_predDif_to_forestAge, file="2_pipeline/store/models/MOWA_predDif_to_forestAge.rData")
+
+
+library(purrr)
+library(broom)
+MOWA_predDif_to_forestAge_df<-purrr::map_df(MOWA_predDif_to_forestAge, broom::glance, .id = 'formula')
+save(MOWA_predDif_to_forestAge_df, file="2_pipeline/store/models/MOWA_predDif_to_forestAge_df.rData")
+
+# forest age class
+MOWA_predDif_to_forestAgeClass<-list(lm_fac_00to01, lm_fac_00to02, lm_fac_00to03, lm_fac_00to04, lm_fac_00to05, lm_fac_00to06, lm_fac_00to07, lm_fac_00to08, lm_fac_00to09, lm_fac_00to10, lm_fac_00to11, lm_fac_00to12, lm_fac_00to13, lm_fac_00to14, lm_fac_00to15)
+names(MOWA_predDif_to_forestAgeClass) <- c("lm_fac_00to01", "lm_fac_00to02", "lm_fac_00to03", "lm_fac_00to04", "lm_fac_00to05", "lm_fac_00to06", "lm_fac_00to07", "lm_fac_00to08", "lm_fac_00to09", "lm_fac_00to10", "lm_fac_00to11", "lm_fac_00to12", "lm_fac_00to13", "lm_fac_00to14", "lm_fac_00to15")
+save(MOWA_predDif_to_forestAgeClass, file="2_pipeline/store/models/MOWA_predDif_to_forestAgeClass.rData")
+
+
+library(purrr)
+library(broom)
+MOWA_predDif_to_forestAgeClass_df<-purrr::map_df(MOWA_predDif_to_forestAgeClass, broom::glance, .id = 'formula')
+save(MOWA_predDif_to_forestAgeClass_df, file="2_pipeline/store/models/MOWA_predDif_to_forestAgeClass_df.rData")
+
+
+#######################################################################################
+#### Plot all on the same plot
+ggplot() +
+  geom_smooth(aes(x = forest_age, y = predDif_0_01, col = "0 and 01 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+  geom_smooth(aes(x = forest_age, y = predDif_0_02, col = "0 and 02 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = forest_age, y = predDif_0_03, col = "0 and 03 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+  geom_smooth(aes(x = forest_age, y = predDif_0_04, col = "0 and 04 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = forest_age, y = predDif_0_05, col = "0 and 05 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+  geom_smooth(aes(x = forest_age, y = predDif_0_06, col = "0 and 06 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = forest_age, y = predDif_0_07, col = "0 and 07 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+  geom_smooth(aes(x = forest_age, y = predDif_0_08, col = "0 and 08 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = forest_age, y = predDif_0_09, col = "0 and 09 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+  geom_smooth(aes(x = forest_age, y = predDif_0_10, col = "0 and 10 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE)+
+   geom_smooth(aes(x = forest_age, y = predDif_0_11, col = "0 and 11 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = forest_age, y = predDif_0_12, col = "0 and 12 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = forest_age, y = predDif_0_13, col = "0 and 13 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = forest_age, y = predDif_0_14, col = "0 and 14 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = forest_age, y = predDif_0_15, col = "0 and 15 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+  scale_colour_viridis_d()+  
+  labs(
+    x = "Forest age when LiDAR was acquired", 
+    y = "Difference between occupancy probability")+
+    theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank())
+  ggsave(filename=paste0("3_output/figures/timelag_stats/MOWA_lm_fa_dif_all.png"), width =8, height=5)
+  
+  
+  
+ggplot() +
+   geom_smooth(aes(x = unclass(forest_age_class), y = predDif_0_01, col = "0 and 01 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+  geom_smooth(aes(x = unclass(forest_age_class), y = predDif_0_02, col = "0 and 02 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = unclass(forest_age_class), y = predDif_0_03, col = "0 and 03 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+  geom_smooth(aes(x = unclass(forest_age_class), y = predDif_0_04, col = "0 and 04 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = unclass(forest_age_class), y = predDif_0_05, col = "0 and 05 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+  geom_smooth(aes(x = unclass(forest_age_class), y = predDif_0_06, col = "0 and 06 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = unclass(forest_age_class), y = predDif_0_07, col = "0 and 07 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+  geom_smooth(aes(x = unclass(forest_age_class), y = predDif_0_08, col = "0 and 08 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = unclass(forest_age_class), y = predDif_0_09, col = "0 and 09 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+  geom_smooth(aes(x = unclass(forest_age_class), y = predDif_0_10, col = "0 and 10 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE)+
+   geom_smooth(aes(x = unclass(forest_age_class), y = predDif_0_11, col = "0 and 11 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = unclass(forest_age_class), y = predDif_0_12, col = "0 and 12 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = unclass(forest_age_class), y = predDif_0_13, col = "0 and 13 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = unclass(forest_age_class), y = predDif_0_14, col = "0 and 14 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+   geom_smooth(aes(x = unclass(forest_age_class), y = predDif_0_15, col = "0 and 15 years"), data = MOWA_fa_dif_ac_df, 
+              method = "lm", se = FALSE) + 
+  scale_colour_viridis_d()+  
+  # scale_colour_manual(name="", 
+    #                   values = c("#fa9fb5","#f768a1","#dd3497","#ae017e","#7a0177")) +
+  labs(
+    x = "Forest age class", 
+    y = "Difference between occupancy probability")+
+    theme(panel.background = element_blank(),
+          text = element_text(size=10),
+          axis.ticks=element_blank(),
+          #strip.background =element_rect(fill="white"),
+         panel.border = element_rect(color = "black", fill = NA, size = .2),
+          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0)),
+         axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0)),
+          #panel.background = element_rect(fill="white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+         legend.title = element_blank())  
+  ggsave(filename=paste0("3_output/figures/timelag_stats/MOWA_lm_fac_dif_all.png"), width =8, height=5)
+  
+```  
+  
+
+```{r  echo=FALSE, out.width = '100%'}
+knitr::include_graphics("3_output/figures/timelag_stats/MOWA_lm_fa_dif_all.png", dpi = 300)
+```
+
+```{r echo=FALSE, message = FALSE, results="asis"}
+load("2_pipeline/store/models/MOWA_predDif_to_forestAge_df.rData")
+
+knitr::kable(MOWA_predDif_to_forestAge_df) %>%
+  kable_styling(font_size = 10, bootstrap_options= c("striped", "hover", "condensed" ), full_width= F, position="center") %>%
+  column_spec(1, width= "20em")%>%
+  scroll_box(width = "100%", height = "400px")
+```
+
+
+
+
 
 
 

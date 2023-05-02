@@ -15,7 +15,7 @@ library(ggstance)
 library(jtools)
 
 ## ---- covDes
-cov_description<-xlsx::read.xlsx("figures_tables/covariate_list.xlsx", "variables")
+cov_description<-xlsx::read.xlsx("../3_output/tables/covariate_list.xlsx", "variables")
 kable(cov_description, position = "h!", col.names = c("Metric",
                                      "Source",
                                      "Description"),

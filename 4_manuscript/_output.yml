@@ -1,6 +1,6 @@
 bookdown::pdf_document2:
     keep_tex: true
-    citation_package: default
+    citation_package: biblatex
     includes:
       in_header: "preamble.tex"
 

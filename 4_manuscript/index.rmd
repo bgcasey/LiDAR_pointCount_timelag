@@ -2,7 +2,7 @@
 title: "The influence of time-lag between LiDAR and wildlife survey data on species distribution models"
 author: Brendan Casey
 abstract: |
- LiDAR has the potential to improve bird models by providing high resolution structural covariates which, when paired with bird monitoring data, can give insight into bird-habitat relationships [@Bradbury2005]. However, LiDAR acquisitions do not always coincide in time with point count surveys. It is unclear how much this temporal misalignment can influence bird distribution models that use LiDAR derived predictor variables. As disturbance-succession cycles change vegetation structure, eventually LiDAR metrics will no longer reflect ground conditions. Their usefulness as explanatory variables will degrade. Here, we evaluated how time-lag between LiDAR acquisitions and bird surveys influenced model robustness for early-successional, mature-forest, and forest generalist birds. We found that for species occupying older, more stable forests, a time difference of up to 15 years temporal has only a small impact on the predictive power of LiDAR based species distribution models. However, for early-successional birds, our findings suggest that a time difference of 5-13 years between LIDAR and bird data may reduce model performance (*p*<0.05).
+ LiDAR has the potential to improve bird-habitat models by providing high resolution structural covariates which can give insight into bird-habitat relationships. However, LiDAR acquisitions do not always coincide in time with point count surveys. It is unclear how much this temporal misalignment influence the predictive accuracy of bird-habitat models that use LiDAR derived predictor variables. As disturbance-succession cycles change vegetation structure, eventually LiDAR metrics will no longer reflect ground conditions. Thus the usefulness of LiDAR explanatory variables will degrade. Here, we evaluated how time-lag between LiDAR acquisitions and bird surveys influenced model robustness for early-successional, mature-forest, and forest generalist birds. We found that for species occupying older, more stable forests, a time difference of up to 15 years has only a small impact on the predictive power of LiDAR based bird-habitat models. However, for early-successional birds, our findings suggest that a time difference of 5-13 years between LIDAR and bird data may reduce model performance.
 fontsize: 12pt
 keywords: one, two, three
 linestretch: 1.25
@@ -10,7 +10,7 @@ linestretch: 1.25
 date: "`r Sys.Date()`"
 bibliography: library.bib
 link-citations: yes
-linenumbers: true
+linenumbers: FALSE
 modulolinenumbers: 1
 numbersections: true
 colorlinks: yes
@@ -18,7 +18,10 @@ citecolor: blue
 # Use a CSL with `citation_package = "default"`
 biblio-style: apalike
 csl: https://www.zotero.org/styles/elsevier-harvard
-
+toc: yes 
+lof: yes 
+lot: yes
+geometry: margin=2.54cm
 ---
 
 
@@ -59,5 +62,7 @@ knitr::read_chunk("code/figures_tables.R")
 
 
 
+```{r child = 'scrivener_manuscript.md'}
+```
 
 

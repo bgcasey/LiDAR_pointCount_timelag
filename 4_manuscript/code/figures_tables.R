@@ -14,7 +14,7 @@ library(dplyr)
 library(ggstance)
 library(jtools)
 
-## ---- covDes
+## ---- 2covDes
 cov_description<-xlsx::read.xlsx("../3_output/tables/covariate_list.xlsx", "variables")
 kable(cov_description, position = "h!", col.names = c("Metric",
                                      "Source",
@@ -25,13 +25,13 @@ kable(cov_description, position = "h!", col.names = c("Metric",
   # kable_styling(font_size = 6, position = "center", full_width = T)
 
 
-## ---- workflow
+## ---- 2workflow
 knitr::include_graphics("../3_output/figures/chapter1_workflow.pdf", dpi = 300, auto_pdf = TRUE)
 
-## ---- studyArea
+## ---- 2studyArea
 knitr::include_graphics("../3_output/maps/studyArea_inset.png", dpi = 300, auto_pdf = TRUE)
 
-## ---- topModels
+## ---- 2topModels
 topModels<-xlsx::read.xlsx("../3_output/tables/top_models.xlsx", "Sheet3")
 kable(topModels, position = "h!",col.names = c("Species",
                                                "Fixed effects",
@@ -56,31 +56,31 @@ kable(topModels, position = "h!",col.names = c("Species",
 # kable_styling(font_size = 6, position = "center", full_width = T)
 
 
-## ---- AUCLag
+## ---- 2AUCLag
 knitr::include_graphics("../3_output/figures/timelag_stats/sppAll_AUC_lm.png", dpi = 300, auto_pdf = TRUE)
 
 
 
 
 
-## ---- sppAll_FACO
+## ---- 2sppAll_FACO
 knitr::include_graphics("../3_output/figures/timelag_stats/sppAll_FACO_lm.png", dpi = 300, auto_pdf = TRUE)
 
 
-## ---- fage
+## ---- 2fage
 knitr::include_graphics("../3_output/figures/timelag_stats/sppAll_FADIF_lm.png", dpi = 300, auto_pdf = TRUE)
 
 
 
-## ---- scatter
+## ---- 2scatter
 knitr::include_graphics("../3_output/figures/timelag_stats/spp_scatter_00to15.png", dpi = 300, auto_pdf = TRUE)
 
 
 
-## ---- model_stats
+## ---- 2model_stats
 knitr::include_graphics("../3_output/tables/spp_models_stats_00_b.png", dpi = 300, auto_pdf = TRUE)
 
-## ---- varImp
+## ---- 2varImp
 load("../3_output/tables/spp_r2beta_long_rank.rData")
 kable(spp_r2beta_long_rank,  col.names = c("Predictor",
                                            "AMRE",
@@ -91,6 +91,7 @@ kable(spp_r2beta_long_rank,  col.names = c("Predictor",
                                            "WTSP"),
       align = c("l","r","r","r","r","r","r"), 
       caption = "Predictor variables ranked according to their semi-partial $R^2$. AMRE=American Redstart (\\emph{Setophaga ruticilla}); BTNW=Black-throated Green Warbler (\\emph{Setophaga virens}); MOWA=Mourning Warbler (\\emph{Geothlypis philadelphia}); SWTH=Swainson's Thrush (\\emph{Catharus ustulatus}); WIWR=Winter Wren (\\emph{Troglodytes hiemalis}); WTSP=White-throated Sparrow (\\emph{Zonotrichia albicollis}).", 
+      caption.short ="Predictor variables ranked according to their semi-partial $R^2$.",
       booktabs=TRUE,  digits=2, escape = FALSE)%>%
   kable_styling(latex_options="scale_down", font_size = 8)%>%
   column_spec(1, width = "20em")

@@ -57,7 +57,7 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, signif = 3
 #           copy.mode = TRUE)
 
 knitr::read_chunk("code/figures_tables.R")
-  
+   
 ```
 
 
